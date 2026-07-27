@@ -208,7 +208,6 @@ async function connectBLEDevice() {
       logSystem('모든 BLE 기기 검색 모드로 재시도합니다.');
       state.bluetoothDevice = await navigator.bluetooth.requestDevice({
         acceptAllDevices: true,
-        optionalServices: [NUS_SERVICE_UUID]
       });
     }
 
