@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initWeather();
   initASMR();
   initTheme();
-  logSystem('JINJIN 스마트홈 모바일 대시보드가 준비되었습니다. (구글 & 애플 캘린더 연동 완비)');
+  logSystem('JINJIN 스마트홈 모바일 대시보드가 준비되었습니다. (Google 캘린더 전용 연동)');
 });
 
 function initTabs() {
@@ -542,6 +542,9 @@ function toggleFocusTimer() {
   }
 }
 
+// ==========================================================================
+// 6. TODO TASK MANAGER & GOOGLE CALENDAR INTEGRATION
+// ==========================================================================
 function initTodoList() {
   const saved = localStorage.getItem(TODO_STORAGE_KEY);
   if (saved) {
@@ -610,9 +613,6 @@ function renderTodoList() {
         <button class="todo-apple-btn" onclick="exportSingleGCal('${safeText}')" title="구글 캘린더에 등록">
           <i class="fa-brands fa-google" style="color:#4285F4;"></i>
         </button>
-        <button class="todo-apple-btn" onclick="exportSingleAppleCal('${safeText}')" title="애플 캘린더에 추가">
-          <i class="fa-brands fa-apple"></i>
-        </button>
         <button class="todo-del-btn" onclick="deleteTodo(${item.id})" title="일정 삭제">
           <i class="fa-solid fa-trash-can"></i>
         </button>
@@ -625,22 +625,12 @@ function renderTodoList() {
 window.toggleTodo = toggleTodo;
 window.deleteTodo = deleteTodo;
 
+// ==========================================================================
+// 7. GOOGLE CALENDAR INTEGRATION FUNCTIONS
+// ==========================================================================
 function initCalendarIntegration() {
   const btnGCalAll = document.getElementById('btn-export-all-gcal');
-  const btnAppleAll = document.getElementById('btn-export-all-apple');
-  const btnImport = document.getElementById('btn-import-ics');
-  const fileInput = document.getElementById('ics-file-input');
-
   if (btnGCalAll) btnGCalAll.addEventListener('click', exportAllToGoogleCalendar);
-  if (btnAppleAll) btnAppleAll.addEventListener('click', exportAllToAppleCalendar);
-  if (btnImport && fileInput) {
-    btnImport.addEventListener('click', () => fileInput.click());
-    fileInput.addEventListener('change', (e) => {
-      if (e.target.files.length > 0) {
-        importCalendarICSFile(e.target.files[0]);
-      }
-    });
-  }
 }
 
 function exportSingleGCal(itemText) {
@@ -655,43 +645,6 @@ function exportSingleGCal(itemText) {
 
   window.open(gcalUrl, '_blank');
   logSystem(`📅 [Google Calendar] "${itemText}" 구글 캘린더 등록 페이지를 엽니다.`);
-}
-
-function exportSingleAppleCal(itemText) {
-  const now = new Date();
-  const startStr = now.toISOString().replace(/-|:|\.\d+/g, '').slice(0, 15) + 'Z';
-  const end = new Date(now.getTime() + 60 * 60 * 1000);
-  const endStr = end.toISOString().replace(/-|:|\.\d+/g, '').slice(0, 15) + 'Z';
-
-  const icsContent = [
-    'BEGIN:VCALENDAR',
-    'VERSION:2.0',
-    'PRODID:-//JINJIN Smart Home//Cal//KO',
-    'CALSCALE:GREGORIAN',
-    'METHOD:PUBLISH',
-    'BEGIN:VEVENT',
-    `SUMMARY:JINJIN 스마트홈 - ${itemText}`,
-    `DESCRIPTION:JINJIN Smart Home 일정`,
-    `DTSTART:${startStr}`,
-    `DTEND:${endStr}`,
-    'BEGIN:VALARM',
-    'TRIGGER:-PT15M',
-    'ACTION:DISPLAY',
-    `DESCRIPTION:JINJIN 일정 알림: ${itemText}`,
-    'END:VALARM',
-    'END:VEVENT',
-    'END:VCALENDAR'
-  ].join('\r\n');
-
-  const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
-  const link = document.createElement('a');
-  link.href = window.URL.createObjectURL(blob);
-  link.setAttribute('download', `smarthome_${Date.now()}.ics`);
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-
-  logSystem(`🍎 [Apple Calendar] "${itemText}" 애플 캘린더(.ics) 이벤트 파일을 내려받았습니다.`);
 }
 
 function exportAllToGoogleCalendar() {
@@ -714,81 +667,7 @@ function exportAllToGoogleCalendar() {
   logSystem(`📅 [Google Calendar] 전체 일정(${pendingTodos.length}개) 구글 캘린더 등록 페이지 오픈.`);
 }
 
-function exportAllToAppleCalendar() {
-  const pendingTodos = todoItems.filter(i => !i.completed);
-  if (pendingTodos.length === 0) {
-    alert('등록할 진행 중인 일정이 없습니다.');
-    return;
-  }
-
-  const now = new Date();
-  const startStr = now.toISOString().replace(/-|:|\.\d+/g, '').slice(0, 15) + 'Z';
-  const end = new Date(now.getTime() + 60 * 60 * 1000);
-  const endStr = end.toISOString().replace(/-|:|\.\d+/g, '').slice(0, 15) + 'Z';
-
-  let vevents = pendingTodos.map(item => {
-    return [
-      'BEGIN:VEVENT',
-      `SUMMARY:JINJIN 스마트홈 - ${item.text}`,
-      `DESCRIPTION:JINJIN Smart Home 일정`,
-      `DTSTART:${startStr}`,
-      `DTEND:${endStr}`,
-      'BEGIN:VALARM',
-      'TRIGGER:-PT15M',
-      'ACTION:DISPLAY',
-      'END:VALARM',
-      'END:VEVENT'
-    ].join('\r\n');
-  }).join('\r\n');
-
-  const icsContent = [
-    'BEGIN:VCALENDAR',
-    'VERSION:2.0',
-    'PRODID:-//JINJIN Smart Home//Cal//KO',
-    'CALSCALE:GREGORIAN',
-    'METHOD:PUBLISH',
-    vevents,
-    'END:VCALENDAR'
-  ].join('\r\n');
-
-  const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
-  const link = document.createElement('a');
-  link.href = window.URL.createObjectURL(blob);
-  link.setAttribute('download', `jinjin_smarthome_all_${Date.now()}.ics`);
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-
-  logSystem(`🍎 [Apple Calendar] 전체 일정(${pendingTodos.length}개) 애플 캘린더 파일 내보내기 완료.`);
-}
-
-function importCalendarICSFile(file) {
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    const text = e.target.result;
-    const matches = text.match(/SUMMARY:(.+)/g);
-    if (matches && matches.length > 0) {
-      let addedCount = 0;
-      matches.forEach(match => {
-        let title = match.replace('SUMMARY:', '').trim();
-        title = title.replace(/^JINJIN 스마트홈 - /, '');
-        if (title && !todoItems.some(item => item.text === title)) {
-          todoItems.push({ id: Date.now() + Math.random(), text: title, completed: false });
-          addedCount++;
-        }
-      });
-      saveAndRenderTodo();
-      alert(`🎉 캘린더 파일(.ics)에서 ${addedCount}개의 일정을 불러왔습니다!`);
-      logSystem(`📥 [Calendar Import] ${addedCount}개 일정을 성공적으로 불러왔습니다.`);
-    } else {
-      alert('⚠️ 캘린더 파일(.ics)에서 일정을 찾을 수 없습니다.');
-    }
-  };
-  reader.readAsText(file);
-}
-
 window.exportSingleGCal = exportSingleGCal;
-window.exportSingleAppleCal = exportSingleAppleCal;
 
 function initControls() {
   document.getElementById('btn-connect').addEventListener('click', connectBLE);
