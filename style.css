@@ -1,0 +1,1095 @@
+/* ==========================================================================
+   예진의 스마트홈 웹 대시보드 - Neumorphic Forest Green Theme CSS
+   Design System: Neumorphism Dual Shadow + Forest Green Accent + Glassmorphic Nav
+   Author: 오예진 (ESP_oyj)
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   0. Color Palette & Neumorphism Design Tokens (Forest Green)
+   -------------------------------------------------------------------------- */
+:root {
+  /* Forest Green Palette */
+  --bg-primary: #f0f5f1;           /* Fresh soft mint/sage background */
+  --bg-secondary: #e5efe7;         /* Secondary warm green card surface */
+  --bg-tertiary: #bbf7d0;          /* Light green highlight */
+  
+  --accent-green: #16a34a;         /* Primary Forest Green */
+  --accent-green-dark: #15803d;    /* Dark Forest Green for active states */
+  --accent-green-light: #dcfce7;   /* Soft tint green */
+  
+  --color-emerald: #10b981;        /* Status success / Light ON */
+  --color-rose: #ef4444;           /* Status error / Light OFF */
+  --color-sky: #0284c7;            /* Humidity blue tint */
+  --color-purple: #8b5cf6;         /* OLED purple tint */
+  
+  /* Neumorphism Shadows for Forest Green Canvas */
+  --neu-shadow-dark: #d2ded4;      /* Soft dark shadow */
+  --neu-shadow-light: #ffffff;     /* Pure white highlights */
+  
+  /* Neumorphism Raised Surface (Buttons, Cards) */
+  --neu-raised: 6px 6px 14px var(--neu-shadow-dark), -6px -6px 14px var(--neu-shadow-light);
+  --neu-raised-hover: 8px 8px 18px var(--neu-shadow-dark), -8px -8px 18px var(--neu-shadow-light);
+  --neu-raised-sm: 3px 3px 8px var(--neu-shadow-dark), -3px -3px 8px var(--neu-shadow-light);
+  
+  /* Neumorphism Sunken Surface (Inputs, Terminal, Gauges) */
+  --neu-sunken: inset 4px 4px 8px var(--neu-shadow-dark), inset -4px -4px 8px var(--neu-shadow-light);
+  --neu-sunken-sm: inset 2px 2px 5px var(--neu-shadow-dark), inset -2px -2px 5px var(--neu-shadow-light);
+  
+  /* Text Colors */
+  --text-main: #1c2e21;            /* Dark forest charcoal */
+  --text-muted: #57705d;           /* Medium sage gray */
+  --text-light: #8fa895;           /* Soft light sage */
+  
+  /* Typography */
+  --font-ui: 'Plus Jakarta Sans', 'Pretendard', -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  
+  /* Transitions */
+  --transition-fast: 0.15s ease;
+  --transition-smooth: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* --------------------------------------------------------------------------
+   1. Base Reset & Layout Constraints
+   -------------------------------------------------------------------------- */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  font-family: var(--font-ui);
+  background-color: #e2ece4;       /* Outer canvas background */
+  color: var(--text-main);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow-x: hidden;
+}
+
+/* Mobile App Shell (Max width 480px) */
+.app-shell {
+  width: 100%;
+  max-width: 480px;
+  min-height: 100vh;
+  background-color: var(--bg-primary);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  box-shadow: 0 20px 50px rgba(22, 163, 74, 0.12);
+}
+
+@media (min-width: 481px) {
+  .app-shell {
+    height: 92vh;
+    max-height: 880px;
+    border-radius: 36px;
+    overflow: hidden;
+    margin: 20px 0;
+    border: 8px solid #ffffff;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   2. Header & Status Bar
+   -------------------------------------------------------------------------- */
+.app-header {
+  padding: 20px 20px 14px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--bg-primary);
+  z-index: 10;
+}
+
+.header-main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.neumorph-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: var(--bg-primary);
+  box-shadow: var(--neu-raised-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-green);
+  font-size: 1.25rem;
+}
+
+.brand-text h1 {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--text-main);
+  letter-spacing: -0.02em;
+}
+
+.creator-tag {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.creator-tag code {
+  font-family: var(--font-mono);
+  background: var(--accent-green-light);
+  color: var(--accent-green-dark);
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+/* Header Status Pill */
+.header-status {
+  padding: 6px 12px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--text-light);
+}
+
+.status-disconnected .status-dot {
+  background-color: var(--color-rose);
+}
+
+.status-connected {
+  color: var(--accent-green-dark);
+}
+.status-connected .status-dot {
+  background-color: var(--accent-green);
+  box-shadow: 0 0 8px var(--accent-green);
+  animation: pulseDot 1.5s infinite;
+}
+
+.status-demo {
+  color: var(--accent-green-dark);
+}
+.status-demo .status-dot {
+  background-color: var(--accent-green);
+}
+
+@keyframes pulseDot {
+  0% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.85); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+/* --------------------------------------------------------------------------
+   3. Warning & Demo Banners
+   -------------------------------------------------------------------------- */
+.warning-banner {
+  margin: 0 16px 10px 16px;
+  padding: 10px 14px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+  border-radius: 12px;
+  font-size: 0.78rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.demo-banner {
+  margin: 0 16px 10px 16px;
+  padding: 8px 14px;
+  background: var(--accent-green-light);
+  border-radius: 12px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--accent-green-dark);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.demo-chip {
+  background: var(--accent-green);
+  color: #ffffff;
+  padding: 2px 6px;
+  border-radius: 6px;
+  font-size: 0.68rem;
+  font-weight: 800;
+}
+
+/* --------------------------------------------------------------------------
+   4. Main Content Views
+   -------------------------------------------------------------------------- */
+.app-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px 18px 90px 18px;
+  scroll-behavior: smooth;
+}
+
+.tab-view {
+  display: none;
+  animation: fadeIn var(--transition-smooth);
+}
+
+.tab-view.active-view {
+  display: block;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Section Headings */
+.section-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 18px 0 12px 0;
+}
+
+.section-title h3 {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.section-title h3 i {
+  color: var(--accent-green);
+}
+
+/* --------------------------------------------------------------------------
+   5. Neumorphic Cards & Components
+   -------------------------------------------------------------------------- */
+.neumorph-card {
+  background: var(--bg-primary);
+  border-radius: 24px;
+  box-shadow: var(--neu-raised);
+  padding: 20px;
+  margin-bottom: 18px;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.neumorph-raised {
+  box-shadow: var(--neu-raised);
+}
+
+.neumorph-sunken {
+  box-shadow: var(--neu-sunken);
+  background: var(--bg-primary);
+}
+
+.neumorph-sunken-sm {
+  box-shadow: var(--neu-sunken-sm);
+  background: var(--bg-primary);
+}
+
+/* --------------------------------------------------------------------------
+   6. View 1: Home Dashboard Elements
+   -------------------------------------------------------------------------- */
+.hero-overview-card {
+  background: linear-gradient(145deg, #f7fcf8, #e7f4e9);
+  border: 1px solid rgba(22, 163, 74, 0.15);
+}
+
+.hero-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.card-subtitle {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--accent-green-dark);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.hero-header h2 {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: var(--text-main);
+}
+
+.hero-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.stat-pill {
+  padding: 12px 10px;
+  border-radius: 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 6px;
+}
+
+.stat-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+}
+
+.icon-temp { background: #fee2e2; color: #ef4444; }
+.icon-humi { background: #e0f2fe; color: #0284c7; }
+.icon-light { background: #fef3c7; color: #d97706; }
+
+.stat-label {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.stat-value {
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+/* Quick Action Grid */
+.quick-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.quick-card {
+  padding: 16px;
+  border-radius: 20px;
+  border: none;
+  background: var(--bg-primary);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+}
+
+.quick-icon {
+  font-size: 1.4rem;
+  color: var(--accent-green);
+}
+
+.quick-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.quick-state {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  padding: 2px 8px;
+  border-radius: 8px;
+  background: var(--bg-primary);
+  box-shadow: var(--neu-sunken-sm);
+}
+
+/* Info Card List */
+.info-card {
+  padding: 16px 20px;
+}
+
+.card-title {
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: var(--text-main);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.info-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.info-item code {
+  font-family: var(--font-mono);
+  background: var(--bg-secondary);
+  padding: 2px 6px;
+  border-radius: 6px;
+  color: var(--text-main);
+}
+
+.theme-tag-green {
+  background: var(--accent-green-light);
+  color: var(--accent-green-dark);
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 0.75rem;
+}
+
+/* --------------------------------------------------------------------------
+   7. View 2: Sensors & Gauges
+   -------------------------------------------------------------------------- */
+.sensor-card {
+  padding: 18px 20px;
+}
+
+.sensor-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.sensor-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sensor-badge {
+  width: 40px;
+  height: 40px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+}
+
+.badge-temp { background: #fef2f2; color: #ef4444; }
+.badge-humi { background: #f0f9ff; color: #0284c7; }
+.badge-light { background: #fffbeb; color: #d97706; }
+
+.sensor-title h4 {
+  font-size: 0.95rem;
+  font-weight: 800;
+}
+
+.sensor-pin {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+}
+
+.sensor-gauge-area {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.sensor-big-val {
+  font-family: var(--font-mono);
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: var(--text-main);
+}
+
+.sensor-big-val .unit {
+  font-size: 1.1rem;
+  color: var(--text-muted);
+  margin-left: 4px;
+}
+
+.sensor-status-badge {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.badge-good { background: #dcfce7; color: #15803d; }
+.badge-warn { background: #fffbe6; color: #d97706; }
+.badge-bright { background: #fef3c7; color: #b45309; }
+
+.gauge-bar-bg {
+  height: 12px;
+  border-radius: 10px;
+  overflow: hidden;
+  padding: 2px;
+  margin-bottom: 6px;
+}
+
+.gauge-bar-fill {
+  height: 100%;
+  border-radius: 8px;
+  transition: width 0.5s ease-in-out;
+}
+
+.bar-temp { background: linear-gradient(90deg, #3b82f6, #ef4444); }
+.bar-humi { background: linear-gradient(90deg, #38bdf8, #0284c7); }
+.bar-light { background: linear-gradient(90deg, #16a34a, #15803d); }
+
+.gauge-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.7rem;
+  color: var(--text-light);
+  font-family: var(--font-mono);
+}
+
+.cds-sub-note {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  margin-top: 8px;
+}
+
+/* --------------------------------------------------------------------------
+   8. View 3: Hardware Control Panels & Table
+   -------------------------------------------------------------------------- */
+.control-group-card {
+  padding: 18px 20px;
+}
+
+.control-card-title {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--text-main);
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.icon-green { color: var(--accent-green); }
+
+.control-desc {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-bottom: 14px;
+}
+
+.btn-dual-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.btn-stacked-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ref-card {
+  padding: 16px;
+}
+
+.cmd-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.75rem;
+  margin-top: 8px;
+}
+
+.cmd-table th, .cmd-table td {
+  padding: 8px 10px;
+  text-align: left;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.cmd-table th {
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+.cmd-table code {
+  font-family: var(--font-mono);
+  background: var(--accent-green-light);
+  color: var(--accent-green-dark);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 700;
+}
+
+/* --------------------------------------------------------------------------
+   9. View 4: Terminal & Manual Input
+   -------------------------------------------------------------------------- */
+.terminal-card {
+  border-radius: 20px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.terminal-bar {
+  background: #1e2923;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+.dot.red { background: #ef4444; }
+.dot.yellow { background: #f59e0b; }
+.dot.green { background: #16a34a; }
+
+.terminal-title {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: #94a3b8;
+  margin-left: 6px;
+}
+
+.terminal-body {
+  background: #141f17;
+  min-height: 240px;
+  max-height: 320px;
+  overflow-y: auto;
+  padding: 14px;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: #e2e8f0;
+}
+
+.log-line {
+  margin-bottom: 6px;
+  word-break: break-all;
+}
+
+.log-sys { color: #94a3b8; }
+.log-tx { color: #86efac; } /* Green TX */
+.log-rx { color: #38bdf8; } /* Sky RX */
+.log-err { color: #f87171; }
+
+.manual-send-box {
+  padding: 14px;
+}
+
+.input-with-button {
+  display: flex;
+  gap: 10px;
+}
+
+.glass-input {
+  flex: 1;
+  padding: 12px 16px;
+  border-radius: 14px;
+  border: none;
+  font-family: var(--font-mono);
+  font-size: 0.88rem;
+  color: var(--text-main);
+  outline: none;
+}
+
+/* --------------------------------------------------------------------------
+   10. Buttons & Interactive States
+   -------------------------------------------------------------------------- */
+.btn {
+  padding: 12px 18px;
+  border-radius: 16px;
+  border: none;
+  font-family: var(--font-ui);
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast), background-color var(--transition-fast);
+}
+
+.neumorph-btn {
+  background: var(--bg-primary);
+  box-shadow: var(--neu-raised);
+}
+
+.neumorph-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--neu-raised-hover);
+}
+
+.neumorph-btn:active, .neumorph-btn.pressed {
+  transform: translateY(1px);
+  box-shadow: var(--neu-sunken);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent-green), var(--accent-green-dark));
+  color: #ffffff;
+  box-shadow: 4px 6px 14px rgba(22, 163, 74, 0.3);
+}
+.btn-primary:hover {
+  box-shadow: 6px 8px 18px rgba(22, 163, 74, 0.4);
+}
+
+.btn-green {
+  background: #16a34a;
+  color: #ffffff;
+}
+
+.btn-emerald {
+  background: #10b981;
+  color: #ffffff;
+}
+
+.btn-danger {
+  background: #ef4444;
+  color: #ffffff;
+}
+
+.btn-neutral {
+  background: var(--bg-primary);
+  color: var(--text-main);
+}
+
+.btn-secondary {
+  background: #dcfce7;
+  color: var(--accent-green-dark);
+}
+
+.btn-sm {
+  padding: 8px 12px;
+  font-size: 0.78rem;
+  border-radius: 12px;
+}
+
+.btn-lg {
+  padding: 16px 24px;
+  font-size: 1rem;
+  border-radius: 18px;
+}
+
+.btn-block {
+  width: 100%;
+}
+
+.icon-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: var(--bg-primary);
+  box-shadow: var(--neu-raised-sm);
+  color: var(--text-main);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-text-sm {
+  background: none;
+  border: none;
+  color: var(--accent-green-dark);
+  font-weight: 800;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* --------------------------------------------------------------------------
+   11. Modal Overlay
+   -------------------------------------------------------------------------- */
+.overlay-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 31, 23, 0.45);
+  backdrop-filter: blur(8px);
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: fadeIn var(--transition-smooth);
+}
+
+.overlay-backdrop.hidden {
+  display: none;
+}
+
+.modal-card {
+  width: 100%;
+  max-width: 400px;
+  background: var(--bg-primary);
+  border-radius: 28px;
+  padding: 28px 24px;
+  text-align: center;
+}
+
+.modal-header {
+  margin-bottom: 20px;
+}
+
+.modal-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: var(--accent-green-light);
+  color: var(--accent-green-dark);
+  font-size: 1.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 14px auto;
+}
+
+.pulse-glow {
+  animation: pulseGlow 2s infinite;
+}
+
+@keyframes pulseGlow {
+  0% { box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.4); }
+  70% { box-shadow: 0 0 0 15px rgba(22, 163, 74, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(22, 163, 74, 0); }
+}
+
+.modal-header h2 {
+  font-size: 1.25rem;
+  font-weight: 800;
+}
+
+.modal-sub {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.connection-status-box {
+  padding: 14px 16px;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+  margin-bottom: 16px;
+}
+
+.status-icon {
+  font-size: 1.6rem;
+  color: var(--accent-green);
+}
+
+.status-title {
+  display: block;
+  font-weight: 700;
+  font-size: 0.88rem;
+}
+
+.status-desc {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.browser-guide-card {
+  background: var(--bg-secondary);
+  padding: 12px 14px;
+  border-radius: 14px;
+  font-size: 0.74rem;
+  text-align: left;
+  color: var(--text-muted);
+  margin-bottom: 22px;
+}
+
+.guide-title {
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 6px;
+}
+
+.browser-guide-card ul {
+  padding-left: 16px;
+}
+
+.badge-bluefy {
+  background: #3b82f6;
+  color: #ffffff;
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-weight: 700;
+}
+
+.modal-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* --------------------------------------------------------------------------
+   12. Switch Toggle UI
+   -------------------------------------------------------------------------- */
+.toggle-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.toggle-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.switch-sm {
+  position: relative;
+  display: inline-block;
+  width: 36px;
+  height: 20px;
+}
+
+.switch-sm input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider-round {
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background-color: var(--neu-shadow-dark);
+  transition: 0.3s;
+  border-radius: 20px;
+}
+
+.slider-round:before {
+  position: absolute;
+  content: "";
+  height: 14px;
+  width: 14px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.3s;
+  border-radius: 50%;
+}
+
+input:checked + .slider-round {
+  background-color: var(--accent-green);
+}
+
+input:checked + .slider-round:before {
+  transform: translateX(16px);
+}
+
+/* --------------------------------------------------------------------------
+   13. Bottom Glassmorphism Navigation Bar
+   -------------------------------------------------------------------------- */
+.app-navbar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 72px;
+  background: rgba(240, 245, 241, 0.88);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-top: 1px solid rgba(22, 163, 74, 0.12);
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  padding: 0 10px;
+  z-index: 50;
+}
+
+.nav-item {
+  background: none;
+  border: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color var(--transition-fast), transform var(--transition-fast);
+}
+
+.nav-item i {
+  font-size: 1.2rem;
+}
+
+.nav-item span {
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.nav-item.active {
+  color: var(--accent-green-dark);
+  transform: translateY(-2px);
+}
+
+.nav-item.active i {
+  color: var(--accent-green);
+}
+
+/* --------------------------------------------------------------------------
+   14. Toast Notifications
+   -------------------------------------------------------------------------- */
+.toast-container {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 90%;
+  max-width: 380px;
+  pointer-events: none;
+}
+
+.toast {
+  padding: 12px 16px;
+  border-radius: 16px;
+  background: #1c2e21;
+  color: #ffffff;
+  font-size: 0.8rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  animation: toastIn 0.3s ease-out;
+}
+
+.toast-success { border-left: 4px solid var(--accent-green); }
+.toast-info { border-left: 4px solid var(--color-sky); }
+.toast-error { border-left: 4px solid var(--color-rose); }
+
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.hidden { display: none !important; }
