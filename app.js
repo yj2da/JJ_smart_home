@@ -611,6 +611,8 @@ function toggleFocusTimer() {
         btnTimer.innerText = '시작';
         btnTimer.classList.add('btn-primary');
         updateTimerDisplay();
+        sendBLECommand('5'); // 집중 타이머 알람 완료 부저 연주
+        logSystem(`🎉 ${focusSelectedMinutes}분 집중 시간 완료! 피에조 부저 알람을 연주합니다.`);
         alert(`🎉 ${focusSelectedMinutes}분 집중 시간이 완료되었습니다!`);
       }
     }, 1000);
@@ -862,9 +864,12 @@ function initControls() {
   const toggleAutoBlind = document.getElementById('toggle-auto-blind');
   if (toggleAutoBlind) {
     toggleAutoBlind.addEventListener('change', (e) => {
-      logSystem(`🪟 [스마트 블라인드] 어두우면 자동 열기 ${e.target.checked ? 'ON (활성화)' : 'OFF (비활성화)'}`);
+      const isChecked = e.target.checked;
+      sendBLECommand(isChecked ? 'B_AUTO:1' : 'B_AUTO:0');
+      logSystem(`🪟 [스마트 블라인드] 어두우면 자동 열기 ${isChecked ? 'ON (활성화)' : 'OFF (비활성화)'}`);
     });
   }
+
   const toggleHumiAlert = document.getElementById('toggle-humi-alert');
   const sliderHumiThreshold = document.getElementById('slider-humi-threshold');
   const humiThresholdVal = document.getElementById('humi-threshold-val');
@@ -874,13 +879,16 @@ function initControls() {
       if (humiThresholdVal) humiThresholdVal.innerText = `${e.target.value}% 이상`;
     });
     sliderHumiThreshold.addEventListener('change', (e) => {
+      sendBLECommand(`H_TH:${e.target.value}`);
       logSystem(`🌧️ [습도 경보] 작동 기준이 ${e.target.value}% 로 설정되었습니다.`);
     });
   }
 
   if (toggleHumiAlert) {
     toggleHumiAlert.addEventListener('change', (e) => {
-      logSystem(`🌧️ [습도 경보] 고습도 안내 경보가 ${e.target.checked ? 'ON (활성화)' : 'OFF (비활성화)'} 되었습니다.`);
+      const isChecked = e.target.checked;
+      sendBLECommand(isChecked ? 'H_ALERT:1' : 'H_ALERT:0');
+      logSystem(`🌧️ [습도 경보] 고습도 안내 경보가 ${isChecked ? 'ON (활성화)' : 'OFF (비활성화)'} 되었습니다.`);
     });
   }
 
@@ -905,6 +913,7 @@ function initControls() {
         modeText = '할 일/D-Day';
         cmd = 'O3';
         if (wordPanel) wordPanel.style.display = 'none';
+        sendTodoToOLED();
       } else {
         if (wordPanel) wordPanel.style.display = 'none';
       }
@@ -944,18 +953,18 @@ function initControls() {
 }
 
 const ENGLISH_WORDS_DB = [
-  { en: 'SERENDIPITY', kr: '뜻밖의 행운 / 우연한 기쁨', ex: 'Finding joy in unexpected moments.' },
-  { en: 'PERSISTENCE', kr: '끈기 / 끊임없는 노력', ex: 'Key to achieving all great goals.' },
-  { en: 'RESILIENCE', kr: '회복탄력성 / 오뚝이 정신', ex: 'Bounce back stronger than ever.' },
-  { en: 'INSPIRATION', kr: '영감 / 창의적 자극', ex: 'Fresh ideas fill your day.' },
-  { en: 'CREATIVITY', kr: '창의성 / 독창력', ex: 'Think differently every single day.' },
-  { en: 'PROSPERITY', kr: '번영 / 풍요로움', ex: 'Wishing you success and joy.' },
-  { en: 'PASSIONATE', kr: '열정적인 / 뜨거운', ex: 'Follow what makes your heart beat.' },
-  { en: 'HARMONY', kr: '조화 / 편안함', ex: 'Peaceful smart home environment.' },
-  { en: 'BRILLIANT', kr: '훌륭한 / 눈부신', ex: 'You have a brilliant future.' },
+  { en: 'SERENDIPITY', kr: '뜻밖의 행운', ex: 'Finding joy in unexpected moments.' },
+  { en: 'PERSISTENCE', kr: '끈기있는 노력', ex: 'Key to achieving all great goals.' },
+  { en: 'RESILIENCE', kr: '회복탄력성', ex: 'Bounce back stronger than ever.' },
+  { en: 'INSPIRATION', kr: '창의적 영감', ex: 'Fresh ideas fill your day.' },
+  { en: 'CREATIVITY', kr: '독창적 창의성', ex: 'Think differently every single day.' },
+  { en: 'PROSPERITY', kr: '풍요로운 번영', ex: 'Wishing you success and joy.' },
+  { en: 'PASSIONATE', kr: '뜨거운 열정', ex: 'Follow what makes your heart beat.' },
+  { en: 'HARMONY', kr: '조화와 편안함', ex: 'Peaceful smart home environment.' },
+  { en: 'BRILLIANT', kr: '눈부신 훌륭함', ex: 'You have a brilliant future.' },
   { en: 'GRATITUDE', kr: '감사하는 마음', ex: 'Be thankful for today.' },
-  { en: 'MOTIVATION', kr: '동기부여 / 자극', ex: 'Start where you are, use what you have.' },
-  { en: 'EXCELLENCE', kr: '탁월함 / 뛰어남', ex: 'Excellence is a habit, not an act.' }
+  { en: 'MOTIVATION', kr: '동기부여 자극', ex: 'Start where you are, use what you have.' },
+  { en: 'EXCELLENCE', kr: '탁월한 습관', ex: 'Excellence is a habit, not an act.' }
 ];
 
 function updateRandomWord() {
@@ -968,8 +977,20 @@ function updateRandomWord() {
   if (elKr) elKr.innerText = item.kr;
   if (elEx) elEx.innerText = `"${item.ex}"`;
 
-  sendBLECommand(`W:${item.en}`);
-  logSystem(`📚 [오늘의 영단어] '${item.en}' (${item.kr}) 세팅 완료.`);
+  sendBLECommand(`W:${item.en}|${item.kr}|${item.ex}`);
+  logSystem(`📚 [오늘의 영단어] '${item.en}' (${item.kr}) / 문장: "${item.ex}"`);
+}
+
+function sendTodoToOLED() {
+  const today = new Date();
+  const dateStr = `${today.getFullYear()}.${(today.getMonth()+1).toString().padStart(2,'0')}.${today.getDate().toString().padStart(2,'0')}`;
+  const pending = todoItems.filter(t => !t.completed);
+  let todoText = "NONE";
+  if (pending.length > 0) {
+    todoText = pending.map(t => t.text).join(", ");
+  }
+  sendBLECommand(`T:${dateStr}|${todoText}`);
+  logSystem(`📅 [오늘의 할 일] 날짜: ${dateStr}, 할 일: ${todoText === 'NONE' ? '오늘도 화이팅!' : todoText}`);
 }
 
 function setModeUI(mode) {
