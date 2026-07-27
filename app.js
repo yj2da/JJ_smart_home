@@ -117,6 +117,8 @@ function initEventListeners() {
   // Command Buttons
   elements.actionCmdBtns.forEach(btn => {
     btn.addEventListener('click', () => {
+      btn.classList.add('btn-active-flash');
+      setTimeout(() => btn.classList.remove('btn-active-flash'), 500);
       const cmd = btn.getAttribute('data-cmd');
       if (cmd) sendCommand(cmd);
     });
@@ -326,6 +328,15 @@ async function sendCommand(cmdStr) {
 
   logTX(`명령어 전송: '${cmdStr}'`);
 
+  // Update internal toggle states based on sent command
+  if (cmdStr === '7') state.lightState = true;
+  else if (cmdStr === '8') state.lightState = false;
+  else if (cmdStr === '3') state.lcdState = true;
+  else if (cmdStr === '4') state.lcdState = false;
+  else if (cmdStr === '1') state.rgbState = 'red';
+  else if (cmdStr === '2') state.rgbState = 'green';
+  updateQuickStates();
+
   if (state.isDemoMode) {
     handleDemoCommand(cmdStr);
     return;
@@ -490,10 +501,85 @@ function updateUIState() {
 }
 
 function updateQuickStates() {
-  elements.quickLightState.textContent = state.lightState ? 'ON (켜짐)' : 'OFF (꺼짐)';
-  elements.quickLightState.style.color = state.lightState ? 'var(--accent-green)' : 'var(--text-muted)';
+  // 1. Light ON (7) / OFF (8) Buttons & Badges
+  const lightCmd7Btns = document.querySelectorAll('[data-cmd="7"]');
+  const lightCmd8Btns = document.querySelectorAll('[data-cmd="8"]');
 
-  elements.quickLcdState.textContent = state.lcdState ? 'ON' : 'OFF';
+  if (state.lightState) {
+    if (elements.quickLightState) {
+      elements.quickLightState.textContent = 'ON (켜짐)';
+      elements.quickLightState.style.color = 'var(--primary-pink-text)';
+    }
+    if (elements.quickBtnLight) {
+      elements.quickBtnLight.className = 'pill-btn pill-btn-pink action-cmd-btn btn-active';
+    }
+    lightCmd7Btns.forEach(btn => {
+      btn.className = 'pill-btn pill-btn-pink action-cmd-btn btn-active';
+    });
+    lightCmd8Btns.forEach(btn => {
+      btn.className = 'pill-btn pill-btn-inactive action-cmd-btn';
+    });
+  } else {
+    if (elements.quickLightState) {
+      elements.quickLightState.textContent = 'OFF (꺼짐)';
+      elements.quickLightState.style.color = 'var(--text-secondary)';
+    }
+    if (elements.quickBtnLight) {
+      elements.quickBtnLight.className = 'pill-btn pill-btn-inactive action-cmd-btn';
+    }
+    lightCmd7Btns.forEach(btn => {
+      btn.className = 'pill-btn pill-btn-inactive action-cmd-btn';
+    });
+    lightCmd8Btns.forEach(btn => {
+      btn.className = 'pill-btn pill-btn-pink action-cmd-btn btn-active';
+    });
+  }
+
+  // 2. LCD ON (3) / OFF (4) Buttons & Badges
+  const lcdCmd3Btns = document.querySelectorAll('[data-cmd="3"]');
+  const lcdCmd4Btns = document.querySelectorAll('[data-cmd="4"]');
+
+  if (state.lcdState) {
+    if (elements.quickLcdState) {
+      elements.quickLcdState.textContent = 'ON (켜짐)';
+      elements.quickLcdState.style.color = 'var(--secondary-mint-text)';
+    }
+    if (elements.quickBtnLcd) {
+      elements.quickBtnLcd.className = 'pill-btn pill-btn-mint action-cmd-btn btn-active';
+    }
+    lcdCmd3Btns.forEach(btn => {
+      btn.className = 'pill-btn pill-btn-mint action-cmd-btn btn-active';
+    });
+    lcdCmd4Btns.forEach(btn => {
+      btn.className = 'pill-btn pill-btn-inactive action-cmd-btn';
+    });
+  } else {
+    if (elements.quickLcdState) {
+      elements.quickLcdState.textContent = 'OFF (꺼짐)';
+      elements.quickLcdState.style.color = 'var(--text-secondary)';
+    }
+    if (elements.quickBtnLcd) {
+      elements.quickBtnLcd.className = 'pill-btn pill-btn-inactive action-cmd-btn';
+    }
+    lcdCmd3Btns.forEach(btn => {
+      btn.className = 'pill-btn pill-btn-inactive action-cmd-btn';
+    });
+    lcdCmd4Btns.forEach(btn => {
+      btn.className = 'pill-btn pill-btn-mint action-cmd-btn btn-active';
+    });
+  }
+
+  // 3. RGB RED (1) / GREEN (2) Buttons
+  const rgbCmd1Btns = document.querySelectorAll('[data-cmd="1"]');
+  const rgbCmd2Btns = document.querySelectorAll('[data-cmd="2"]');
+
+  if (state.rgbState === 'red') {
+    rgbCmd1Btns.forEach(btn => btn.className = 'pill-btn pill-btn-pink action-cmd-btn btn-active');
+    rgbCmd2Btns.forEach(btn => btn.className = 'pill-btn pill-btn-inactive action-cmd-btn');
+  } else if (state.rgbState === 'green') {
+    rgbCmd1Btns.forEach(btn => btn.className = 'pill-btn pill-btn-inactive action-cmd-btn');
+    rgbCmd2Btns.forEach(btn => btn.className = 'pill-btn pill-btn-mint action-cmd-btn btn-active');
+  }
 }
 
 function updateTemperatureUI(temp) {

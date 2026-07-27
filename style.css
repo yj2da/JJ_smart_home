@@ -339,6 +339,58 @@ body {
   color: var(--text-primary);
 }
 
+/* Active Highlight & Inactive Button States */
+.pill-btn.btn-active {
+  transform: translateY(-2px) scale(1.03);
+  font-weight: 800;
+}
+
+.pill-btn-pink.btn-active {
+  background: var(--primary-pink) !important;
+  color: var(--primary-pink-text) !important;
+  border-color: rgba(255, 255, 255, 0.95) !important;
+  box-shadow: 0 0 20px rgba(255, 214, 232, 0.9), 0 4px 15px rgba(255, 214, 232, 0.5) !important;
+}
+
+.pill-btn-mint.btn-active {
+  background: var(--secondary-mint) !important;
+  color: var(--secondary-mint-text) !important;
+  border-color: rgba(255, 255, 255, 0.95) !important;
+  box-shadow: 0 0 20px rgba(224, 242, 241, 0.9), 0 4px 15px rgba(224, 242, 241, 0.5) !important;
+}
+
+.pill-btn-lavender.btn-active {
+  background: var(--tertiary-lavender) !important;
+  color: var(--tertiary-lavender-text) !important;
+  border-color: rgba(255, 255, 255, 0.95) !important;
+  box-shadow: 0 0 20px rgba(243, 229, 245, 0.9), 0 4px 15px rgba(243, 229, 245, 0.5) !important;
+}
+
+.pill-btn-inactive {
+  background: rgba(255, 255, 255, 0.35) !important;
+  color: var(--text-secondary) !important;
+  border-color: rgba(255, 255, 255, 0.5) !important;
+  box-shadow: none !important;
+  transform: none !important;
+  opacity: 0.65;
+}
+
+.pill-btn-inactive:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.55) !important;
+  color: var(--text-primary) !important;
+}
+
+.btn-active-flash {
+  animation: pulseActive 0.5s ease;
+}
+
+@keyframes pulseActive {
+  0% { transform: scale(0.96); box-shadow: 0 0 0 rgba(255, 214, 232, 0); }
+  50% { transform: scale(1.05); box-shadow: 0 0 25px rgba(255, 214, 232, 0.9); }
+  100% { transform: scale(1); }
+}
+
 /* Icon Buttons */
 .icon-btn-glass {
   width: 44px;
