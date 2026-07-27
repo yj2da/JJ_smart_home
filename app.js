@@ -494,60 +494,59 @@ function updateQuickStates() {
 
 function updateTemperatureUI(temp) {
   state.temperature = temp;
-  elements.homeTemp.textContent = `${temp} °C`;
-  elements.valTemp.textContent = temp;
+  if (elements.homeTemp) elements.homeTemp.innerHTML = `${temp} <span>°C</span>`;
+  if (elements.valTemp) elements.valTemp.textContent = temp;
 
   // Percentage for gauge (0 to 50 deg C scale)
   const pct = Math.min(100, Math.max(0, (temp / 50) * 100));
-  elements.gaugeTemp.style.width = `${pct}%`;
+  if (elements.gaugeTemp) elements.gaugeTemp.style.width = `${pct}%`;
 
-  if (temp < 18) {
-    elements.badgeTemp.textContent = '쌀쌀함';
-    elements.badgeTemp.className = 'sensor-status-badge badge-warn';
-  } else if (temp <= 28) {
-    elements.badgeTemp.textContent = '쾌적함';
-    elements.badgeTemp.className = 'sensor-status-badge badge-good';
-  } else {
-    elements.badgeTemp.textContent = '무더움';
-    elements.badgeTemp.className = 'sensor-status-badge badge-warn';
+  if (elements.badgeTemp) {
+    if (temp < 18) {
+      elements.badgeTemp.textContent = '쌀쌀함';
+    } else if (temp <= 28) {
+      elements.badgeTemp.textContent = '쾌적함';
+    } else {
+      elements.badgeTemp.textContent = '무더움';
+    }
   }
 }
 
 function updateHumidityUI(humi) {
   state.humidity = humi;
-  elements.homeHumi.textContent = `${humi} %`;
-  elements.valHumi.textContent = humi;
+  if (elements.homeHumi) elements.homeHumi.innerHTML = `${humi} <span>%</span>`;
+  if (elements.valHumi) elements.valHumi.textContent = humi;
 
   const pct = Math.min(100, Math.max(0, humi));
-  elements.gaugeHumi.style.width = `${pct}%`;
+  if (elements.gaugeHumi) elements.gaugeHumi.style.width = `${pct}%`;
 
-  if (humi < 35) {
-    elements.badgeHumi.textContent = '건조함';
-    elements.badgeHumi.className = 'sensor-status-badge badge-warn';
-  } else if (humi <= 65) {
-    elements.badgeHumi.textContent = '적정 습도';
-    elements.badgeHumi.className = 'sensor-status-badge badge-good';
-  } else {
-    elements.badgeHumi.textContent = '습함';
-    elements.badgeHumi.className = 'sensor-status-badge badge-warn';
+  if (elements.badgeHumi) {
+    if (humi < 35) {
+      elements.badgeHumi.textContent = '건조함';
+    } else if (humi <= 65) {
+      elements.badgeHumi.textContent = '적정';
+    } else {
+      elements.badgeHumi.textContent = '습함';
+    }
   }
 }
 
 function updateCdSUI(cdsVal) {
   state.cdsValue = cdsVal;
-  elements.valCds.textContent = cdsVal;
+  if (elements.homeLight) elements.homeLight.textContent = cdsVal;
+  if (elements.valCds) elements.valCds.textContent = cdsVal;
 
+  const lightBar = document.getElementById('home-light-bar');
   const pct = Math.min(100, Math.max(0, (cdsVal / 4095) * 100));
-  elements.gaugeCds.style.width = `${pct}%`;
+  if (elements.gaugeCds) elements.gaugeCds.style.width = `${pct}%`;
+  if (lightBar) lightBar.style.width = `${pct}%`;
 
-  if (cdsVal > 4000) {
-    elements.homeLight.textContent = '어두움';
-    elements.badgeCds.textContent = '어두움 (Dark)';
-    elements.badgeCds.className = 'sensor-status-badge badge-warn';
-  } else {
-    elements.homeLight.textContent = '밝음';
-    elements.badgeCds.textContent = '밝음 (Bright)';
-    elements.badgeCds.className = 'sensor-status-badge badge-bright';
+  if (elements.badgeCds) {
+    if (cdsVal > 3000) {
+      elements.badgeCds.textContent = '어두움';
+    } else {
+      elements.badgeCds.textContent = '밝음';
+    }
   }
 }
 
