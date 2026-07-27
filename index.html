@@ -157,10 +157,10 @@
                   
                   <div style="display:flex; align-items:center; gap:8px;">
                     <!-- 시간 조절 버튼 (- / +) -->
-                    <div style="display:flex; align-items:center; gap:4px; background:rgba(0,0,0,0.15); padding:3px 8px; border-radius:8px; border:1px solid var(--border-glass);">
-                      <button id="btn-timer-minus" style="background:none; border:none; color:var(--text-main); cursor:pointer; font-weight:800; font-size:0.95rem; padding:0 4px;" title="5분 감수">-</button>
+                    <div class="timer-stepper-box">
+                      <button id="btn-timer-minus" class="btn-stepper" title="5분 감수">-</button>
                       <span id="focus-timer-display" style="font-family:var(--font-mono); font-weight:700; color:var(--accent-sky); font-size:0.95rem; min-width:44px; text-align:center;">25:00</span>
-                      <button id="btn-timer-plus" style="background:none; border:none; color:var(--text-main); cursor:pointer; font-weight:800; font-size:0.95rem; padding:0 4px;" title="5분 증가">+</button>
+                      <button id="btn-timer-plus" class="btn-stepper" title="5분 증가">+</button>
                     </div>
 
                     <button id="btn-start-timer" class="btn-glass btn-primary" style="padding:5px 12px; font-size:0.75rem;">시작</button>

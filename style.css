@@ -981,5 +981,47 @@ body.light-mode .chat-bubble.bot { background: rgba(0, 0, 0, 0.06); color: #0F17
   font-weight: 700;
 }
 
+/* Timer Stepper Box (+ / -) Glow Styling */
+.timer-stepper-box {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(56, 189, 248, 0.08);
+  padding: 4px 10px;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  box-shadow: 0 2px 10px rgba(56, 189, 248, 0.1);
+  transition: var(--transition-fast);
+}
+
+.timer-stepper-box:hover {
+  background: rgba(56, 189, 248, 0.15);
+  border-color: var(--accent-sky);
+}
+
+body.light-mode .timer-stepper-box {
+  background: rgba(56, 189, 248, 0.12);
+  border-color: rgba(56, 189, 248, 0.35);
+  box-shadow: 0 2px 8px rgba(56, 189, 248, 0.15);
+}
+
+.btn-stepper {
+  background: none;
+  border: none;
+  color: var(--accent-sky);
+  cursor: pointer;
+  font-weight: 800;
+  font-size: 1rem;
+  padding: 0 4px;
+  line-height: 1;
+  transition: transform 0.15s ease, color 0.15s ease;
+}
+
+.btn-stepper:hover {
+  transform: scale(1.25);
+  color: var(--accent-indigo);
+}
+
+
 
 
