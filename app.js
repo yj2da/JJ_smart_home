@@ -238,16 +238,47 @@ function parseDeviceMessage(msg) {
     document.getElementById('sensor-cds').innerText = cdsVal;
   }
 
-  if (msg.includes('Snore Monitor Started')) {
+  if (msg.includes('MODE:SLEEP') || msg.includes('Snore Monitor Started')) {
     setModeUI('sleep');
   }
 
-  if (msg.includes('Snore Monitor OFF')) {
+  if (msg.includes('MODE:WAKEUP') || msg.includes('Snore Monitor OFF')) {
     if (currentMode === 'sleep') {
       finishSleepSession();
     } else {
-      setModeUI(null);
+      setModeUI('wakeup');
     }
+  }
+
+  if (msg.includes('MODE:FOCUS')) {
+    setModeUI('focus');
+    focusSelectedMinutes = 5;
+    focusTimeRemaining = 5 * 60;
+    document.querySelectorAll('.btn-preset-min').forEach(b => {
+      b.classList.toggle('active', b.getAttribute('data-min') === '5');
+    });
+    updateTimerDisplay();
+    startASMR();
+    if (!focusTimerInterval) {
+      toggleFocusTimer();
+    }
+    logSystem('🧠 [Touch 3] 하드웨어 집중 모드 시작 (5분 타이머 & 백색소음 자동 실행)');
+  }
+
+  if (msg.includes('MODE:OFF')) {
+    setModeUI(null);
+    stopASMR();
+    if (focusTimerInterval) {
+      clearInterval(focusTimerInterval);
+      focusTimerInterval = null;
+      const btnTimer = document.getElementById('btn-start-timer');
+      if (btnTimer) {
+        btnTimer.innerText = '시작';
+        btnTimer.classList.add('btn-primary');
+      }
+      updateTimerDisplay();
+    }
+    logSystem('⚪ [Touch 4] 하드웨어 모든 모드 OFF (스마트홈 대기 상태)');
   }
 
   if (msg.includes('Mic Level')) {

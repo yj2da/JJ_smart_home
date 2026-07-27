@@ -484,38 +484,70 @@ print("🚀 JINJIN Smart Home ESP32 Ready! (Manual Sync & Silent Snore Alert Mod
 
 # 메인 무한 루프
 while True:
-    # 1. 정전식 터치 센서 접촉 감지에 따른 실시간 제어
-    if touch1.value():
+    # 1. 정전식 터치 센서 4핀 실시간 제어
+    if touch1.value(): # 터치 1: 수면 모드 (Sleep Mode)
         if not mic_active:
             mic_active = True
             snore_count = 0
             snore_flag = False
-            print("💤 [Snore Monitor] 수면 모드가 시작되었습니다. (불 다 끄기)")
-            p.send("Snore Monitor Started\n")
+            print("💤 [Touch 1] 수면 모드 시작 (불 다 끄기)")
+            p.send("MODE:SLEEP\n")
             R.off(); G.off(); B.off()
+            if display1:
+                display1.fill(0)
+                display1.text("=== SLEEP MODE ===", 0, 0)
+                display1.text("Lights: OFF", 0, 20)
+                display1.text("Snore Monitor: ON", 0, 40)
+                display1.show()
+            sleep(0.3)
         
-    elif touch2.value():
-        if mic_active:
-            mic_active = False
-            snore_count = 0
-            snore_flag = False
-            print("☀️ [Snore Monitor] 기상 모드로 전환합니다. (불 켜기 & 블라인드 180°)")
-            p.send("Snore Monitor OFF\n")
-            R.on(); G.on(); B.on()
-            motor.move(180)
-            update_sensors_and_oled2()
+    elif touch2.value(): # 터치 2: 기상 모드 (Wakeup Mode)
+        mic_active = False
+        snore_count = 0
+        snore_flag = False
+        buzzer.duty_u16(0)
+        print("☀️ [Touch 2] 기상 모드 진입 (불 켜기 & 블라인드 180°)")
+        p.send("MODE:WAKEUP\n")
+        R.on(); G.on(); B.on()
+        motor.move(180)
+        if display1:
+            display1.fill(0)
+            display1.text("=== WAKEUP MODE ===", 0, 0)
+            display1.text("Lights: ON", 0, 20)
+            display1.text("Blind: 180 Open", 0, 40)
+            display1.show()
+        update_sensors_and_oled2()
+        sleep(0.3)
     
-    elif touch3.value():
-        print("Button 3 touched - Updating Weather & Sensors")
-        update_weather()
+    elif touch3.value(): # 터치 3: 집중 모드 (Focus Mode - 웹 5분 타이머 자동 시작)
+        mic_active = False
+        snore_count = 0
+        buzzer.duty_u16(0)
+        print("🧠 [Touch 3] 집중 모드 진입 (웹 5분 집중 타이머 & 백색소음 자동 실행)")
+        p.send("MODE:FOCUS\n")
+        R.on(); G.on(); B.off() # 따뜻한 무드등
+        if display1:
+            display1.fill(0)
+            display1.text("=== FOCUS MODE ===", 0, 0)
+            display1.text("Timer: 5 Mins", 0, 20)
+            display1.text("ASMR: Web Active", 0, 40)
+            display1.show()
+        sleep(0.3)
         
-    elif touch4.value():
-        print("🔔 [Piezo Buzzer Test] 피에조 부저 멜로디 연주!")
-        p.send("Piezo Buzzer Test\n")
-        scale_notes = [NOTE_C4, NOTE_D4, NOTE_E4, NOTE_F4, NOTE_G4, NOTE_A4, NOTE_B4, NOTE_C5]
-        for freq in scale_notes:
-            play_tone(freq, 0.15)
-            sleep(0.03)
+    elif touch4.value(): # 터치 4: 모든 모드 OFF (All Modes OFF)
+        mic_active = False
+        snore_count = 0
+        snore_flag = False
+        buzzer.duty_u16(0)
+        print("⚪ [Touch 4] 모든 모드 OFF (스마트홈 대기 상태)")
+        p.send("MODE:OFF\n")
+        R.off(); G.off(); B.off()
+        if display1:
+            display1.fill(0)
+            display1.text("=== ALL MODES OFF ===", 0, 0)
+            display1.text("JINJIN Smart Home", 0, 24)
+            display1.show()
+        sleep(0.3)
 
     # 2. 수면 모드 활성화 시 실시간 코골이 음성 샘플링 & 패턴 분석
     if mic_active:
