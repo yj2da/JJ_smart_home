@@ -1,8 +1,17 @@
-/* Copy of jinjin_smart-home/app.js for root workspace entry */
-const BLE_SERVICE_UUID = '6e400001-b5a3-f393-e0a9-e50e24dcca9e';
-const BLE_RX_UUID = '6e400002-b5a3-f393-e0a9-e50e24dcca9e';
-const BLE_TX_UUID = '6e400003-b5a3-f393-e0a9-e50e24dcca9e';
+/* ==========================================================================
+   JINJIN SMART HOME DASHBOARD - JAVASCRIPT APPLICATION (app.js)
+   Mobile-First Web Bluetooth (NUS), Realtime Chart.js, ASMR Web Audio, AI Chatbot
+   Google Calendar Integration, OpenWeatherMap API & Cloud DB Sync (/api/todos)
+   Default Theme: Light Mode (야간 모드 OFF)
+   Creators: Jina & Yejin
+   ========================================================================== */
 
+// --- BLE Constants (Nordic UART Service) ---
+const BLE_SERVICE_UUID = '6e400001-b5a3-f393-e0a9-e50e24dcca9e';
+const BLE_RX_UUID = '6e400002-b5a3-f393-e0a9-e50e24dcca9e'; // Web -> ESP32
+const BLE_TX_UUID = '6e400003-b5a3-f393-e0a9-e50e24dcca9e'; // ESP32 -> Web
+
+// --- Global Application State ---
 let bleDevice = null;
 let rxCharacteristic = null;
 let txCharacteristic = null;
@@ -10,27 +19,35 @@ let isConnected = false;
 let isDemoMode = false;
 let demoInterval = null;
 
-let currentMode = null;
+// App States
+let currentMode = null; // 'sleep', 'wakeup', 'focus', or null (nothing)
 let snoreCount = 0;
 
+// Sleep Session Score Tracking
 let sleepSessionSnoreCount = 0;
 let sleepStartTime = null;
 let lastSleepScore = null;
 
+// ASMR & Focus Timer States
 let isAsmrPlaying = false;
 let asmrAudioCtx = null;
 let asmrGainNode = null;
 let focusTimerInterval = null;
-let focusTimeRemaining = 25 * 60;
+let focusTimeRemaining = 25 * 60; // 25 mins
 
+// Chart.js Instance
 let snoreChart = null;
 const chartDataPoints = [];
 const chartLabels = [];
 const MAX_CHART_POINTS = 15;
 
+// Todo Task Storage Key
 const TODO_STORAGE_KEY = 'jinjin_smarthome_todos';
 let todoItems = [];
 
+// ==========================================================================
+// 1. INITIALIZATION & TAB SWITCHING
+// ==========================================================================
 document.addEventListener('DOMContentLoaded', () => {
   initTabs();
   initChart();
@@ -44,6 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
   logSystem('JINJIN 스마트홈 모바일 대시보드가 준비되었습니다. (야간 모드 OFF 기본 세팅)');
 });
 
+// Tab View Switcher (Mobile Bottom Nav: 오늘 하루 / 홈 제어 / 설정)
 function initTabs() {
   const navItems = document.querySelectorAll('.nav-item');
   const tabViews = document.querySelectorAll('.tab-view');
@@ -63,6 +81,9 @@ function initTabs() {
   });
 }
 
+// ==========================================================================
+// 2. THEME SETTINGS & NIGHT MODE TOGGLE (Default: 야간 모드 OFF / Light Mode)
+// ==========================================================================
 function initTheme() {
   const toggleTheme = document.getElementById('toggle-theme-mode');
   const savedTheme = localStorage.getItem('jinjin_theme');
@@ -97,6 +118,9 @@ function applyTheme(isDark) {
   }
 }
 
+// ==========================================================================
+// 3. WEB BLUETOOTH NUS LOGIC & DISCONNECTED ALERT
+// ==========================================================================
 function checkConnectionGuard() {
   if (!isConnected && !isDemoMode) {
     alert('⚠️ 스마트홈 기기를 연결해주세요!\n\n우측 상단의 [ESP_JJ] 버튼을 눌러 블루투스로 연결하거나, [데모] 버튼을 눌러 체험 모드를 실행해 주세요.');
@@ -248,6 +272,9 @@ function parseDeviceMessage(msg) {
   }
 }
 
+// ==========================================================================
+// 4. SIMULATION / DEMO MODE
+// ==========================================================================
 function toggleDemoMode(forceState) {
   isDemoMode = forceState !== undefined ? forceState : !isDemoMode;
 
@@ -322,6 +349,9 @@ function updateStatusUI(state, text) {
   }
 }
 
+// ==========================================================================
+// 5. CHART.JS REALTIME SNORE GRAPH
+// ==========================================================================
 function initChart() {
   const ctx = document.getElementById('snoreChart').getContext('2d');
 
@@ -587,6 +617,9 @@ function toggleFocusTimer() {
   }
 }
 
+// ==========================================================================
+// 6. TODO TASK MANAGER & CLOUD DB INTEGRATION (/api/todos)
+// ==========================================================================
 async function initTodoList() {
   document.getElementById('btn-add-todo').addEventListener('click', addTodo);
   document.getElementById('todo-input').addEventListener('keypress', (e) => {
@@ -692,6 +725,9 @@ function renderTodoList() {
 window.toggleTodo = toggleTodo;
 window.deleteTodo = deleteTodo;
 
+// ==========================================================================
+// 7. GOOGLE CALENDAR INTEGRATION FUNCTIONS
+// ==========================================================================
 function initCalendarIntegration() {
   const btnGCalAll = document.getElementById('btn-export-all-gcal');
   if (btnGCalAll) btnGCalAll.addEventListener('click', exportAllToGoogleCalendar);
@@ -829,8 +865,6 @@ function initControls() {
       logSystem(`🪟 [스마트 블라인드] 어두우면 자동 열기 ${e.target.checked ? 'ON (활성화)' : 'OFF (비활성화)'}`);
     });
   }
-
-  // 스마트 습도 경보 설정
   const toggleHumiAlert = document.getElementById('toggle-humi-alert');
   const sliderHumiThreshold = document.getElementById('slider-humi-threshold');
   const humiThresholdVal = document.getElementById('humi-threshold-val');
