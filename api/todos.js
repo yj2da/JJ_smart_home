@@ -1,20 +1,14 @@
 /* ==========================================================================
    VERCEL SERVERLESS FUNCTION - TODO LIST DATABASE API (/api/todos)
-   Supports Vercel KV / Upstash Redis REST API
-   Environment Variables:
-     - KV_REST_API_URL or UPSTASH_REDIS_REST_URL
-     - KV_REST_API_TOKEN or UPSTASH_REDIS_REST_TOKEN
-   Fallback: In-memory store for local testing
+   Supports Vercel KV, Upstash Redis & REDIS_URL Environment Variables
    ========================================================================= */
 
-// In-Memory Fallback Cache for local dev
 let localTodoCache = [
   { id: 1, text: '스마트홈 온습도 체크', completed: true },
   { id: 2, text: '수면 코골이 분석 모니터링', completed: false }
 ];
 
 export default async function handler(req, res) {
-  // CORS Headers
   res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,POST,PUT,DELETE');
@@ -28,28 +22,35 @@ export default async function handler(req, res) {
     return;
   }
 
-  const kvUrl = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
-  const kvToken = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
+  // Resolve Vercel KV / Upstash / REDIS Env Vars
+  let kvUrl = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
+  let kvToken = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
+
+  // If REDIS_URL is provided as https Upstash REST URL
+  if (!kvUrl && process.env.REDIS_URL && process.env.REDIS_URL.startsWith('https://')) {
+    kvUrl = process.env.REDIS_URL;
+  }
 
   // 1. GET Request: Fetch Todos from DB
   if (req.method === 'GET') {
     if (kvUrl && kvToken) {
       try {
-        const fetchUrl = `${kvUrl}/get/jinjin_smarthome_todos`;
+        const fetchUrl = `${kvUrl.replace(/\/$/, '')}/get/jinjin_smarthome_todos`;
         const apiRes = await fetch(fetchUrl, {
           headers: { Authorization: `Bearer ${kvToken}` }
         });
         const data = await apiRes.json();
         
-        if (data && data.result) {
+        if (data && data.result !== undefined && data.result !== null) {
           let parsedData = typeof data.result === 'string' ? JSON.parse(data.result) : data.result;
-          return res.status(200).json({ success: true, todos: parsedData, source: 'Vercel_KV' });
+          if (Array.isArray(parsedData)) {
+            return res.status(200).json({ success: true, todos: parsedData, source: 'Vercel_KV' });
+          }
         }
       } catch (err) {
         console.error('Vercel KV GET Error:', err);
       }
     }
-    // Fallback to local memory
     return res.status(200).json({ success: true, todos: localTodoCache, source: 'Local_Cache' });
   }
 
@@ -64,7 +65,7 @@ export default async function handler(req, res) {
       localTodoCache = todos;
 
       if (kvUrl && kvToken) {
-        const setUrl = `${kvUrl}/set/jinjin_smarthome_todos`;
+        const setUrl = `${kvUrl.replace(/\/$/, '')}/set/jinjin_smarthome_todos`;
         const apiRes = await fetch(setUrl, {
           method: 'POST',
           headers: {
