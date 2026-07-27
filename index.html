@@ -18,6 +18,34 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body class="light-mode">
+  <!-- APP LAUNCH SPLASH SCREEN (앱 시작 스플래시 화면) -->
+  <div id="splash-screen" class="splash-screen">
+    <div class="splash-content">
+      <div class="splash-icon-wrapper">
+        <i class="fa-solid fa-house-signal"></i>
+      </div>
+      <h1 class="splash-title">JINJIN HOME</h1>
+      <p class="splash-sub">Jina & Yejin's Smart Home</p>
+      <div class="splash-loader">
+        <div class="splash-spinner"></div>
+      </div>
+    </div>
+  </div>
+  <script>
+    (function() {
+      var el = document.getElementById('splash-screen');
+      if (el) {
+        setTimeout(function() {
+          el.style.opacity = '0';
+          el.style.pointerEvents = 'none';
+          el.style.transition = 'opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
+          setTimeout(function() { el.style.display = 'none'; }, 500);
+        }, 1200);
+      }
+    })();
+  </script>
+
+
   <!-- Ambient Ethereal Glow Background -->
   <div class="ethereal-bg"></div>
 
@@ -166,7 +194,6 @@
           <div id="todo-list" class="todo-list"></div>
           <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:var(--text-muted); margin-top:8px; border-top:1px solid var(--border-glass); padding-top:8px;">
             <span id="task-count-badge">0개 남음</span>
-            <span>💡 G 아이콘 클릭 시 구글 캘린더 1초 연동</span>
           </div>
         </div>
 
@@ -193,12 +220,15 @@
         <div class="glass-card">
           <div class="card-header">
             <div class="card-title">
-              <i class="fa-solid fa-lightbulb"></i>
+              <i id="led-icon-el" class="fa-solid fa-lightbulb"></i>
               <h3>스마트 조명 (RGB LED)</h3>
             </div>
-            <span id="led-status-badge" class="card-subtitle">OFF</span>
+            <div style="display:flex; align-items:center; gap:6px;">
+              <div id="led-color-preview" style="width:14px; height:14px; border-radius:50%; background:#38BDF8; display:inline-block; border:1px solid var(--border-glass); box-shadow:0 0 8px #38BDF8;"></div>
+              <span id="led-status-badge" class="card-subtitle">OFF</span>
+            </div>
           </div>
-          <div class="control-switch-card">
+          <div class="control-switch-card" style="margin-bottom:12px;">
             <div>
               <div style="font-weight:700; font-size:0.9rem;">전등 Switch</div>
               <div style="font-size:0.75rem; color:var(--text-muted);">스마트 조명 ON / OFF</div>
@@ -207,6 +237,27 @@
               <input type="checkbox" id="toggle-rgb-led">
               <span class="slider"></span>
             </label>
+          </div>
+
+          <!-- 무드 맞춤 RGB 컬러 팔레트 & 커스텀 컬러 피커 -->
+          <div style="border-top:1px solid var(--border-glass); padding-top:12px;">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+              <span style="font-size:0.8rem; font-weight:700; color:var(--text-main);"><i class="fa-solid fa-palette" style="color:var(--accent-purple);"></i> 무드 컬러 선택</span>
+              <div style="display:flex; align-items:center; gap:6px;">
+                <label for="rgb-color-picker" style="font-size:0.72rem; color:var(--text-muted); cursor:pointer;">직접 선택</label>
+                <input type="color" id="rgb-color-picker" value="#38BDF8" style="width:26px; height:26px; border:none; background:none; cursor:pointer; border-radius:6px;">
+              </div>
+            </div>
+            <div class="color-mood-grid">
+              <button class="btn-color-mood" data-color="#FF3B30" style="background:#FF3B30;" title="열정 레드"></button>
+              <button class="btn-color-mood" data-color="#FF9500" style="background:#FF9500;" title="석양 오렌지"></button>
+              <button class="btn-color-mood" data-color="#FFCC00" style="background:#FFCC00;" title="따뜻한 웜화이트"></button>
+              <button class="btn-color-mood" data-color="#34C759" style="background:#34C759;" title="힐링 그린"></button>
+              <button class="btn-color-mood" data-color="#38BDF8" style="background:#38BDF8;" title="스카이 블루"></button>
+              <button class="btn-color-mood" data-color="#AF52DE" style="background:#AF52DE;" title="몽환 퍼플"></button>
+              <button class="btn-color-mood" data-color="#FF2D55" style="background:#FF2D55;" title="로맨틱 핑크"></button>
+              <button class="btn-color-mood" data-color="#FFFFFF" style="background:#FFFFFF;" title="퓨어 화이트"></button>
+            </div>
           </div>
         </div>
 

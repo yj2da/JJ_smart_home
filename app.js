@@ -742,6 +742,23 @@ function initControls() {
     sendBLECommand(e.target.checked ? '7' : '8');
   });
 
+  // RGB Color Picker & Mood Buttons Event Listeners
+  const colorPicker = document.getElementById('rgb-color-picker');
+  if (colorPicker) {
+    colorPicker.addEventListener('input', (e) => applyRGBColor(e.target.value));
+    colorPicker.addEventListener('change', (e) => applyRGBColor(e.target.value));
+  }
+
+  document.querySelectorAll('.btn-color-mood').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const color = btn.getAttribute('data-color');
+      if (colorPicker) colorPicker.value = color;
+      applyRGBColor(color);
+      document.querySelectorAll('.btn-color-mood').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+  });
+
   const blindSlider = document.getElementById('slider-blind-motor');
   blindSlider.addEventListener('change', (e) => {
     if (!checkConnectionGuard()) return;
@@ -812,6 +829,33 @@ function setModeUI(mode) {
     focusPanel.style.display = 'none';
     logSystem('⚪ 모드가 해제되었습니다 (Nothing 상태)');
   }
+}
+
+function applyRGBColor(hex) {
+  const toggleLED = document.getElementById('toggle-rgb-led');
+  if (toggleLED && !toggleLED.checked) {
+    toggleLED.checked = true;
+  }
+
+  const badge = document.getElementById('led-status-badge');
+  if (badge) {
+    badge.innerText = 'ON';
+    badge.style.color = hex;
+  }
+
+  const preview = document.getElementById('led-color-preview');
+  if (preview) {
+    preview.style.background = hex;
+    preview.style.boxShadow = `0 0 10px ${hex}`;
+  }
+
+  const icon = document.getElementById('led-icon-el');
+  if (icon) {
+    icon.style.color = hex;
+  }
+
+  sendBLECommand(`C${hex}`);
+  logSystem(`💡 [RGB 조명] 무드 컬러 적용 (${hex})`);
 }
 
 function sendCustomCommand() {
