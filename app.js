@@ -447,12 +447,50 @@ function finishSleepSession() {
   logSystem(`📊 [수면 점수 측정 완료] 수면 점수: ${score}점, 코골이: ${sleepSessionSnoreCount}회, 수면시간: ${durationStr}`, 'tx');
 }
 
+let focusSelectedMinutes = 25;
+
 function initASMR() {
   const btnToggle = document.getElementById('btn-toggle-asmr');
   const btnTimer = document.getElementById('btn-start-timer');
+  const btnMinus = document.getElementById('btn-timer-minus');
+  const btnPlus = document.getElementById('btn-timer-plus');
 
-  btnToggle.addEventListener('click', toggleASMR);
-  btnTimer.addEventListener('click', toggleFocusTimer);
+  if (btnToggle) btnToggle.addEventListener('click', toggleASMR);
+  if (btnTimer) btnTimer.addEventListener('click', toggleFocusTimer);
+
+  if (btnMinus) {
+    btnMinus.addEventListener('click', () => {
+      if (focusTimerInterval) return;
+      focusSelectedMinutes = Math.max(5, focusSelectedMinutes - 5);
+      updateTimerDisplay();
+    });
+  }
+
+  if (btnPlus) {
+    btnPlus.addEventListener('click', () => {
+      if (focusTimerInterval) return;
+      focusSelectedMinutes = Math.min(120, focusSelectedMinutes + 5);
+      updateTimerDisplay();
+    });
+  }
+
+  document.querySelectorAll('.btn-preset-min').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (focusTimerInterval) return;
+      const mins = parseInt(btn.getAttribute('data-min'), 10);
+      focusSelectedMinutes = mins;
+      document.querySelectorAll('.btn-preset-min').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      updateTimerDisplay();
+    });
+  });
+}
+
+function updateTimerDisplay() {
+  focusTimeRemaining = focusSelectedMinutes * 60;
+  const mins = focusSelectedMinutes.toString().padStart(2, '0');
+  const display = document.getElementById('focus-timer-display');
+  if (display) display.innerText = `${mins}:00`;
 }
 
 function toggleASMR() {
@@ -525,18 +563,25 @@ function toggleFocusTimer() {
     clearInterval(focusTimerInterval);
     focusTimerInterval = null;
     btnTimer.innerText = '시작';
+    btnTimer.classList.add('btn-primary');
+    updateTimerDisplay();
   } else {
     btnTimer.innerText = '정지';
+    btnTimer.classList.remove('btn-primary');
     focusTimerInterval = setInterval(() => {
       focusTimeRemaining--;
       const mins = Math.floor(focusTimeRemaining / 60).toString().padStart(2, '0');
       const secs = (focusTimeRemaining % 60).toString().padStart(2, '0');
-      document.getElementById('focus-timer-display').innerText = `${mins}:${secs}`;
+      const display = document.getElementById('focus-timer-display');
+      if (display) display.innerText = `${mins}:${secs}`;
 
       if (focusTimeRemaining <= 0) {
         clearInterval(focusTimerInterval);
         focusTimerInterval = null;
-        alert('🎉 25분 집중 시간이 완료되었습니다!');
+        btnTimer.innerText = '시작';
+        btnTimer.classList.add('btn-primary');
+        updateTimerDisplay();
+        alert(`🎉 ${focusSelectedMinutes}분 집중 시간이 완료되었습니다!`);
       }
     }, 1000);
   }

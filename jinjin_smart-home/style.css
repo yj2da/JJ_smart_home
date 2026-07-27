@@ -938,6 +938,28 @@ body.light-mode .chat-bubble.bot { background: rgba(0, 0, 0, 0.06); color: #0F17
   box-shadow: 0 0 14px rgba(255, 255, 255, 0.8);
 }
 
+/* Focus Timer Minute Presets */
+.btn-preset-min {
+  flex: 1;
+  padding: 5px 4px;
+  font-size: 0.7rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-glass);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: var(--transition-fast);
+  text-align: center;
+}
+
+.btn-preset-min:hover, .btn-preset-min.active {
+  background: rgba(56, 189, 248, 0.2);
+  border-color: var(--accent-sky);
+  color: var(--text-main);
+  font-weight: 700;
+}
+
+
 
 .chat-bubble.bot {
   background: rgba(255, 255, 255, 0.08);

@@ -132,20 +132,50 @@
             </div>
           </div>
 
-          <!-- 백색소음 & 타이머 패널 -->
+          <!-- 백색소음 & 타이머 조절 패널 -->
           <div id="focus-panel" class="sub-panel" style="display: none;">
-            <div style="display:flex; flex-direction:column; gap:10px;">
+            <div style="display:flex; flex-direction:column; gap:12px;">
+              
+              <!-- ASMR 빗소리 -->
               <div style="display:flex; align-items:center; justify-content:space-between;">
-                <span style="font-size:0.82rem; font-weight:600; display:inline-flex; align-items:center; gap:8px;"><i class="fa-solid fa-headphones" style="color:var(--accent-sky); margin-right:6px;"></i> ASMR 빗소리:</span>
-                <button id="btn-toggle-asmr" class="btn-glass" style="padding:6px 12px; font-size:0.75rem;">
+                <div style="display:flex; align-items:center; gap:8px; font-size:0.82rem; font-weight:600;">
+                  <i class="fa-solid fa-headphones" style="color:var(--accent-sky); font-size:0.95rem;"></i>
+                  <span>ASMR 빗소리</span>
+                </div>
+                <button id="btn-toggle-asmr" class="btn-glass" style="padding:5px 12px; font-size:0.75rem;">
                   <i class="fa-solid fa-play"></i> 재생
                 </button>
               </div>
-              <div style="display:flex; align-items:center; justify-content:space-between; border-top:1px solid var(--border-glass); padding-top:8px;">
-                <span style="font-size:0.82rem; font-weight:600; display:inline-flex; align-items:center; gap:8px;"><i class="fa-solid fa-stopwatch" style="color:var(--accent-indigo); margin-right:6px;"></i> 집중 타이머:</span>
-                <span id="focus-timer-display" style="font-family:var(--font-mono); font-weight:700; color:var(--accent-sky);">25:00</span>
-                <button id="btn-start-timer" class="btn-glass" style="padding:6px 10px; font-size:0.75rem;">시작</button>
+
+              <!-- 집중 타이머 설정 -->
+              <div style="border-top:1px solid var(--border-glass); padding-top:10px; display:flex; flex-direction:column; gap:8px;">
+                <div style="display:flex; align-items:center; justify-content:space-between;">
+                  <div style="display:flex; align-items:center; gap:8px; font-size:0.82rem; font-weight:600;">
+                    <i class="fa-solid fa-stopwatch" style="color:var(--accent-indigo); font-size:0.95rem;"></i>
+                    <span>집중 타이머</span>
+                  </div>
+                  
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <!-- 시간 조절 버튼 (- / +) -->
+                    <div style="display:flex; align-items:center; gap:4px; background:rgba(0,0,0,0.15); padding:3px 8px; border-radius:8px; border:1px solid var(--border-glass);">
+                      <button id="btn-timer-minus" style="background:none; border:none; color:var(--text-main); cursor:pointer; font-weight:800; font-size:0.95rem; padding:0 4px;" title="5분 감수">-</button>
+                      <span id="focus-timer-display" style="font-family:var(--font-mono); font-weight:700; color:var(--accent-sky); font-size:0.95rem; min-width:44px; text-align:center;">25:00</span>
+                      <button id="btn-timer-plus" style="background:none; border:none; color:var(--text-main); cursor:pointer; font-weight:800; font-size:0.95rem; padding:0 4px;" title="5분 증가">+</button>
+                    </div>
+
+                    <button id="btn-start-timer" class="btn-glass btn-primary" style="padding:5px 12px; font-size:0.75rem;">시작</button>
+                  </div>
+                </div>
+
+                <!-- 분 단위 프리셋 버튼 -->
+                <div style="display:flex; justify-content:space-between; gap:6px;">
+                  <button class="btn-preset-min" data-min="10">10분</button>
+                  <button class="btn-preset-min active" data-min="25">25분</button>
+                  <button class="btn-preset-min" data-min="45">45분</button>
+                  <button class="btn-preset-min" data-min="60">60분</button>
+                </div>
               </div>
+
             </div>
           </div>
         </div>
