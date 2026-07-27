@@ -68,7 +68,13 @@ display2.show()
 
 # 블루투스 수신 이벤트 핸들러
 def on_rx(v): 
-    print(v)
+    # bytes 타입으로 전달되는 경우 문자열로 안전하게 디코딩 및 공백 제거
+    if isinstance(v, bytes):
+        v = v.decode('utf-8').strip()
+    else:
+        v = str(v).strip()
+        
+    print("Received BLE Command:", v)
     # '1' 수신 시: TV(LCD)에 현재 온습도 표시 및 웹 브라우저로 블루투스 송신
     if v == '1':
         lcd.clear()
