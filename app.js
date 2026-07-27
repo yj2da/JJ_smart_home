@@ -1,16 +1,8 @@
-/* ==========================================================================
-   JINJIN SMART HOME DASHBOARD - JAVASCRIPT APPLICATION (app.js)
-   Mobile-First Web Bluetooth (NUS), Realtime Chart.js, ASMR Web Audio, AI Chatbot
-   Integrated with Real Google Gemini API & OpenWeatherMap API via Vercel Serverless
-   Creators: Jina & Yejin
-   ========================================================================== */
-
-// --- BLE Constants (Nordic UART Service) ---
+/* Copy of jinjin_smart-home/app.js for root workspace entry */
 const BLE_SERVICE_UUID = '6e400001-b5a3-f393-e0a9-e50e24dcca9e';
-const BLE_RX_UUID = '6e400002-b5a3-f393-e0a9-e50e24dcca9e'; // Web -> ESP32
-const BLE_TX_UUID = '6e400003-b5a3-f393-e0a9-e50e24dcca9e'; // ESP32 -> Web
+const BLE_RX_UUID = '6e400002-b5a3-f393-e0a9-e50e24dcca9e';
+const BLE_TX_UUID = '6e400003-b5a3-f393-e0a9-e50e24dcca9e';
 
-// --- Global Application State ---
 let bleDevice = null;
 let rxCharacteristic = null;
 let txCharacteristic = null;
@@ -18,48 +10,40 @@ let isConnected = false;
 let isDemoMode = false;
 let demoInterval = null;
 
-// App States
-let currentMode = null; // 'sleep', 'wakeup', 'focus', or null (nothing)
+let currentMode = null;
 let snoreCount = 0;
 
-// Sleep Session Score Tracking
 let sleepSessionSnoreCount = 0;
 let sleepStartTime = null;
 let lastSleepScore = null;
 
-// ASMR & Focus Timer States
 let isAsmrPlaying = false;
 let asmrAudioCtx = null;
 let asmrGainNode = null;
 let focusTimerInterval = null;
-let focusTimeRemaining = 25 * 60; // 25 mins
+let focusTimeRemaining = 25 * 60;
 
-// Chart.js Instance
 let snoreChart = null;
 const chartDataPoints = [];
 const chartLabels = [];
 const MAX_CHART_POINTS = 15;
 
-// Todo Task Storage Key
 const TODO_STORAGE_KEY = 'jinjin_smarthome_todos';
 let todoItems = [];
 
-// ==========================================================================
-// 1. INITIALIZATION & TAB SWITCHING
-// ==========================================================================
 document.addEventListener('DOMContentLoaded', () => {
   initTabs();
   initChart();
   initTodoList();
+  initCalendarIntegration();
   initControls();
   initChatbot();
   initWeather();
   initASMR();
   initTheme();
-  logSystem('JINJIN 스마트홈 모바일 대시보드가 준비되었습니다. (Vercel 환경 변수 API 보안 프록시 적용)');
+  logSystem('JINJIN 스마트홈 모바일 대시보드가 준비되었습니다. (구글 & 애플 캘린더 연동 완비)');
 });
 
-// Tab View Switcher (Mobile Bottom Nav: 오늘 하루 / 홈 제어 / 설정)
 function initTabs() {
   const navItems = document.querySelectorAll('.nav-item');
   const tabViews = document.querySelectorAll('.tab-view');
@@ -79,9 +63,6 @@ function initTabs() {
   });
 }
 
-// ==========================================================================
-// 2. THEME SETTINGS & NIGHT MODE TOGGLE (야간 모드 ON / OFF)
-// ==========================================================================
 function initTheme() {
   const toggleTheme = document.getElementById('toggle-theme-mode');
   const savedTheme = localStorage.getItem('jinjin_theme');
@@ -116,9 +97,6 @@ function applyTheme(isDark) {
   }
 }
 
-// ==========================================================================
-// 3. WEB BLUETOOTH NUS LOGIC & DISCONNECTED ALERT
-// ==========================================================================
 function checkConnectionGuard() {
   if (!isConnected && !isDemoMode) {
     alert('⚠️ 스마트홈 기기를 연결해주세요!\n\n우측 상단의 [ESP_JJ] 버튼을 눌러 블루투스로 연결하거나, [데모] 버튼을 눌러 체험 모드를 실행해 주세요.');
@@ -613,11 +591,14 @@ function renderTodoList() {
   const countBadge = document.getElementById('task-count-badge');
   container.innerHTML = '';
 
-  countBadge.innerText = `${todoItems.filter(i => !i.completed).length}개 남음`;
+  const activeCount = todoItems.filter(i => !i.completed).length;
+  if (countBadge) countBadge.innerText = `${activeCount}개 남음`;
 
   todoItems.forEach(item => {
     const div = document.createElement('div');
     div.className = `todo-item ${item.completed ? 'completed' : ''}`;
+    const safeText = item.text.replace(/'/g, "\\'");
+
     div.innerHTML = `
       <div class="todo-left">
         <div class="todo-checkbox" onclick="toggleTodo(${item.id})">
@@ -625,9 +606,17 @@ function renderTodoList() {
         </div>
         <span class="todo-text">${item.text}</span>
       </div>
-      <button class="todo-del-btn" onclick="deleteTodo(${item.id})">
-        <i class="fa-solid fa-trash-can"></i>
-      </button>
+      <div class="todo-right-btns">
+        <button class="todo-apple-btn" onclick="exportSingleGCal('${safeText}')" title="구글 캘린더에 등록">
+          <i class="fa-brands fa-google" style="color:#4285F4;"></i>
+        </button>
+        <button class="todo-apple-btn" onclick="exportSingleAppleCal('${safeText}')" title="애플 캘린더에 추가">
+          <i class="fa-brands fa-apple"></i>
+        </button>
+        <button class="todo-del-btn" onclick="deleteTodo(${item.id})" title="일정 삭제">
+          <i class="fa-solid fa-trash-can"></i>
+        </button>
+      </div>
     `;
     container.appendChild(div);
   });
@@ -635,6 +624,171 @@ function renderTodoList() {
 
 window.toggleTodo = toggleTodo;
 window.deleteTodo = deleteTodo;
+
+function initCalendarIntegration() {
+  const btnGCalAll = document.getElementById('btn-export-all-gcal');
+  const btnAppleAll = document.getElementById('btn-export-all-apple');
+  const btnImport = document.getElementById('btn-import-ics');
+  const fileInput = document.getElementById('ics-file-input');
+
+  if (btnGCalAll) btnGCalAll.addEventListener('click', exportAllToGoogleCalendar);
+  if (btnAppleAll) btnAppleAll.addEventListener('click', exportAllToAppleCalendar);
+  if (btnImport && fileInput) {
+    btnImport.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files.length > 0) {
+        importCalendarICSFile(e.target.files[0]);
+      }
+    });
+  }
+}
+
+function exportSingleGCal(itemText) {
+  const now = new Date();
+  const startStr = now.toISOString().replace(/-|:|\.\d+/g, '').slice(0, 15) + 'Z';
+  const end = new Date(now.getTime() + 60 * 60 * 1000);
+  const endStr = end.toISOString().replace(/-|:|\.\d+/g, '').slice(0, 15) + 'Z';
+
+  const title = encodeURIComponent(`JINJIN 스마트홈 - ${itemText}`);
+  const details = encodeURIComponent(`JINJIN Smart Home 대시보드에서 등록한 일정입니다.`);
+  const gcalUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&details=${details}&dates=${startStr}/${endStr}`;
+
+  window.open(gcalUrl, '_blank');
+  logSystem(`📅 [Google Calendar] "${itemText}" 구글 캘린더 등록 페이지를 엽니다.`);
+}
+
+function exportSingleAppleCal(itemText) {
+  const now = new Date();
+  const startStr = now.toISOString().replace(/-|:|\.\d+/g, '').slice(0, 15) + 'Z';
+  const end = new Date(now.getTime() + 60 * 60 * 1000);
+  const endStr = end.toISOString().replace(/-|:|\.\d+/g, '').slice(0, 15) + 'Z';
+
+  const icsContent = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//JINJIN Smart Home//Cal//KO',
+    'CALSCALE:GREGORIAN',
+    'METHOD:PUBLISH',
+    'BEGIN:VEVENT',
+    `SUMMARY:JINJIN 스마트홈 - ${itemText}`,
+    `DESCRIPTION:JINJIN Smart Home 일정`,
+    `DTSTART:${startStr}`,
+    `DTEND:${endStr}`,
+    'BEGIN:VALARM',
+    'TRIGGER:-PT15M',
+    'ACTION:DISPLAY',
+    `DESCRIPTION:JINJIN 일정 알림: ${itemText}`,
+    'END:VALARM',
+    'END:VEVENT',
+    'END:VCALENDAR'
+  ].join('\r\n');
+
+  const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+  const link = document.createElement('a');
+  link.href = window.URL.createObjectURL(blob);
+  link.setAttribute('download', `smarthome_${Date.now()}.ics`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+
+  logSystem(`🍎 [Apple Calendar] "${itemText}" 애플 캘린더(.ics) 이벤트 파일을 내려받았습니다.`);
+}
+
+function exportAllToGoogleCalendar() {
+  const pendingTodos = todoItems.filter(i => !i.completed);
+  if (pendingTodos.length === 0) {
+    alert('등록할 진행 중인 일정이 없습니다.');
+    return;
+  }
+  const summaryText = pendingTodos.map(t => `• ${t.text}`).join('\n');
+  const title = encodeURIComponent(`JINJIN 스마트홈 오늘 일정 (${pendingTodos.length}개)`);
+  const details = encodeURIComponent(`오늘의 스마트홈 주요 일정 목록:\n\n${summaryText}`);
+
+  const now = new Date();
+  const startStr = now.toISOString().replace(/-|:|\.\d+/g, '').slice(0, 15) + 'Z';
+  const end = new Date(now.getTime() + 60 * 60 * 1000);
+  const endStr = end.toISOString().replace(/-|:|\.\d+/g, '').slice(0, 15) + 'Z';
+
+  const gcalUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&details=${details}&dates=${startStr}/${endStr}`;
+  window.open(gcalUrl, '_blank');
+  logSystem(`📅 [Google Calendar] 전체 일정(${pendingTodos.length}개) 구글 캘린더 등록 페이지 오픈.`);
+}
+
+function exportAllToAppleCalendar() {
+  const pendingTodos = todoItems.filter(i => !i.completed);
+  if (pendingTodos.length === 0) {
+    alert('등록할 진행 중인 일정이 없습니다.');
+    return;
+  }
+
+  const now = new Date();
+  const startStr = now.toISOString().replace(/-|:|\.\d+/g, '').slice(0, 15) + 'Z';
+  const end = new Date(now.getTime() + 60 * 60 * 1000);
+  const endStr = end.toISOString().replace(/-|:|\.\d+/g, '').slice(0, 15) + 'Z';
+
+  let vevents = pendingTodos.map(item => {
+    return [
+      'BEGIN:VEVENT',
+      `SUMMARY:JINJIN 스마트홈 - ${item.text}`,
+      `DESCRIPTION:JINJIN Smart Home 일정`,
+      `DTSTART:${startStr}`,
+      `DTEND:${endStr}`,
+      'BEGIN:VALARM',
+      'TRIGGER:-PT15M',
+      'ACTION:DISPLAY',
+      'END:VALARM',
+      'END:VEVENT'
+    ].join('\r\n');
+  }).join('\r\n');
+
+  const icsContent = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//JINJIN Smart Home//Cal//KO',
+    'CALSCALE:GREGORIAN',
+    'METHOD:PUBLISH',
+    vevents,
+    'END:VCALENDAR'
+  ].join('\r\n');
+
+  const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+  const link = document.createElement('a');
+  link.href = window.URL.createObjectURL(blob);
+  link.setAttribute('download', `jinjin_smarthome_all_${Date.now()}.ics`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+
+  logSystem(`🍎 [Apple Calendar] 전체 일정(${pendingTodos.length}개) 애플 캘린더 파일 내보내기 완료.`);
+}
+
+function importCalendarICSFile(file) {
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const text = e.target.result;
+    const matches = text.match(/SUMMARY:(.+)/g);
+    if (matches && matches.length > 0) {
+      let addedCount = 0;
+      matches.forEach(match => {
+        let title = match.replace('SUMMARY:', '').trim();
+        title = title.replace(/^JINJIN 스마트홈 - /, '');
+        if (title && !todoItems.some(item => item.text === title)) {
+          todoItems.push({ id: Date.now() + Math.random(), text: title, completed: false });
+          addedCount++;
+        }
+      });
+      saveAndRenderTodo();
+      alert(`🎉 캘린더 파일(.ics)에서 ${addedCount}개의 일정을 불러왔습니다!`);
+      logSystem(`📥 [Calendar Import] ${addedCount}개 일정을 성공적으로 불러왔습니다.`);
+    } else {
+      alert('⚠️ 캘린더 파일(.ics)에서 일정을 찾을 수 없습니다.');
+    }
+  };
+  reader.readAsText(file);
+}
+
+window.exportSingleGCal = exportSingleGCal;
+window.exportSingleAppleCal = exportSingleAppleCal;
 
 function initControls() {
   document.getElementById('btn-connect').addEventListener('click', connectBLE);

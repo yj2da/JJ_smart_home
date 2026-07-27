@@ -148,20 +148,35 @@
           </div>
         </div>
 
-        <!-- 오늘 일정 카드 -->
+        <!-- 오늘 일정 카드 (구글 & 애플 캘린더 동시 연동 지원) -->
         <div class="glass-card">
           <div class="card-header">
             <div class="card-title">
               <i class="fa-solid fa-list-check"></i>
               <h3>오늘 하루 일정</h3>
             </div>
-            <span id="task-count-badge" class="card-subtitle">0개</span>
+            <div style="display:flex; gap:4px; align-items:center;">
+              <button id="btn-export-all-gcal" class="btn-glass" style="padding:4px 8px; font-size:0.7rem;" title="구글 캘린더로 내보내기">
+                <i class="fa-brands fa-google" style="color:#4285F4;"></i> Google
+              </button>
+              <button id="btn-export-all-apple" class="btn-glass" style="padding:4px 8px; font-size:0.7rem;" title="애플 캘린더로 내보내기">
+                <i class="fa-brands fa-apple"></i> Apple
+              </button>
+              <button id="btn-import-ics" class="btn-glass" style="padding:4px 8px; font-size:0.7rem;" title="캘린더 파일 불러오기">
+                <i class="fa-solid fa-file-import"></i> 불러오기
+              </button>
+              <input type="file" id="ics-file-input" accept=".ics" style="display:none;">
+            </div>
           </div>
           <div class="todo-input-box">
             <input type="text" id="todo-input" class="glass-input" placeholder="새 일정 입력...">
             <button id="btn-add-todo" class="btn-glass btn-primary" style="padding:8px 14px; font-size:0.8rem;">추가</button>
           </div>
           <div id="todo-list" class="todo-list"></div>
+          <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:var(--text-muted); margin-top:8px; border-top:1px solid var(--border-glass); padding-top:8px;">
+            <span id="task-count-badge">0개 남음</span>
+            <span>💡 캘린더 아이콘 클릭 시 원클릭 등록</span>
+          </div>
         </div>
 
         <!-- 수면 질 분석 차트 카드 -->
