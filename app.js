@@ -194,20 +194,25 @@ async function connectBLEDevice() {
     elements.overlayStatusDesc.textContent = '팝업창에서 [ESP_oyj] 기기를 선택해 주세요.';
     logSystem('BLE 기기 검색을 시작합니다 (Filter: NUS Service & namePrefix "ESP_").');
 
-    // Try scanning for 'ESP_' prefix first, with optionalServices
+    // Try scanning for 'ESP_' prefix or NUS Service, with optionalServices
     try {
       state.bluetoothDevice = await navigator.bluetooth.requestDevice({
-        filters: [{ namePrefix: 'ESP_' }],
+        filters: [
+          { namePrefix: 'ESP_' },
+          { name: 'ESP_oyj' },
+          { services: [NUS_SERVICE_UUID] }
+        ],
         optionalServices: [NUS_SERVICE_UUID]
       });
     } catch (filterErr) {
-      if (filterErr.name === 'NotFoundError' || filterErr.name === 'SecurityError') {
-        throw filterErr; // User explicitly cancelled the dialog
+      if (filterErr.name === 'SecurityError' || (filterErr.name === 'NotFoundError' && filterErr.message.includes('User cancelled'))) {
+        throw filterErr; // User explicitly clicked cancel
       }
       // Fallback scan: list all devices if filter failed
       logSystem('모든 BLE 기기 검색 모드로 재시도합니다.');
       state.bluetoothDevice = await navigator.bluetooth.requestDevice({
         acceptAllDevices: true,
+        optionalServices: [NUS_SERVICE_UUID]
       });
     }
 
