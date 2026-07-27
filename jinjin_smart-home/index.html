@@ -17,7 +17,7 @@
   <!-- Mobile-First Stylesheet -->
   <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="light-mode">
   <!-- Ambient Ethereal Glow Background -->
   <div class="ethereal-bg"></div>
 
@@ -301,10 +301,10 @@
         <div class="glass-card">
           <div class="card-header">
             <div class="card-title">
-              <i class="fa-solid fa-moon"></i>
+              <i class="fa-solid fa-sun"></i>
               <h3>앱 디스플레이 테마</h3>
             </div>
-            <span id="theme-status-badge" class="card-subtitle">야간 모드 ON</span>
+            <span id="theme-status-badge" class="card-subtitle">야간 모드 OFF (화이트)</span>
           </div>
           <div class="control-switch-card">
             <div>
@@ -312,7 +312,7 @@
               <div style="font-size:0.75rem; color:var(--text-muted);">ON: 검은색 배경 / OFF: 흰색 배경</div>
             </div>
             <label class="toggle-switch">
-              <input type="checkbox" id="toggle-theme-mode" checked>
+              <input type="checkbox" id="toggle-theme-mode">
               <span class="slider"></span>
             </label>
           </div>

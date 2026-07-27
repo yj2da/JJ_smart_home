@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initWeather();
   initASMR();
   initTheme();
-  logSystem('JINJIN 스마트홈 모바일 대시보드가 준비되었습니다. (클라우드 DB & 구글 캘린더 연동)');
+  logSystem('JINJIN 스마트홈 모바일 대시보드가 준비되었습니다. (야간 모드 OFF 기본 세팅)');
 });
 
 function initTabs() {
@@ -67,12 +67,12 @@ function initTheme() {
   const toggleTheme = document.getElementById('toggle-theme-mode');
   const savedTheme = localStorage.getItem('jinjin_theme');
 
-  if (savedTheme === 'light') {
-    applyTheme(false);
-    if (toggleTheme) toggleTheme.checked = false;
-  } else {
+  if (savedTheme === 'dark') {
     applyTheme(true);
     if (toggleTheme) toggleTheme.checked = true;
+  } else {
+    applyTheme(false);
+    if (toggleTheme) toggleTheme.checked = false;
   }
 
   if (toggleTheme) {

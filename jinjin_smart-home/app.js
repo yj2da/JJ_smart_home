@@ -2,6 +2,7 @@
    JINJIN SMART HOME DASHBOARD - JAVASCRIPT APPLICATION (app.js)
    Mobile-First Web Bluetooth (NUS), Realtime Chart.js, ASMR Web Audio, AI Chatbot
    Google Calendar Integration, OpenWeatherMap API & Cloud DB Sync (/api/todos)
+   Default Theme: Light Mode (야간 모드 OFF)
    Creators: Jina & Yejin
    ========================================================================== */
 
@@ -57,7 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initWeather();
   initASMR();
   initTheme();
-  logSystem('JINJIN 스마트홈 모바일 대시보드가 준비되었습니다. (클라우드 DB & 구글 캘린더 연동)');
+  logSystem('JINJIN 스마트홈 모바일 대시보드가 준비되었습니다. (야간 모드 OFF 기본 세팅)');
 });
 
 // Tab View Switcher (Mobile Bottom Nav: 오늘 하루 / 홈 제어 / 설정)
@@ -81,18 +82,18 @@ function initTabs() {
 }
 
 // ==========================================================================
-// 2. THEME SETTINGS & NIGHT MODE TOGGLE (야간 모드 ON / OFF)
+// 2. THEME SETTINGS & NIGHT MODE TOGGLE (Default: 야간 모드 OFF / Light Mode)
 // ==========================================================================
 function initTheme() {
   const toggleTheme = document.getElementById('toggle-theme-mode');
   const savedTheme = localStorage.getItem('jinjin_theme');
 
-  if (savedTheme === 'light') {
-    applyTheme(false);
-    if (toggleTheme) toggleTheme.checked = false;
-  } else {
+  if (savedTheme === 'dark') {
     applyTheme(true);
     if (toggleTheme) toggleTheme.checked = true;
+  } else {
+    applyTheme(false);
+    if (toggleTheme) toggleTheme.checked = false;
   }
 
   if (toggleTheme) {
@@ -580,7 +581,6 @@ async function initTodoList() {
     if (e.key === 'Enter') addTodo();
   });
 
-  // Try fetching from Cloud DB (/api/todos) first
   try {
     const res = await fetch('/api/todos');
     const data = await res.json();
@@ -595,7 +595,6 @@ async function initTodoList() {
     console.log('Cloud DB Fetch Fallback to LocalStorage:', e);
   }
 
-  // Fallback to LocalStorage
   const saved = localStorage.getItem(TODO_STORAGE_KEY);
   if (saved) {
     try { todoItems = JSON.parse(saved); } catch (e) { todoItems = []; }
@@ -633,7 +632,6 @@ async function saveAndRenderTodo() {
   localStorage.setItem(TODO_STORAGE_KEY, JSON.stringify(todoItems));
   renderTodoList();
 
-  // Sync to Cloud DB (/api/todos)
   try {
     await fetch('/api/todos', {
       method: 'POST',
@@ -883,9 +881,6 @@ function logSystem(text, type = 'sys') {
   logTerminal(`[${timeStr}] [System]: ${text}`, type);
 }
 
-// ==========================================================================
-// REAL OPENWEATHERMAP API INTEGRATION VIA VERCEL SERVERLESS FUNCTION (BUSAN)
-// ==========================================================================
 async function initWeather() {
   try {
     const res = await fetch('/api/weather?city=Busan');
@@ -923,9 +918,6 @@ async function initWeather() {
   }
 }
 
-// ==========================================================================
-// 8. REAL GOOGLE GEMINI API AI CHATBOT INTEGRATION VIA SERVERLESS PROXY
-// ==========================================================================
 function initChatbot() {
   const toggleBtn = document.getElementById('btn-chatbot-toggle');
   const modal = document.getElementById('chatbot-modal');
