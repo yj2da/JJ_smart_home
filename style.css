@@ -296,6 +296,7 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.8);
   cursor: pointer;
   outline: none;
+  white-space: nowrap;
 }
 
 .pill-btn-pink {
@@ -389,16 +390,35 @@ body {
   gap: 24px;
 }
 
-.col-span-8 {
-  grid-column: span 8;
-}
-
 .col-span-4 {
   grid-column: span 4;
 }
 
+.col-span-6 {
+  grid-column: span 6;
+}
+
+.col-span-8 {
+  grid-column: span 8;
+}
+
 .col-span-12 {
   grid-column: span 12;
+}
+
+.control-row-horizontal {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.control-row-horizontal .control-btn-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
 /* Sensor Hero Grid */

@@ -296,38 +296,81 @@
         </div>
       </section>
 
-      <!-- VIEW 3: FULL HARDWARE CONTROLS -->
+      <!-- VIEW 3: FULL HARDWARE CONTROLS (HORIZONTAL DESKTOP EDITION) -->
       <section id="view-controls" class="tab-view">
-        <h3 class="font-bold" style="font-size: 1.5rem; margin-bottom: 24px;"><span class="material-symbols-rounded text-secondary">tune</span> 전체 하드웨어 상세 제어</h3>
+        <h3 class="font-bold" style="font-size: 1.5rem; margin-bottom: 24px;">
+          <span class="material-symbols-rounded text-secondary">tune</span> 전체 하드웨어 상세 제어
+        </h3>
         
-        <div class="desktop-grid">
-          <!-- RGB LEDs -->
-          <div class="col-span-6 bubble-glass">
-            <h4 class="font-bold" style="font-size: 1.2rem; margin-bottom: 16px;">RGB LED 조명 제어</h4>
-            <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-              <button class="pill-btn pill-btn-pink action-cmd-btn" data-cmd="1">RGB Red On ('1')</button>
-              <button class="pill-btn pill-btn-mint action-cmd-btn" data-cmd="2">RGB Green On ('2')</button>
-              <button class="pill-btn pill-btn-pink action-cmd-btn" data-cmd="7">전등 On ('7')</button>
-              <button class="pill-btn pill-btn-secondary action-cmd-btn" data-cmd="8">전등 Off ('8')</button>
+        <div style="display: flex; flex-direction: column; gap: 24px;">
+          <!-- RGB LED Card (Horizontal Full Width) -->
+          <div class="bubble-glass control-row-horizontal">
+            <div style="display: flex; align-items: center; gap: 16px;">
+              <div style="width: 48px; height: 48px; border-radius: 18px; background: var(--primary-pink); display: flex; align-items: center; justify-content: center; color: var(--primary-pink-text); font-size: 24px;">
+                <span class="material-symbols-rounded">lightbulb</span>
+              </div>
+              <div>
+                <h4 class="font-bold" style="font-size: 1.25rem;">RGB LED & 조명 제어</h4>
+                <p class="font-mono text-secondary" style="font-size: 12px; margin-top: 2px;">RGB LED (Pin 25, 26, 27) 릴레이 조명 스위치</p>
+              </div>
+            </div>
+
+            <div class="control-btn-group">
+              <button class="pill-btn pill-btn-pink action-cmd-btn" data-cmd="1">
+                <span class="material-symbols-rounded text-sm">palette</span> RGB Red On ('1')
+              </button>
+              <button class="pill-btn pill-btn-mint action-cmd-btn" data-cmd="2">
+                <span class="material-symbols-rounded text-sm">palette</span> RGB Green On ('2')
+              </button>
+              <button class="pill-btn pill-btn-pink action-cmd-btn" data-cmd="7">
+                <span class="material-symbols-rounded text-sm">power_settings_new</span> 전등 On ('7')
+              </button>
+              <button class="pill-btn pill-btn-secondary action-cmd-btn" data-cmd="8">
+                <span class="material-symbols-rounded text-sm">power_off</span> 전등 Off ('8')
+              </button>
             </div>
           </div>
 
-          <!-- LCD & OLED -->
-          <div class="col-span-6 bubble-glass">
-            <h4 class="font-bold" style="font-size: 1.2rem; margin-bottom: 16px;">LCD & OLED 디스플레이</h4>
-            <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-              <button class="pill-btn pill-btn-mint action-cmd-btn" data-cmd="3">LCD 켜기 ('3')</button>
-              <button class="pill-btn pill-btn-secondary action-cmd-btn" data-cmd="4">LCD 끄기 ('4')</button>
-              <button class="pill-btn pill-btn-lavender action-cmd-btn" data-cmd="9">OLED 비트맵 출력 ('9')</button>
+          <!-- LCD & OLED Display Card (Horizontal Full Width) -->
+          <div class="bubble-glass control-row-horizontal">
+            <div style="display: flex; align-items: center; gap: 16px;">
+              <div style="width: 48px; height: 48px; border-radius: 18px; background: var(--secondary-mint); display: flex; align-items: center; justify-content: center; color: var(--secondary-mint-text); font-size: 24px;">
+                <span class="material-symbols-rounded">display_settings</span>
+              </div>
+              <div>
+                <h4 class="font-bold" style="font-size: 1.25rem;">LCD & OLED 디스플레이</h4>
+                <p class="font-mono text-secondary" style="font-size: 12px; margin-top: 2px;">16x2 I2C LCD 백라이트 및 SSD1306 OLED 그래픽 출력</p>
+              </div>
+            </div>
+
+            <div class="control-btn-group">
+              <button class="pill-btn pill-btn-mint action-cmd-btn" data-cmd="3">
+                <span class="material-symbols-rounded text-sm">wb_incandescent</span> LCD 켜기 ('3')
+              </button>
+              <button class="pill-btn pill-btn-secondary action-cmd-btn" data-cmd="4">
+                <span class="material-symbols-rounded text-sm">light_off</span> LCD 끄기 ('4')
+              </button>
+              <button class="pill-btn pill-btn-lavender action-cmd-btn" data-cmd="9">
+                <span class="material-symbols-rounded text-sm">auto_awesome</span> OLED 비트맵 출력 ('9')
+              </button>
             </div>
           </div>
 
-          <!-- Buzzer Melodies -->
-          <div class="col-span-12 bubble-glass">
-            <h4 class="font-bold" style="font-size: 1.2rem; margin-bottom: 16px;">피에조 부저 멜로디</h4>
-            <div style="display: flex; gap: 16px;">
+          <!-- Buzzer Melodies Card (Horizontal Full Width) -->
+          <div class="bubble-glass control-row-horizontal">
+            <div style="display: flex; align-items: center; gap: 16px;">
+              <div style="width: 48px; height: 48px; border-radius: 18px; background: var(--tertiary-lavender); display: flex; align-items: center; justify-content: center; color: var(--tertiary-lavender-text); font-size: 24px;">
+                <span class="material-symbols-rounded">music_note</span>
+              </div>
+              <div>
+                <h4 class="font-bold" style="font-size: 1.25rem;">피에조 부저 멜로디</h4>
+                <p class="font-mono text-secondary" style="font-size: 12px; margin-top: 2px;">PWM Pin 23 피에조 부저 멜로디 재생</p>
+              </div>
+            </div>
+
+            <div class="control-btn-group">
               <button class="pill-btn pill-btn-lavender action-cmd-btn" data-cmd="5">
-                <span class="material-symbols-rounded">music_note</span> 학교종 멜로디 재생 ('5')
+                <span class="material-symbols-rounded">play_circle</span> 학교종 멜로디 재생 ('5')
               </button>
               <button class="pill-btn pill-btn-lavender action-cmd-btn" data-cmd="6">
                 <span class="material-symbols-rounded">graphic_eq</span> 엘리제를 위하여 재생 ('6')
