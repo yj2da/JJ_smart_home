@@ -1,7 +1,7 @@
 /* ==========================================================================
    JINJIN SMART HOME DASHBOARD - JAVASCRIPT APPLICATION (app.js)
    Mobile-First Web Bluetooth (NUS), Realtime Chart.js, ASMR Web Audio, AI Chatbot
-   Google Calendar Integration & OpenWeatherMap API (Default: Busan)
+   Google Calendar Integration, OpenWeatherMap API & Cloud DB Sync (/api/todos)
    Creators: Jina & Yejin
    ========================================================================== */
 
@@ -57,7 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initWeather();
   initASMR();
   initTheme();
-  logSystem('JINJIN 스마트홈 모바일 대시보드가 준비되었습니다. (부산 날씨 & 구글 캘린더 연동)');
+  logSystem('JINJIN 스마트홈 모바일 대시보드가 준비되었습니다. (클라우드 DB & 구글 캘린더 연동)');
 });
 
 // Tab View Switcher (Mobile Bottom Nav: 오늘 하루 / 홈 제어 / 설정)
@@ -572,9 +572,30 @@ function toggleFocusTimer() {
 }
 
 // ==========================================================================
-// 6. TODO TASK MANAGER & GOOGLE CALENDAR INTEGRATION
+// 6. TODO TASK MANAGER & CLOUD DB INTEGRATION (/api/todos)
 // ==========================================================================
-function initTodoList() {
+async function initTodoList() {
+  document.getElementById('btn-add-todo').addEventListener('click', addTodo);
+  document.getElementById('todo-input').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') addTodo();
+  });
+
+  // Try fetching from Cloud DB (/api/todos) first
+  try {
+    const res = await fetch('/api/todos');
+    const data = await res.json();
+    if (data && data.success && Array.isArray(data.todos)) {
+      todoItems = data.todos;
+      localStorage.setItem(TODO_STORAGE_KEY, JSON.stringify(todoItems));
+      logSystem(`🗄️ [Cloud DB] 서버에서 ${todoItems.length}개의 일정을 로드했습니다.`);
+      renderTodoList();
+      return;
+    }
+  } catch (e) {
+    console.log('Cloud DB Fetch Fallback to LocalStorage:', e);
+  }
+
+  // Fallback to LocalStorage
   const saved = localStorage.getItem(TODO_STORAGE_KEY);
   if (saved) {
     try { todoItems = JSON.parse(saved); } catch (e) { todoItems = []; }
@@ -584,11 +605,6 @@ function initTodoList() {
       { id: 2, text: '수면 코골이 분석 모니터링', completed: false }
     ];
   }
-
-  document.getElementById('btn-add-todo').addEventListener('click', addTodo);
-  document.getElementById('todo-input').addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') addTodo();
-  });
 
   renderTodoList();
 }
@@ -613,9 +629,21 @@ function deleteTodo(id) {
   saveAndRenderTodo();
 }
 
-function saveAndRenderTodo() {
+async function saveAndRenderTodo() {
   localStorage.setItem(TODO_STORAGE_KEY, JSON.stringify(todoItems));
   renderTodoList();
+
+  // Sync to Cloud DB (/api/todos)
+  try {
+    await fetch('/api/todos', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ todos: todoItems })
+    });
+    logSystem(`☁️ [Cloud DB] 일정 데이터 ${todoItems.length}개 저장 완료.`);
+  } catch (e) {
+    console.error('Cloud DB Sync Error:', e);
+  }
 }
 
 function renderTodoList() {
@@ -826,7 +854,8 @@ function setModeUI(mode) {
 
 function sendCustomCommand() {
   if (!checkConnectionGuard()) return;
-  const input = document.value ? input.value.trim() : '';
+  const input = document.getElementById('custom-cmd-input');
+  const cmd = input ? input.value.trim() : '';
   if (cmd) {
     sendBLECommand(cmd);
     input.value = '';
