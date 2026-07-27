@@ -858,13 +858,67 @@ function initControls() {
     });
   });
 
-  document.getElementById('btn-oled1-on').addEventListener('click', () => sendBLECommand('3'));
-  document.getElementById('btn-oled1-off').addEventListener('click', () => sendBLECommand('4'));
-  document.getElementById('btn-kitty-draw').addEventListener('click', () => sendBLECommand('9'));
+  // 어두우면 블라인드 자동 열기 토글
+  const toggleAutoBlind = document.getElementById('toggle-auto-blind');
+  if (toggleAutoBlind) {
+    toggleAutoBlind.addEventListener('change', (e) => {
+      logSystem(`🪟 [스마트 블라인드] 어두우면 자동 열기 ${e.target.checked ? 'ON (활성화)' : 'OFF (비활성화)'}`);
+    });
+  }
+  const toggleHumiAlert = document.getElementById('toggle-humi-alert');
+  const sliderHumiThreshold = document.getElementById('slider-humi-threshold');
+  const humiThresholdVal = document.getElementById('humi-threshold-val');
 
-  document.getElementById('btn-melody-bell').addEventListener('click', () => sendBLECommand('5'));
-  document.getElementById('btn-melody-shark').addEventListener('click', () => sendBLECommand('6'));
-  document.getElementById('btn-buzzer-scale').addEventListener('click', () => sendBLECommand('4'));
+  if (sliderHumiThreshold) {
+    sliderHumiThreshold.addEventListener('input', (e) => {
+      if (humiThresholdVal) humiThresholdVal.innerText = `${e.target.value}% 이상`;
+    });
+    sliderHumiThreshold.addEventListener('change', (e) => {
+      logSystem(`🌧️ [습도 경보] 작동 기준이 ${e.target.value}% 로 설정되었습니다.`);
+    });
+  }
+
+  if (toggleHumiAlert) {
+    toggleHumiAlert.addEventListener('change', (e) => {
+      logSystem(`🌧️ [습도 경보] 고습도 안내 경보가 ${e.target.checked ? 'ON (활성화)' : 'OFF (비활성화)'} 되었습니다.`);
+    });
+  }
+
+  // 스마트 디스플레이 세팅
+  document.querySelectorAll('.btn-oled-setting').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const mode = btn.getAttribute('data-mode');
+      document.querySelectorAll('.btn-oled-setting').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      const badge = document.getElementById('oled-mode-badge');
+      const wordPanel = document.getElementById('word-card-panel');
+      let modeText = '날씨/미세먼지';
+      let cmd = 'O1';
+
+      if (mode === 'word') {
+        modeText = '오늘의 영단어';
+        cmd = 'O2';
+        if (wordPanel) wordPanel.style.display = 'block';
+        updateRandomWord();
+      } else if (mode === 'todo') {
+        modeText = '할 일/D-Day';
+        cmd = 'O3';
+        if (wordPanel) wordPanel.style.display = 'none';
+      } else {
+        if (wordPanel) wordPanel.style.display = 'none';
+      }
+
+      if (badge) badge.innerText = modeText;
+      sendBLECommand(cmd);
+      logSystem(`🖥️ [스마트 디스플레이] 화면 모드가 '${modeText}'(으)로 변경되었습니다.`);
+    });
+  });
+
+  const btnRefreshWord = document.getElementById('btn-refresh-word');
+  if (btnRefreshWord) {
+    btnRefreshWord.addEventListener('click', () => updateRandomWord());
+  }
 
   document.getElementById('btn-read-cds').addEventListener('click', () => sendBLECommand('2'));
   document.getElementById('btn-sync-weather').addEventListener('click', () => sendBLECommand('1'));
@@ -887,6 +941,35 @@ function initControls() {
   });
 
   document.getElementById('btn-stop-alert').addEventListener('click', () => sendBLECommand('A'));
+}
+
+const ENGLISH_WORDS_DB = [
+  { en: 'SERENDIPITY', kr: '뜻밖의 행운 / 우연한 기쁨', ex: 'Finding joy in unexpected moments.' },
+  { en: 'PERSISTENCE', kr: '끈기 / 끊임없는 노력', ex: 'Key to achieving all great goals.' },
+  { en: 'RESILIENCE', kr: '회복탄력성 / 오뚝이 정신', ex: 'Bounce back stronger than ever.' },
+  { en: 'INSPIRATION', kr: '영감 / 창의적 자극', ex: 'Fresh ideas fill your day.' },
+  { en: 'CREATIVITY', kr: '창의성 / 독창력', ex: 'Think differently every single day.' },
+  { en: 'PROSPERITY', kr: '번영 / 풍요로움', ex: 'Wishing you success and joy.' },
+  { en: 'PASSIONATE', kr: '열정적인 / 뜨거운', ex: 'Follow what makes your heart beat.' },
+  { en: 'HARMONY', kr: '조화 / 편안함', ex: 'Peaceful smart home environment.' },
+  { en: 'BRILLIANT', kr: '훌륭한 / 눈부신', ex: 'You have a brilliant future.' },
+  { en: 'GRATITUDE', kr: '감사하는 마음', ex: 'Be thankful for today.' },
+  { en: 'MOTIVATION', kr: '동기부여 / 자극', ex: 'Start where you are, use what you have.' },
+  { en: 'EXCELLENCE', kr: '탁월함 / 뛰어남', ex: 'Excellence is a habit, not an act.' }
+];
+
+function updateRandomWord() {
+  const item = ENGLISH_WORDS_DB[Math.floor(Math.random() * ENGLISH_WORDS_DB.length)];
+  const elEn = document.getElementById('word-card-en');
+  const elKr = document.getElementById('word-card-kr');
+  const elEx = document.getElementById('word-card-ex');
+
+  if (elEn) elEn.innerText = item.en;
+  if (elKr) elKr.innerText = item.kr;
+  if (elEx) elEx.innerText = `"${item.ex}"`;
+
+  sendBLECommand(`W:${item.en}`);
+  logSystem(`📚 [오늘의 영단어] '${item.en}' (${item.kr}) 세팅 완료.`);
 }
 
 function setModeUI(mode) {
