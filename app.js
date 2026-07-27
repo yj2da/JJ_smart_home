@@ -1104,19 +1104,131 @@ function initChatbot() {
   chatInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') handleChatSubmit();
   });
+
+  // AI 챗봇 상단 빠른 질문/제어 칩 클릭 핸들러 (AI API 미호출 / 즉시 실행)
+  document.querySelectorAll('.btn-chat-chip').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const cmdKey = btn.getAttribute('data-chat-cmd');
+      const labelText = btn.innerText.trim();
+      executeQuickChatAction(cmdKey, labelText);
+    });
+  });
 }
+
+function executeQuickChatAction(cmdKey, userLabelText) {
+  // 사용자 말풍선 추가
+  if (userLabelText) {
+    appendChatBubble(userLabelText, 'user');
+  }
+
+  // 명령어 모음 조회인 경우
+  if (cmdKey === 'LIST') {
+    const botDiv = appendChatBubble('', 'bot');
+    botDiv.innerHTML = `
+      <div>🤖 <strong>스마트홈 빠른 제어 명령어 모음</strong></div>
+      <div style="font-size:0.78rem; color:var(--text-muted); margin:4px 0 8px 0;">원하시는 명령 버튼을 누르면 AI API 없이 즉시 실행됩니다:</div>
+      <div class="chat-cmd-grid">
+        <button class="btn-chat-chip" onclick="executeQuickChatAction('LIGHT_ON', '💡 조명 켜기')">💡 조명 켜기</button>
+        <button class="btn-chat-chip" onclick="executeQuickChatAction('LIGHT_OFF', '🌙 조명 끄기')">🌙 조명 끄기</button>
+        <button class="btn-chat-chip" onclick="executeQuickChatAction('SLEEP', '💤 수면 모드')">💤 수면 모드</button>
+        <button class="btn-chat-chip" onclick="executeQuickChatAction('WAKEUP', '☀️ 기상 모드')">☀️ 기상 모드</button>
+        <button class="btn-chat-chip" onclick="executeQuickChatAction('WEATHER', '🌤️ 날씨 보기')">🌤️ 날씨 보기</button>
+        <button class="btn-chat-chip" onclick="executeQuickChatAction('BABY_SHARK', '🎵 아기상어')">🎵 아기상어</button>
+        <button class="btn-chat-chip" onclick="executeQuickChatAction('OPEN_BLIND', '🪟 창문 열기')">🪟 창문 열기</button>
+        <button class="btn-chat-chip" onclick="executeQuickChatAction('STOP_ALARM', '🔔 알람 끄기')">🔔 알람 끄기</button>
+      </div>
+    `;
+    return;
+  }
+
+  // 하드웨어 제어 즉시 실행 및 봇 응답 생성 (AI API 호출 없음)
+  let botReply = '';
+  if (cmdKey === 'LIGHT_ON') {
+    sendBLECommand('7');
+    botReply = '전등(RGB LED)을 켰습니다! 💡';
+  } else if (cmdKey === 'LIGHT_OFF') {
+    sendBLECommand('8');
+    botReply = '전등(RGB LED)을 껐습니다. 🌙';
+  } else if (cmdKey === 'SLEEP') {
+    sendBLECommand('S');
+    startSleepSession();
+    botReply = '수면 모드를 켜서 코골이 감지를 시작했습니다! 💤';
+  } else if (cmdKey === 'WAKEUP') {
+    sendBLECommand('Q');
+    finishSleepSession();
+    botReply = '기상 모드로 전환했습니다! 좋은 아침이에요 ☀️';
+  } else if (cmdKey === 'WEATHER') {
+    sendBLECommand('1');
+    const tempEl = document.getElementById('weather-temp-val');
+    const temp = tempEl ? tempEl.innerText : '27';
+    botReply = `부산 실시간 날씨 정보를 OLED 화면에 전송했습니다! (현재 ${temp}°C) 🌤️`;
+  } else if (cmdKey === 'BABY_SHARK') {
+    sendBLECommand('6');
+    botReply = '피에조 부저로 아기상어 멜로디를 연주합니다! 🦈🎵';
+  } else if (cmdKey === 'OPEN_BLIND') {
+    sendBLECommand('M180');
+    botReply = '스마트 창문 블라인드를 180° 열었습니다! 🪟';
+  } else if (cmdKey === 'CLOSE_BLIND') {
+    sendBLECommand('M0');
+    botReply = '스마트 창문 블라인드를 닫았습니다! 🪟';
+  } else if (cmdKey === 'STOP_ALARM') {
+    sendBLECommand('A');
+    botReply = '부저 알람 및 경보를 종료했습니다! 🔔';
+  } else {
+    botReply = `명령어 '${cmdKey}'를 성공적으로 실행했습니다! ✨`;
+  }
+
+  appendChatBubble(botReply, 'bot');
+}
+window.executeQuickChatAction = executeQuickChatAction;
 
 function handleChatSubmit() {
   const input = document.getElementById('chat-input');
   const text = input.value.trim();
   if (!text) return;
 
-  appendChatBubble(text, 'user');
+  const query = text.toLowerCase();
   input.value = '';
 
-  executeHardwarePattern(text);
-  const thinkingBubble = appendChatBubble('🤖 Gemini AI 가 생각 중...', 'bot thinking');
+  // 1. "명령어", "목록", "도움말" 등의 입력 시 AI API 미호출로 빠른 안내
+  if (query.includes('명령어') || query.includes('목록') || query.includes('도움말') || query.includes('기능')) {
+    executeQuickChatAction('LIST', text);
+    return;
+  }
 
+  // 2. 직관적 제어 명령어 입력 시 AI API 미호출로 즉시 실행
+  if (query.includes('불 켜') || query.includes('조명 켜') || query.includes('전등 켜')) {
+    executeQuickChatAction('LIGHT_ON', text);
+    return;
+  } else if (query.includes('불 꺼') || query.includes('조명 꺼') || query.includes('전등 꺼')) {
+    executeQuickChatAction('LIGHT_OFF', text);
+    return;
+  } else if (query.includes('수면') || query.includes('잘자') || query.includes('잠자리')) {
+    executeQuickChatAction('SLEEP', text);
+    return;
+  } else if (query.includes('기상') || query.includes('일어') || query.includes('모닝')) {
+    executeQuickChatAction('WAKEUP', text);
+    return;
+  } else if (query.includes('알람 끄') || query.includes('소리 끄') || query.includes('알람 꺼')) {
+    executeQuickChatAction('STOP_ALARM', text);
+    return;
+  } else if (query.includes('날씨')) {
+    executeQuickChatAction('WEATHER', text);
+    return;
+  } else if (query.includes('상어') || query.includes('아기상어')) {
+    executeQuickChatAction('BABY_SHARK', text);
+    return;
+  } else if (query.includes('창문 열') || query.includes('블라인드 열')) {
+    executeQuickChatAction('OPEN_BLIND', text);
+    return;
+  } else if (query.includes('창문 닫') || query.includes('블라인드 닫')) {
+    executeQuickChatAction('CLOSE_BLIND', text);
+    return;
+  }
+
+  // 3. 그 외 일반 대화 질문인 경우만 Gemini AI API 호출
+  appendChatBubble(text, 'user');
+  const thinkingBubble = appendChatBubble('🤖 Gemini AI 가 생각 중...', 'bot thinking');
   fetchGeminiAIResponse(text, thinkingBubble);
 }
 
@@ -1124,7 +1236,7 @@ function appendChatBubble(msg, sender) {
   const container = document.getElementById('chat-messages');
   const div = document.createElement('div');
   div.className = `chat-bubble ${sender}`;
-  div.innerText = msg;
+  if (msg) div.innerText = msg;
   container.appendChild(div);
   container.scrollTop = container.scrollHeight;
   return div;

@@ -1,6 +1,6 @@
-# 📋 김진아의 스마트홈 웹 대시보드 제품 요구사항 정의서 (PRD)
+# 📋 김진아와 오예진의 스마트홈 웹 대시보드 제품 요구사항 정의서 (PRD)
 
-본 문서는 `JJ_smartHome.py` MicroPython 펌웨어를 기반으로 작동하는 **김진아의 스마트홈 웹 대시보드**에 대한 제품 요구사항 정의서(PRD)입니다. Web Bluetooth(Nordic UART Service, NUS)를 통해 ESP32 기기와 브라우저 간의 실시간 양방향 제어 및 센서 데이터 모니터링을 구현합니다.
+본 문서는 `JJ_smartHome.py` MicroPython 펌웨어를 기반으로 작동하는 **김진아와 오예진의 스마트홈 웹 대시보드**에 대한 제품 요구사항 정의서(PRD)입니다. Web Bluetooth(Nordic UART Service, NUS)를 통해 ESP32 기기와 브라우저 간의 실시간 양방향 제어 및 센서 데이터 모니터링을 구현합니다.
 
 ---
 
@@ -9,7 +9,7 @@
 | 항목 | 내용 |
 | :--- | :--- |
 | **프로젝트명** | JINJIN 스마트홈 웹 대시보드 (Jina's Smart Home Dashboard) |
-| **제작자** | 김진아 (Jina) |
+| **제작자** | 김진아 (Jina), 오예진(Yejin) |
 | **BLE 기기명** | `ESP_JJ` |
 | **OLED 이미지 캐릭터** | `img/kitty.pbm` (헬로키티 단색 비트맵 이미지) |
 | **디자인 테마** | **Midnight Slate (미드나잇 슬레이트 - 모던 다크 & 글래스모피즘)** - 시크하고 세련된 차콜 & 일렉트릭 스카이 블루 톤 |

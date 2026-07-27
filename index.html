@@ -385,7 +385,7 @@
                 <i class="fa-solid fa-rotate"></i> 새로고침
               </button>
             </div>
-            <div style="background:rgba(175, 82, 222, 0.1); border:1px solid rgba(175, 82, 222, 0.3); border-radius:var(--radius-md); padding:10px 12px; text-align:center;">
+            <div class="word-card-box">
               <div id="word-card-en" style="font-family:var(--font-mono); font-size:1.15rem; font-weight:800; color:var(--accent-purple); letter-spacing:1px;">SERENDIPITY</div>
               <div id="word-card-kr" style="font-size:0.85rem; font-weight:700; color:var(--text-main); margin:4px 0;">뜻밖의 행운 / 우연한 기쁨</div>
               <div id="word-card-ex" style="font-size:0.75rem; color:var(--text-muted); font-style:italic;">"Finding joy in unexpected moments."</div>
@@ -405,19 +405,19 @@
             </button>
           </div>
           <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap:10px; text-align:center;">
-            <div class="sub-panel">
+            <div class="sensor-sub-panel">
               <div style="font-size:0.72rem; color:var(--text-muted);">실내 온도</div>
               <div id="sensor-temp" style="font-family:var(--font-mono); font-size:1.3rem; font-weight:800; color:var(--accent-sky);">24 °C</div>
             </div>
-            <div class="sub-panel">
+            <div class="sensor-sub-panel">
               <div style="font-size:0.72rem; color:var(--text-muted);">실내 습도</div>
               <div id="sensor-humi" style="font-family:var(--font-mono); font-size:1.3rem; font-weight:800; color:var(--accent-indigo);">55 %</div>
             </div>
-            <div class="sub-panel">
+            <div class="sensor-sub-panel">
               <div style="font-size:0.72rem; color:var(--text-muted);">조도 센서</div>
               <div id="sensor-cds" style="font-family:var(--font-mono); font-size:1.3rem; font-weight:800; color:var(--accent-amber);">3200</div>
             </div>
-            <div class="sub-panel">
+            <div class="sensor-sub-panel">
               <div style="font-size:0.72rem; color:var(--text-muted);">코골이 음량</div>
               <div id="sensor-mic" style="font-family:var(--font-mono); font-size:1.3rem; font-weight:800; color:var(--accent-rose);">12</div>
             </div>
@@ -552,9 +552,23 @@
       </div>
       <button id="btn-chat-close" style="background:none; border:none; color:var(--text-muted); cursor:pointer;"><i class="fa-solid fa-xmark"></i></button>
     </div>
+
+    <!-- AI 빠른 질문 및 즉시 제어 버튼 바 -->
+    <div class="chat-quick-bar">
+      <button class="btn-chat-chip" data-chat-cmd="LIST"><i class="fa-solid fa-list-check" style="color:var(--accent-sky);"></i> 명령어 모음</button>
+      <button class="btn-chat-chip" data-chat-cmd="LIGHT_ON"><i class="fa-solid fa-lightbulb" style="color:var(--accent-amber);"></i> 조명 켜기</button>
+      <button class="btn-chat-chip" data-chat-cmd="LIGHT_OFF"><i class="fa-regular fa-lightbulb"></i> 조명 끄기</button>
+      <button class="btn-chat-chip" data-chat-cmd="SLEEP"><i class="fa-solid fa-moon" style="color:var(--accent-indigo);"></i> 수면 모드</button>
+      <button class="btn-chat-chip" data-chat-cmd="WAKEUP"><i class="fa-solid fa-sun" style="color:var(--accent-amber);"></i> 기상 모드</button>
+      <button class="btn-chat-chip" data-chat-cmd="WEATHER"><i class="fa-solid fa-cloud-sun" style="color:var(--accent-sky);"></i> 실시간 날씨</button>
+      <button class="btn-chat-chip" data-chat-cmd="BABY_SHARK"><i class="fa-solid fa-music" style="color:var(--accent-rose);"></i> 아기상어</button>
+      <button class="btn-chat-chip" data-chat-cmd="OPEN_BLIND"><i class="fa-solid fa-blinds"></i> 창문 열기</button>
+      <button class="btn-chat-chip" data-chat-cmd="STOP_ALARM"><i class="fa-solid fa-bell-slash"></i> 알람 끄기</button>
+    </div>
+
     <div id="chat-messages" class="chat-messages">
       <div class="chat-bubble bot">
-        안녕하세요! 👋 스마트홈 AI 도우미입니다. "불 켜줘", "수면모드 시작", "날씨 어때", "아기상어" 등 말씀해주세요!
+        안녕하세요! 👋 스마트홈 AI 도우미입니다.<br>위 <strong>명령어 버튼</strong>을 누르면 API 호출 없이 즉시 제어되며, "명령어 모음"을 누르면 전체 기능 목록을 확인하실 수 있습니다!
       </div>
     </div>
     <div class="chat-input-box">
