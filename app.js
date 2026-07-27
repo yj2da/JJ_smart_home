@@ -1,7 +1,6 @@
 /* Copy of jinjin_smart-home/app.js for root workspace entry */
-const GEMINI_API_KEY = 'AIzaSyDi9Ew17PZ9D4Hi2MHzHJJrwwMGMuOMi0A';
-const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${GEMINI_API_KEY}`;
-const GEMINI_BACKUP_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+const GEMINI_API_KEY_FALLBACK = 'AIzaSyDi9Ew17PZ9D4Hi2MHzHJJrwwMGMuOMi0A';
+const GEMINI_DIRECT_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${GEMINI_API_KEY_FALLBACK}`;
 
 const BLE_SERVICE_UUID = '6e400001-b5a3-f393-e0a9-e50e24dcca9e';
 const BLE_RX_UUID = '6e400002-b5a3-f393-e0a9-e50e24dcca9e';
@@ -44,7 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initWeather();
   initASMR();
   initTheme();
-  logSystem('JINJIN 스마트홈 모바일 대시보드가 준비되었습니다. (Google Gemini AI 정상 연동)');
+  logSystem('JINJIN 스마트홈 모바일 대시보드가 준비되었습니다. (Vercel 환경 변수 API 프록시 적용)');
 });
 
 function initTabs() {
@@ -858,29 +857,20 @@ function executeHardwarePattern(text) {
 
 async function fetchGeminiAIResponse(userPrompt, thinkingBubble) {
   try {
-    const payload = {
-      contents: [
-        {
-          parts: [{ text: userPrompt }]
-        }
-      ],
-      systemInstruction: {
-        parts: [
-          {
-            text: "당신은 김진아(Jina)와 오예진(Yejin)의 스마트홈 전용 AI 스마트 비서입니다. 한국어로 친절하고 밝고 간결하게 2-3문장으로 답변하세요. 스마트 조명, 수면 모드, 창문 블라인드, 날씨, 멜로디 제어 등의 문의에 상냥하게 응답해주세요."
-          }
-        ]
-      }
-    };
-
-    let response = await fetch(GEMINI_API_URL, {
+    let response = await fetch('/api/gemini', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
+      body: JSON.stringify({ prompt: userPrompt })
     });
 
     if (!response.ok) {
-      response = await fetch(GEMINI_BACKUP_URL, {
+      const payload = {
+        contents: [{ parts: [{ text: userPrompt }] }],
+        systemInstruction: {
+          parts: [{ text: "당신은 김진아와 오예진의 스마트홈 전용 AI 비서입니다. 친절하고 간결하게 답변하세요." }]
+        }
+      };
+      response = await fetch(GEMINI_DIRECT_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
