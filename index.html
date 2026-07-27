@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>JINJIN HOME - 스마트홈 모바일 대시보드</title>
+
+  <!-- Google Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Mobile-First Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Ambient Ethereal Glow Background -->
+  <div class="ethereal-bg"></div>
+
+  <!-- Mobile App Shell Container (Max Width 480px) -->
+  <div class="mobile-app-shell">
+    
+    <!-- Mobile Sticky Top Header -->
+    <header class="mobile-header">
+      <div class="header-brand">
+        <div class="header-brand-icon">
+          <i class="fa-solid fa-house-signal"></i>
+        </div>
+        <div>
+          <h1 class="header-brand-title">JINJIN HOME</h1>
+          <p class="header-brand-sub">Jina & Yejin's Smart Home</p>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:8px; align-items:center;">
+        <button id="btn-demo" class="btn-glass" style="padding:6px 10px; font-size:0.7rem;">
+          <i class="fa-solid fa-wand-magic-sparkles"></i> 데모
+        </button>
+        <button id="btn-connect" class="header-ble-pill">
+          <div id="header-status-dot" class="status-dot"></div>
+          <span id="header-status-text">ESP_JJ</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Scrollable Content Body -->
+    <main class="content-body">
+      
+      <!-- 1️⃣ TAB 1: 오늘 하루 (Today's Summary) -->
+      <section id="view-today" class="tab-view active">
+        <!-- 수면 점수 직관적 카드 (수면 모드 종료 시 바로 반영) -->
+        <div id="sleep-score-card" class="glass-card" style="display: block; transition: var(--transition-fast);">
+          <div class="card-header">
+            <div class="card-title">
+              <i class="fa-solid fa-star" style="color:var(--accent-amber);"></i>
+              <h3>수면 분석 점수</h3>
+            </div>
+            <span id="last-sleep-time-badge" class="card-subtitle">측정 대기</span>
+          </div>
+          <div style="display:flex; align-items:center; justify-content:space-around; padding:6px 0;">
+            <div class="score-circle-badge" style="margin:0;">
+              <span id="card-sleep-score-num" class="score-num">--</span>
+              <span class="score-label">SCORE</span>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:6px;">
+              <div id="card-sleep-grade" style="font-weight:700; font-size:0.95rem; color:var(--text-main);">수면 모드를 켜서 점수를 체크하세요! 💤</div>
+              <div style="font-size:0.75rem; color:var(--text-muted);">
+                코골이 감지: <strong id="card-sleep-snore-count" style="color:var(--accent-rose);">0회</strong>
+              </div>
+              <div style="font-size:0.75rem; color:var(--text-muted);">
+                수면 시간: <strong id="card-sleep-duration">--</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 모드 설정 카드 -->
+        <div class="glass-card">
+          <div class="card-header">
+            <div class="card-title">
+              <i class="fa-solid fa-moon"></i>
+              <h3>스마트 모드 설정</h3>
+            </div>
+          </div>
+          <div class="mode-grid-mobile">
+            <div id="mode-sleep" class="mode-card-btn sleep">
+              <i class="fa-solid fa-bed"></i>
+              <div class="mode-title">수면 모드</div>
+              <div class="card-subtitle">코골이 분석</div>
+            </div>
+            <div id="mode-wakeup" class="mode-card-btn wakeup">
+              <i class="fa-solid fa-sun"></i>
+              <div class="mode-title">기상 모드</div>
+              <div class="card-subtitle">모닝 알람</div>
+            </div>
+            <div id="mode-focus" class="mode-card-btn focus">
+              <i class="fa-solid fa-brain"></i>
+              <div class="mode-title">집중 모드</div>
+              <div class="card-subtitle">ASMR 빗소리</div>
+            </div>
+          </div>
+
+          <!-- 백색소음 & 타이머 패널 -->
+          <div id="focus-panel" class="sub-panel" style="display: none;">
+            <div style="display:flex; flex-direction:column; gap:10px;">
+              <div style="display:flex; align-items:center; justify-content:space-between;">
+                <span style="font-size:0.82rem; font-weight:600;"><i class="fa-solid fa-headphones" style="color:var(--accent-sky);"></i> ASMR 빗소리:</span>
+                <button id="btn-toggle-asmr" class="btn-glass" style="padding:6px 12px; font-size:0.75rem;">
+                  <i class="fa-solid fa-play"></i> 재생
+                </button>
+              </div>
+              <div style="display:flex; align-items:center; justify-content:space-between; border-top:1px solid var(--border-glass); padding-top:8px;">
+                <span style="font-size:0.82rem; font-weight:600;"><i class="fa-solid fa-stopwatch" style="color:var(--accent-indigo);"></i> 25분 집중:</span>
+                <span id="focus-timer-display" style="font-family:var(--font-mono); font-weight:700; color:var(--accent-sky);">25:00</span>
+                <button id="btn-start-timer" class="btn-glass" style="padding:6px 10px; font-size:0.75rem;">시작</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 실시간 날씨 카드 -->
+        <div class="glass-card">
+          <div class="card-header">
+            <div class="card-title">
+              <i class="fa-solid fa-cloud-sun"></i>
+              <h3>서울 실시간 날씨</h3>
+            </div>
+            <button id="btn-sync-weather" class="btn-glass" style="padding:4px 10px; font-size:0.7rem;">
+              <i class="fa-solid fa-tv"></i> 화면에 띄우기
+            </button>
+          </div>
+          <div class="weather-display">
+            <div>
+              <div class="weather-temp-val"><span id="weather-temp-val">24</span>°C</div>
+              <div style="font-size:0.8rem; color:var(--text-muted);">맑음 (Clear Sky)</div>
+            </div>
+            <div class="weather-icon-box">
+              <i class="fa-solid fa-sun"></i>
+            </div>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:0.8rem; color:var(--text-muted); margin-top:8px; border-top:1px solid var(--border-glass); padding-top:8px;">
+            <span>습도: <strong id="weather-humi-val">55</strong>%</span>
+            <span>위치: 서울 (Seoul)</span>
+          </div>
+        </div>
+
+        <!-- 오늘 일정 카드 -->
+        <div class="glass-card">
+          <div class="card-header">
+            <div class="card-title">
+              <i class="fa-solid fa-list-check"></i>
+              <h3>오늘 하루 일정</h3>
+            </div>
+            <span id="task-count-badge" class="card-subtitle">0개</span>
+          </div>
+          <div class="todo-input-box">
+            <input type="text" id="todo-input" class="glass-input" placeholder="새 일정 입력...">
+            <button id="btn-add-todo" class="btn-glass btn-primary" style="padding:8px 14px; font-size:0.8rem;">추가</button>
+          </div>
+          <div id="todo-list" class="todo-list"></div>
+        </div>
+
+        <!-- 수면 질 분석 차트 카드 -->
+        <div class="glass-card">
+          <div class="card-header">
+            <div class="card-title">
+              <i class="fa-solid fa-chart-line"></i>
+              <h3>실시간 수면 질 차트</h3>
+            </div>
+            <span id="snore-count-badge" class="angle-badge" style="font-size:0.75rem; color:var(--accent-rose);">
+              코골이: 0회
+            </span>
+          </div>
+          <div class="chart-container-mobile">
+            <canvas id="snoreChart"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2️⃣ TAB 2: 홈 제어 (Home Control) -->
+      <section id="view-control" class="tab-view">
+        <!-- 스마트 조명 (RGB LED) 카드 -->
+        <div class="glass-card">
+          <div class="card-header">
+            <div class="card-title">
+              <i class="fa-solid fa-lightbulb"></i>
+              <h3>스마트 조명 (RGB LED)</h3>
+            </div>
+            <span id="led-status-badge" class="card-subtitle">OFF</span>
+          </div>
+          <div class="control-switch-card">
+            <div>
+              <div style="font-weight:700; font-size:0.9rem;">전등 Switch</div>
+              <div style="font-size:0.75rem; color:var(--text-muted);">스마트 조명 ON / OFF</div>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="toggle-rgb-led">
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <!-- 스마트 창문 블라인드 (서보 모터) 카드 -->
+        <div class="glass-card">
+          <div class="card-header">
+            <div class="card-title">
+              <i class="fa-solid fa-blinds"></i>
+              <h3>스마트 창문 블라인드</h3>
+            </div>
+            <span id="blind-angle-val" class="angle-badge">90°</span>
+          </div>
+          <div style="padding:6px 0;">
+            <input type="range" id="slider-blind-motor" class="glass-range" min="0" max="180" value="90">
+            <div class="range-presets">
+              <button class="btn-preset" data-angle="0">0° 닫힘</button>
+              <button class="btn-preset" data-angle="90">90° 절반</button>
+              <button class="btn-preset" data-angle="180">180° 열림</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- OLED 화면 & 캐릭터 드로잉 -->
+        <div class="glass-card">
+          <div class="card-header">
+            <div class="card-title">
+              <i class="fa-solid fa-tv"></i>
+              <h3>스마트 디스플레이 제어</h3>
+            </div>
+          </div>
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-bottom:8px;">
+            <button id="btn-oled1-on" class="btn-glass"><i class="fa-solid fa-desktop"></i> 화면 켜기</button>
+            <button id="btn-oled1-off" class="btn-glass"><i class="fa-solid fa-desktop-slash"></i> 화면 끄기</button>
+          </div>
+          <button id="btn-kitty-draw" class="btn-glass btn-primary" style="width:100%;">
+            <i class="fa-solid fa-cat"></i> Kitty 캐릭터 띄우기
+          </button>
+        </div>
+
+        <!-- 멜로디 & 부저 -->
+        <div class="glass-card">
+          <div class="card-header">
+            <div class="card-title">
+              <i class="fa-solid fa-music"></i>
+              <h3>피에조 부저 멜로디</h3>
+            </div>
+          </div>
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-bottom:8px;">
+            <button id="btn-melody-bell" class="btn-glass"><i class="fa-solid fa-bell"></i> 학교종 멜로디</button>
+            <button id="btn-melody-shark" class="btn-glass"><i class="fa-solid fa-fish"></i> 아기상어 멜로디</button>
+          </div>
+          <button id="btn-buzzer-scale" class="btn-glass" style="width:100%;">
+            <i class="fa-solid fa-drum"></i> 8음계 부저 테스트
+          </button>
+        </div>
+
+        <!-- 센서 Telemetry 카드 -->
+        <div class="glass-card">
+          <div class="card-header">
+            <div class="card-title">
+              <i class="fa-solid fa-microchip"></i>
+              <h3>실시간 센서 정보</h3>
+            </div>
+            <button id="btn-read-cds" class="btn-glass" style="padding:4px 10px; font-size:0.7rem;">
+              <i class="fa-solid fa-sun"></i> 조도 측정
+            </button>
+          </div>
+          <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap:10px; text-align:center;">
+            <div class="sub-panel">
+              <div style="font-size:0.72rem; color:var(--text-muted);">실내 온도</div>
+              <div id="sensor-temp" style="font-family:var(--font-mono); font-size:1.3rem; font-weight:800; color:var(--accent-sky);">24 °C</div>
+            </div>
+            <div class="sub-panel">
+              <div style="font-size:0.72rem; color:var(--text-muted);">실내 습도</div>
+              <div id="sensor-humi" style="font-family:var(--font-mono); font-size:1.3rem; font-weight:800; color:var(--accent-indigo);">55 %</div>
+            </div>
+            <div class="sub-panel">
+              <div style="font-size:0.72rem; color:var(--text-muted);">조도 센서</div>
+              <div id="sensor-cds" style="font-family:var(--font-mono); font-size:1.3rem; font-weight:800; color:var(--accent-amber);">3200</div>
+            </div>
+            <div class="sub-panel">
+              <div style="font-size:0.72rem; color:var(--text-muted);">코골이 음량</div>
+              <div id="sensor-mic" style="font-family:var(--font-mono); font-size:1.3rem; font-weight:800; color:var(--accent-rose);">12</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3️⃣ TAB 3: 앱 설정 (Settings & Theme) -->
+      <section id="view-settings" class="tab-view">
+        <!-- 테마 설정 카드 (야간 모드 ON / OFF) -->
+        <div class="glass-card">
+          <div class="card-header">
+            <div class="card-title">
+              <i class="fa-solid fa-moon"></i>
+              <h3>앱 디스플레이 테마</h3>
+            </div>
+            <span id="theme-status-badge" class="card-subtitle">야간 모드 ON</span>
+          </div>
+          <div class="control-switch-card">
+            <div>
+              <div style="font-weight:700; font-size:0.9rem;">야간 모드 (Dark Mode)</div>
+              <div style="font-size:0.75rem; color:var(--text-muted);">ON: 검은색 배경 / OFF: 흰색 배경</div>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="toggle-theme-mode" checked>
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <!-- 하드웨어 & 기기 정보 -->
+        <div class="glass-card">
+          <div class="card-header">
+            <div class="card-title">
+              <i class="fa-solid fa-circle-info"></i>
+              <h3>스마트홈 기기 정보</h3>
+            </div>
+          </div>
+          <div class="sub-panel" style="font-size:0.8rem; display:flex; flex-direction:column; gap:6px;">
+            <div style="display:flex; justify-content:space-between;">
+              <span style="color:var(--text-muted);">BLE 디바이스:</span>
+              <strong style="color:var(--accent-sky);">ESP_JJ</strong>
+            </div>
+            <div style="display:flex; justify-content:space-between;">
+              <span style="color:var(--text-muted);">통신 프로토콜:</span>
+              <strong>Nordic UART Service (NUS)</strong>
+            </div>
+            <div style="display:flex; justify-content:space-between;">
+              <span style="color:var(--text-muted);">프로젝트 제작자:</span>
+              <strong>김진아 (Jina), 오예진 (Yejin)</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- Web Bluetooth 로그 콘솔 -->
+        <div class="glass-card">
+          <div class="card-header">
+            <div class="card-title">
+              <i class="fa-solid fa-terminal"></i>
+              <h3>Web Bluetooth 로그</h3>
+            </div>
+            <button id="btn-clear-logs" class="btn-glass" style="padding:4px 10px; font-size:0.7rem;">
+              <i class="fa-solid fa-trash"></i> 지우기
+            </button>
+          </div>
+          <div id="terminal-logs" class="terminal-logs">
+            <div class="log-entry log-sys">
+              <span>[System] JINJIN Smart Home Mobile Dashboard Ready.</span>
+            </div>
+          </div>
+
+          <div style="display:flex; gap:8px; margin-top:10px;">
+            <input type="text" id="custom-cmd-input" class="glass-input" placeholder="커스텀 명령 전송...">
+            <button id="btn-send-custom-cmd" class="btn-glass btn-primary" style="padding:8px 16px;">전송</button>
+          </div>
+        </div>
+
+        <!-- 빠른 제어 버튼 Grid -->
+        <div class="glass-card">
+          <div class="card-header">
+            <div class="card-title">
+              <i class="fa-solid fa-bolt"></i>
+              <h3>빠른 제어 버튼</h3>
+            </div>
+          </div>
+          <div class="quick-action-grid">
+            <button class="btn-quick-cmd" data-cmd="1"><i class="fa-solid fa-cloud"></i> 날씨 정보</button>
+            <button class="btn-quick-cmd" data-cmd="2"><i class="fa-solid fa-sun"></i> 조도 센서</button>
+            <button class="btn-quick-cmd" data-cmd="3"><i class="fa-solid fa-tv"></i> 화면 켜기</button>
+            <button class="btn-quick-cmd" data-cmd="4"><i class="fa-solid fa-tv"></i> 화면 끄기</button>
+            <button class="btn-quick-cmd" data-cmd="5"><i class="fa-solid fa-music"></i> 학교종</button>
+            <button class="btn-quick-cmd" data-cmd="6"><i class="fa-solid fa-fish"></i> 아기상어</button>
+            <button class="btn-quick-cmd" data-cmd="7"><i class="fa-solid fa-lightbulb"></i> 조명 켜기</button>
+            <button class="btn-quick-cmd" data-cmd="8"><i class="fa-regular fa-lightbulb"></i> 조명 끄기</button>
+            <button class="btn-quick-cmd" data-cmd="9"><i class="fa-solid fa-cat"></i> Kitty 그림</button>
+            <button class="btn-quick-cmd" data-cmd="S"><i class="fa-solid fa-moon"></i> 수면 모드</button>
+            <button class="btn-quick-cmd" data-cmd="Q"><i class="fa-solid fa-sun"></i> 기상 모드</button>
+            <button class="btn-quick-cmd" data-cmd="A"><i class="fa-solid fa-bell-slash"></i> 알람 끄기</button>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Mobile Bottom Navigation Bar -->
+    <nav class="mobile-bottom-nav">
+      <a class="nav-item active" data-target="view-today">
+        <i class="fa-solid fa-calendar-day"></i>
+        <span>오늘 하루</span>
+      </a>
+      <a class="nav-item" data-target="view-control">
+        <i class="fa-solid fa-sliders"></i>
+        <span>홈 제어</span>
+      </a>
+      <a class="nav-item" data-target="view-settings">
+        <i class="fa-solid fa-gear"></i>
+        <span>설정</span>
+      </a>
+    </nav>
+  </div>
+
+  <!-- AI Chatbot Floating Button & Drawer -->
+  <button id="btn-chatbot-toggle" class="chatbot-floating-btn" title="AI 스마트 도우미">
+    <i class="fa-solid fa-robot"></i>
+  </button>
+
+  <div id="chatbot-modal" class="chatbot-modal">
+    <div class="chat-header">
+      <div style="display:flex; align-items:center; gap:8px; font-weight:700; font-size:0.9rem;">
+        <i class="fa-solid fa-robot" style="color:var(--accent-sky);"></i>
+        <span>JINJIN AI 도우미</span>
+      </div>
+      <button id="btn-chat-close" style="background:none; border:none; color:var(--text-muted); cursor:pointer;"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div id="chat-messages" class="chat-messages">
+      <div class="chat-bubble bot">
+        안녕하세요! 👋 스마트홈 AI 도우미입니다. "불 켜줘", "수면모드 시작", "날씨 어때", "아기상어" 등 말씀해주세요!
+      </div>
+    </div>
+    <div class="chat-input-box">
+      <input type="text" id="chat-input" class="glass-input" placeholder="메시지 입력..." style="padding:8px 12px;">
+      <button id="btn-send-chat" class="btn-glass btn-primary" style="padding:8px 12px;"><i class="fa-solid fa-paper-plane"></i></button>
+    </div>
+  </div>
+
+  <!-- 코골이 감지 알람 팝업 모달 -->
+  <div id="alert-overlay" class="alert-overlay">
+    <div class="alert-card">
+      <i class="fa-solid fa-triangle-exclamation" style="font-size:3rem; color:var(--accent-rose); margin-bottom:12px;"></i>
+      <h2 style="font-size:1.3rem; font-weight:800; margin-bottom:8px; color:#fff;">🚨 코골이 감지 경보!</h2>
+      <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:20px;">
+        ESP32 마이크 센서에서 코골이가 지속 감지되어 피에조 부저 경보음이 작용 중입니다.
+      </p>
+      <button id="btn-stop-alert" class="btn-glass btn-rose" style="width:100%; padding:12px; font-size:0.9rem;">
+        <i class="fa-solid fa-bell-slash"></i> 알람 끄기
+      </button>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
