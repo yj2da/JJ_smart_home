@@ -1,4 +1,4 @@
-/* Copy of api/weather.js without hardcoded secret */
+/* Copy of api/weather.js with Busan default */
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -14,7 +14,7 @@ export default async function handler(req, res) {
   }
 
   const apiKey = process.env.OPENWEATHER_API_KEY;
-  const city = req.query.city || 'Seoul';
+  const city = req.query.city || 'Busan';
 
   if (!apiKey) {
     return res.status(500).json({ error: 'OPENWEATHER_API_KEY environment variable is not set' });

@@ -1,7 +1,7 @@
 /* ==========================================================================
    JINJIN SMART HOME DASHBOARD - JAVASCRIPT APPLICATION (app.js)
    Mobile-First Web Bluetooth (NUS), Realtime Chart.js, ASMR Web Audio, AI Chatbot
-   Google Calendar Integration & OpenWeatherMap API
+   Google Calendar Integration & OpenWeatherMap API (Default: Busan)
    Creators: Jina & Yejin
    ========================================================================== */
 
@@ -57,7 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initWeather();
   initASMR();
   initTheme();
-  logSystem('JINJIN 스마트홈 모바일 대시보드가 준비되었습니다. (Google 캘린더 전용 연동)');
+  logSystem('JINJIN 스마트홈 모바일 대시보드가 준비되었습니다. (부산 날씨 & 구글 캘린더 연동)');
 });
 
 // Tab View Switcher (Mobile Bottom Nav: 오늘 하루 / 홈 제어 / 설정)
@@ -826,8 +826,7 @@ function setModeUI(mode) {
 
 function sendCustomCommand() {
   if (!checkConnectionGuard()) return;
-  const input = document.getElementById('custom-cmd-input');
-  const cmd = input.value.trim();
+  const input = document.value ? input.value.trim() : '';
   if (cmd) {
     sendBLECommand(cmd);
     input.value = '';
@@ -856,16 +855,16 @@ function logSystem(text, type = 'sys') {
 }
 
 // ==========================================================================
-// REAL OPENWEATHERMAP API INTEGRATION VIA VERCEL SERVERLESS FUNCTION
+// REAL OPENWEATHERMAP API INTEGRATION VIA VERCEL SERVERLESS FUNCTION (BUSAN)
 // ==========================================================================
 async function initWeather() {
   try {
-    const res = await fetch('/api/weather?city=Seoul');
+    const res = await fetch('/api/weather?city=Busan');
     const data = await res.json();
     if (data && data.main) {
       const temp = Math.round(data.main.temp);
       const humi = data.main.humidity;
-      const desc = data.weather && data.weather[0] ? data.weather[0].description : '맑음';
+      const desc = data.weather && data.weather[0] ? data.weather[0].description : '온흐림';
       
       const tempEl = document.getElementById('weather-temp-val');
       const humiEl = document.getElementById('weather-humi-val');
@@ -877,7 +876,7 @@ async function initWeather() {
       if (humiEl) humiEl.innerText = humi;
       if (sensorTempEl) sensorTempEl.innerText = `${temp} °C`;
       if (sensorHumiEl) sensorHumiEl.innerText = `${humi} %`;
-      if (descEl) descEl.innerText = `${desc} (Seoul)`;
+      if (descEl) descEl.innerText = `${desc} (Busan)`;
 
       const iconEl = document.getElementById('weather-icon-el');
       if (iconEl && data.weather && data.weather[0]) {
@@ -888,7 +887,7 @@ async function initWeather() {
         else if (mainState.includes('thunder')) iconEl.className = 'fa-solid fa-cloud-bolt';
         else if (mainState.includes('snow')) iconEl.className = 'fa-solid fa-snowflake';
       }
-      logSystem(`🌤️ [OpenWeatherMap] 서울 실시간 날씨 수신 완료 (${temp}°C, ${desc}, 습도 ${humi}%)`);
+      logSystem(`🌤️ [OpenWeatherMap] 부산 실시간 날씨 수신 완료 (${temp}°C, ${desc}, 습도 ${humi}%)`);
     }
   } catch (e) {
     console.log('Weather API fallback used:', e);
@@ -1004,7 +1003,7 @@ function fallbackChatResponse(userPrompt, thinkingBubble) {
   } else if (query.includes('날씨')) {
     const tempEl = document.getElementById('weather-temp-val');
     const temp = tempEl ? tempEl.innerText : '27';
-    botReply = `현재 서울 실시간 온도는 ${temp}°C 입니다! 🌤️`;
+    botReply = `현재 부산 실시간 온도는 ${temp}°C 입니다! 🌤️`;
   } else {
     botReply = `스마트홈 AI 비서입니다. "${userPrompt}" 요청을 성공적으로 처리하였습니다! ✨`;
   }

@@ -1,6 +1,7 @@
 /* ==========================================================================
    VERCEL SERVERLESS FUNCTION - OPENWEATHERMAP API PROXY
    Environment Variable: OPENWEATHER_API_KEY (Set in Vercel Dashboard)
+   Default Location: Busan (부산)
    ========================================================================== */
 
 export default async function handler(req, res) {
@@ -17,9 +18,9 @@ export default async function handler(req, res) {
     return;
   }
 
-  // Read OpenWeatherMap Key exclusively from Vercel Environment Variable OPENWEATHER_API_KEY
+  // Read OpenWeatherMap Key from Vercel Environment Variable OPENWEATHER_API_KEY
   const apiKey = process.env.OPENWEATHER_API_KEY;
-  const city = req.query.city || 'Seoul';
+  const city = req.query.city || 'Busan';
 
   if (!apiKey) {
     return res.status(500).json({ error: 'OPENWEATHER_API_KEY environment variable is not set' });
