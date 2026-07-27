@@ -125,19 +125,9 @@ function initEventListeners() {
   });
 
   // Quick Action Buttons
-  elements.quickBtnLight.addEventListener('click', () => {
-    state.lightState = !state.lightState;
-    sendCommand(state.lightState ? '7' : '8');
-  });
-
-  elements.quickBtnLcd.addEventListener('click', () => {
-    state.lcdState = !state.lcdState;
-    sendCommand(state.lcdState ? '3' : '4');
-  });
-
-  elements.quickBtnM1.addEventListener('click', () => sendCommand('5'));
-  elements.quickBtnOled.addEventListener('click', () => sendCommand('9'));
-  elements.btnQuickRefresh.addEventListener('click', refreshSensors);
+  if (elements.quickBtnM1) elements.quickBtnM1.addEventListener('click', () => sendCommand('5'));
+  if (elements.quickBtnOled) elements.quickBtnOled.addEventListener('click', () => sendCommand('9'));
+  if (elements.btnQuickRefresh) elements.btnQuickRefresh.addEventListener('click', refreshSensors);
 
   // Terminal Controls
   elements.btnClearTerminal.addEventListener('click', () => {
