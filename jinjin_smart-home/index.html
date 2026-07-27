@@ -122,7 +122,7 @@
           </div>
         </div>
 
-        <!-- 실시간 날씨 카드 -->
+        <!-- 실시간 날씨 카드 (OpenWeatherMap API 연동) -->
         <div class="glass-card">
           <div class="card-header">
             <div class="card-title">
@@ -135,15 +135,15 @@
           </div>
           <div class="weather-display">
             <div>
-              <div class="weather-temp-val"><span id="weather-temp-val">24</span>°C</div>
-              <div style="font-size:0.8rem; color:var(--text-muted);">맑음 (Clear Sky)</div>
+              <div class="weather-temp-val"><span id="weather-temp-val">27</span>°C</div>
+              <div id="weather-desc-val" style="font-size:0.8rem; color:var(--text-muted);">온흐림 (Overcast)</div>
             </div>
             <div class="weather-icon-box">
-              <i class="fa-solid fa-sun"></i>
+              <i id="weather-icon-el" class="fa-solid fa-cloud"></i>
             </div>
           </div>
           <div style="display:flex; justify-content:space-between; font-size:0.8rem; color:var(--text-muted); margin-top:8px; border-top:1px solid var(--border-glass); padding-top:8px;">
-            <span>습도: <strong id="weather-humi-val">55</strong>%</span>
+            <span>습도: <strong id="weather-humi-val">82</strong>%</span>
             <span>위치: 서울 (Seoul)</span>
           </div>
         </div>

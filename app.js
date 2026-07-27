@@ -1,11 +1,16 @@
-/* Copy of jinjin_smart-home/app.js for root workspace entry */
-const GEMINI_API_KEY_FALLBACK = 'AIzaSyDi9Ew17PZ9D4Hi2MHzHJJrwwMGMuOMi0A';
-const GEMINI_DIRECT_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${GEMINI_API_KEY_FALLBACK}`;
+/* ==========================================================================
+   JINJIN SMART HOME DASHBOARD - JAVASCRIPT APPLICATION (app.js)
+   Mobile-First Web Bluetooth (NUS), Realtime Chart.js, ASMR Web Audio, AI Chatbot
+   Integrated with Real Google Gemini API & OpenWeatherMap API via Vercel Serverless
+   Creators: Jina & Yejin
+   ========================================================================== */
 
+// --- BLE Constants (Nordic UART Service) ---
 const BLE_SERVICE_UUID = '6e400001-b5a3-f393-e0a9-e50e24dcca9e';
-const BLE_RX_UUID = '6e400002-b5a3-f393-e0a9-e50e24dcca9e';
-const BLE_TX_UUID = '6e400003-b5a3-f393-e0a9-e50e24dcca9e';
+const BLE_RX_UUID = '6e400002-b5a3-f393-e0a9-e50e24dcca9e'; // Web -> ESP32
+const BLE_TX_UUID = '6e400003-b5a3-f393-e0a9-e50e24dcca9e'; // ESP32 -> Web
 
+// --- Global Application State ---
 let bleDevice = null;
 let rxCharacteristic = null;
 let txCharacteristic = null;
@@ -13,27 +18,35 @@ let isConnected = false;
 let isDemoMode = false;
 let demoInterval = null;
 
-let currentMode = null;
+// App States
+let currentMode = null; // 'sleep', 'wakeup', 'focus', or null (nothing)
 let snoreCount = 0;
 
+// Sleep Session Score Tracking
 let sleepSessionSnoreCount = 0;
 let sleepStartTime = null;
 let lastSleepScore = null;
 
+// ASMR & Focus Timer States
 let isAsmrPlaying = false;
 let asmrAudioCtx = null;
 let asmrGainNode = null;
 let focusTimerInterval = null;
-let focusTimeRemaining = 25 * 60;
+let focusTimeRemaining = 25 * 60; // 25 mins
 
+// Chart.js Instance
 let snoreChart = null;
 const chartDataPoints = [];
 const chartLabels = [];
 const MAX_CHART_POINTS = 15;
 
+// Todo Task Storage Key
 const TODO_STORAGE_KEY = 'jinjin_smarthome_todos';
 let todoItems = [];
 
+// ==========================================================================
+// 1. INITIALIZATION & TAB SWITCHING
+// ==========================================================================
 document.addEventListener('DOMContentLoaded', () => {
   initTabs();
   initChart();
@@ -43,9 +56,10 @@ document.addEventListener('DOMContentLoaded', () => {
   initWeather();
   initASMR();
   initTheme();
-  logSystem('JINJIN 스마트홈 모바일 대시보드가 준비되었습니다. (Vercel 환경 변수 API 프록시 적용)');
+  logSystem('JINJIN 스마트홈 모바일 대시보드가 준비되었습니다. (Vercel 환경 변수 API 보안 프록시 적용)');
 });
 
+// Tab View Switcher (Mobile Bottom Nav: 오늘 하루 / 홈 제어 / 설정)
 function initTabs() {
   const navItems = document.querySelectorAll('.nav-item');
   const tabViews = document.querySelectorAll('.tab-view');
@@ -65,6 +79,9 @@ function initTabs() {
   });
 }
 
+// ==========================================================================
+// 2. THEME SETTINGS & NIGHT MODE TOGGLE (야간 모드 ON / OFF)
+// ==========================================================================
 function initTheme() {
   const toggleTheme = document.getElementById('toggle-theme-mode');
   const savedTheme = localStorage.getItem('jinjin_theme');
@@ -99,6 +116,9 @@ function applyTheme(isDark) {
   }
 }
 
+// ==========================================================================
+// 3. WEB BLUETOOTH NUS LOGIC & DISCONNECTED ALERT
+// ==========================================================================
 function checkConnectionGuard() {
   if (!isConnected && !isDemoMode) {
     alert('⚠️ 스마트홈 기기를 연결해주세요!\n\n우측 상단의 [ESP_JJ] 버튼을 눌러 블루투스로 연결하거나, [데모] 버튼을 눌러 체험 모드를 실행해 주세요.');
@@ -773,20 +793,49 @@ function logSystem(text, type = 'sys') {
   logTerminal(`[${timeStr}] [System]: ${text}`, type);
 }
 
+// ==========================================================================
+// REAL OPENWEATHERMAP API INTEGRATION VIA VERCEL SERVERLESS FUNCTION
+// ==========================================================================
 async function initWeather() {
   try {
-    const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=37.5665&longitude=126.9780&current_weather=true');
+    const res = await fetch('/api/weather?city=Seoul');
     const data = await res.json();
-    if (data && data.current_weather) {
-      const temp = Math.round(data.current_weather.temperature);
-      document.getElementById('weather-temp-val').innerText = temp;
-      document.getElementById('sensor-temp').innerText = `${temp} °C`;
+    if (data && data.main) {
+      const temp = Math.round(data.main.temp);
+      const humi = data.main.humidity;
+      const desc = data.weather && data.weather[0] ? data.weather[0].description : '맑음';
+      
+      const tempEl = document.getElementById('weather-temp-val');
+      const humiEl = document.getElementById('weather-humi-val');
+      const sensorTempEl = document.getElementById('sensor-temp');
+      const sensorHumiEl = document.getElementById('sensor-humi');
+      const descEl = document.getElementById('weather-desc-val');
+      
+      if (tempEl) tempEl.innerText = temp;
+      if (humiEl) humiEl.innerText = humi;
+      if (sensorTempEl) sensorTempEl.innerText = `${temp} °C`;
+      if (sensorHumiEl) sensorHumiEl.innerText = `${humi} %`;
+      if (descEl) descEl.innerText = `${desc} (Seoul)`;
+
+      const iconEl = document.getElementById('weather-icon-el');
+      if (iconEl && data.weather && data.weather[0]) {
+        const mainState = data.weather[0].main.toLowerCase();
+        if (mainState.includes('clear')) iconEl.className = 'fa-solid fa-sun';
+        else if (mainState.includes('cloud')) iconEl.className = 'fa-solid fa-cloud';
+        else if (mainState.includes('rain') || mainState.includes('drizzle')) iconEl.className = 'fa-solid fa-cloud-showers-heavy';
+        else if (mainState.includes('thunder')) iconEl.className = 'fa-solid fa-cloud-bolt';
+        else if (mainState.includes('snow')) iconEl.className = 'fa-solid fa-snowflake';
+      }
+      logSystem(`🌤️ [OpenWeatherMap] 서울 실시간 날씨 수신 완료 (${temp}°C, ${desc}, 습도 ${humi}%)`);
     }
   } catch (e) {
     console.log('Weather API fallback used:', e);
   }
 }
 
+// ==========================================================================
+// 8. REAL GOOGLE GEMINI API AI CHATBOT INTEGRATION VIA SERVERLESS PROXY
+// ==========================================================================
 function initChatbot() {
   const toggleBtn = document.getElementById('btn-chatbot-toggle');
   const modal = document.getElementById('chatbot-modal');
@@ -863,20 +912,6 @@ async function fetchGeminiAIResponse(userPrompt, thinkingBubble) {
       body: JSON.stringify({ prompt: userPrompt })
     });
 
-    if (!response.ok) {
-      const payload = {
-        contents: [{ parts: [{ text: userPrompt }] }],
-        systemInstruction: {
-          parts: [{ text: "당신은 김진아와 오예진의 스마트홈 전용 AI 비서입니다. 친절하고 간결하게 답변하세요." }]
-        }
-      };
-      response = await fetch(GEMINI_DIRECT_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-    }
-
     const data = await response.json();
 
     if (data.candidates && data.candidates[0] && data.candidates[0].content) {
@@ -905,7 +940,8 @@ function fallbackChatResponse(userPrompt, thinkingBubble) {
   } else if (query.includes('기상')) {
     botReply = '기상 모드로 전환했습니다! 좋은 아침이에요 ☀️';
   } else if (query.includes('날씨')) {
-    const temp = document.getElementById('weather-temp-val').innerText;
+    const tempEl = document.getElementById('weather-temp-val');
+    const temp = tempEl ? tempEl.innerText : '27';
     botReply = `현재 서울 실시간 온도는 ${temp}°C 입니다! 🌤️`;
   } else {
     botReply = `스마트홈 AI 비서입니다. "${userPrompt}" 요청을 성공적으로 처리하였습니다! ✨`;
