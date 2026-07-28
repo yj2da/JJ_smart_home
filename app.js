@@ -1028,10 +1028,18 @@ function initControls() {
   });
 
   document.getElementById('btn-stop-alert').addEventListener('click', () => sendBLECommand('A'));
+}
 
+function bootApp() {
   initControls();
   initRoutineScheduler();
   initFocusTimer();
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', bootApp);
+} else {
+  bootApp();
 }
 
 const ENGLISH_WORDS_DB = [
