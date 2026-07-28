@@ -258,9 +258,24 @@ function parseDeviceMessage(msg) {
     }
   }
 
+function syncBlindUI(angle) {
+  const blindSlider = document.getElementById('slider-blind-motor');
+  const valBadge = document.getElementById('blind-angle-val');
+  if (blindSlider) blindSlider.value = angle;
+  if (valBadge) valBadge.innerText = `${angle}°`;
+}
+
   if (/^\d+$/.test(msg)) {
     const cdsVal = parseInt(msg, 10);
-    document.getElementById('sensor-cds').innerText = cdsVal;
+    const cdsEl = document.getElementById('sensor-cds');
+    if (cdsEl) cdsEl.innerText = cdsVal;
+  }
+
+  if (msg.includes('BLIND:') || msg.includes('M:')) {
+    const match = msg.match(/(?:BLIND:|M:)(\d+)/i);
+    if (match) {
+      syncBlindUI(match[1]);
+    }
   }
 
   if (msg.includes('MODE:SLEEP') || msg.includes('Snore Monitor Started')) {
@@ -1156,11 +1171,13 @@ function setModeUI(mode) {
   if (mode === 'sleep') {
     document.getElementById('mode-sleep').classList.add('active');
     focusPanel.style.display = 'none';
-    logSystem('💤 수면 모드 (조용한 코골이 카운팅 진행 중)');
+    syncBlindUI(90);
+    logSystem('💤 수면 모드 (조용한 코골이 카운팅 진행 중 - 블라인드 90° 닫힘)');
   } else if (mode === 'wakeup') {
     document.getElementById('mode-wakeup').classList.add('active');
     focusPanel.style.display = 'none';
-    logSystem('☀️ 기상 모드 전환 (5초 후 일반 모드로 자동 복귀)');
+    syncBlindUI(180);
+    logSystem('☀️ 기상 모드 전환 (블라인드 180° 개방, 5초 후 일반 모드로 자동 복귀)');
 
     wakeupTimeout = setTimeout(() => {
       if (currentMode === 'wakeup') {
@@ -1802,8 +1819,9 @@ function toggleFocusTimer() {
         focusSecondsLeft = focusMinutes * 60;
         updateFocusTimerDisplay();
         
-        // 부저 알람 및 알림
-        sendBLECommand('A');
+        // 부저 알람 연주 (BLE 명령 '5' -> 피에조 부저 알람 멜로디 재생)
+        sendBLECommand('5');
+        playWebRoutineChime();
         logSystem(`🔔 [집중 타이머 완료] 설정한 ${focusMinutes}분 집중 시간이 종료되었습니다! 축하합니다! 🎉`);
         alert(`🔔 [집중 타이머 종료]\n설정한 ${focusMinutes}분 집중 시간이 완료되었습니다!`);
       }

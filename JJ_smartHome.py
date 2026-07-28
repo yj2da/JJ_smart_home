@@ -215,7 +215,10 @@ def update_sensors_and_oled2():
         display2.text("Humi: " + humi_str + " %", 0, 32)
         if h_val >= humi_threshold and humi_alert_enabled:
             display2.text("⚠️ HIGH HUMI!", 0, 48)
+            B.on() # 고습도 경보 시 RGB LED 파란색 불 켜기!
         else:
+            if not mic_active:
+                pass
             display2.text("CDS: " + str(current_cds), 0, 48)
         display2.show()
 
@@ -666,14 +669,15 @@ while True:
             current_blind_angle = 90
             print("☀️ [Auto Blind] 밝아짐 (CDS: " + str(c_val) + ") -> 블라인드 90° 닫기")
 
-    # 2.1 초음파 센서 감지: 3cm 미만 근접 시 기상 모드 자동 활성화 (auto_wakeup_enabled ON 일 때)
+    # 2.1 초음파 센서 감지: 근접(10cm 미만) 시 기상 모드 자동 활성화 (auto_wakeup_enabled ON 일 때)
     if auto_wakeup_enabled:
         dist_cm = get_ultrasonic_distance()
-        if 0.1 <= dist_cm < 3.0:
+        if 0.1 <= dist_cm <= 10.0:
             if ticks_diff(current_ms, last_auto_wakeup_time) > 5000:
                 last_auto_wakeup_time = current_ms
-                print("☀️ [Auto Wakeup] 초음파 센서 3cm 미만 감지 (" + str(round(dist_cm, 1)) + "cm) -> 기상모드 자동 활성화!")
+                print("☀️ [Auto Wakeup] 초음파 센서 근접 감지 (" + str(round(dist_cm, 1)) + "cm) -> 기상모드 자동 활성화!")
                 p.send("AUTO_WAKEUP_TRIGGERED\n")
+                p.send("MODE:WAKEUP\n")
                 mic_active = False
                 snore_count = 0
                 snore_flag = False
