@@ -140,7 +140,7 @@ async function connectBLE() {
     updateStatusUI('connecting', '연결 시도...');
 
     bleDevice = await navigator.bluetooth.requestDevice({
-      filters: [{ name: 'ESP_JJ' }, { namePrefix: 'ESP_' }],
+      acceptAllDevices: true,
       optionalServices: [BLE_SERVICE_UUID]
     });
 
@@ -180,7 +180,7 @@ function onDisconnected() {
 
 async function sendBLECommand(cmd) {
   const timestamp = new Date().toLocaleTimeString();
-  
+
   if (isDemoMode) {
     logTerminal(`[${timestamp}] [TX - DEMO]: ${cmd}`, 'tx');
     handleDemoCommandResponse(cmd);
@@ -1019,7 +1019,7 @@ function updateRandomWord() {
 
 function sendTodoToOLED() {
   const today = new Date();
-  const dateStr = `${today.getFullYear()}.${(today.getMonth()+1).toString().padStart(2,'0')}.${today.getDate().toString().padStart(2,'0')}`;
+  const dateStr = `${today.getFullYear()}.${(today.getMonth() + 1).toString().padStart(2, '0')}.${today.getDate().toString().padStart(2, '0')}`;
   const pending = todoItems.filter(t => !t.completed);
   let todoText = "NONE";
   if (pending.length > 0) {
@@ -1123,13 +1123,13 @@ async function initWeather() {
       const temp = Math.round(data.main.temp);
       const humi = data.main.humidity;
       const desc = data.weather && data.weather[0] ? data.weather[0].description : '온흐림';
-      
+
       const tempEl = document.getElementById('weather-temp-val');
       const humiEl = document.getElementById('weather-humi-val');
       const sensorTempEl = document.getElementById('sensor-temp');
       const sensorHumiEl = document.getElementById('sensor-humi');
       const descEl = document.getElementById('weather-desc-val');
-      
+
       if (tempEl) tempEl.innerText = temp;
       if (humiEl) humiEl.innerText = humi;
       if (sensorTempEl) sensorTempEl.innerText = `${temp} °C`;
