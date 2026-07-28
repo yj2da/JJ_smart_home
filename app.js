@@ -1029,6 +1029,7 @@ function initControls() {
 
   document.getElementById('btn-stop-alert').addEventListener('click', () => sendBLECommand('A'));
 
+  initControls();
   initRoutineScheduler();
   initFocusTimer();
 }
