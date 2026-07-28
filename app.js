@@ -2161,7 +2161,7 @@ const I18N_TRANSLATIONS = {
   },
   en: {
     appName: "JINJIN Smart Home",
-    statusConn: "Disconnected",
+    statusConn: "Offline",
     statusConnSuccess: "Connected",
     demoBtn: "🪄 Demo",
     tabToday: "Today",
@@ -2365,7 +2365,7 @@ function applyLanguage(lang) {
     if (isDemoMode) {
       statusText.innerText = lang === 'en' ? 'Demo Mode' : '데모 모드';
     } else if (!isConnected) {
-      statusText.innerText = lang === 'en' ? 'Disconnected' : '연결 안됨';
+      statusText.innerText = lang === 'en' ? 'Offline' : '연결 안됨';
     }
   }
 
