@@ -233,9 +233,13 @@ window.resetSmartHomeDefaults = resetSmartHomeDefaults;
 async function sendBLECommand(cmd) {
   const timestamp = new Date().toLocaleTimeString();
 
+  // ESP32 BLE 수신 시 패킷 분할 UTF-8 UnicodeError 완전 차단을 위해 순수 ASCII만 송신
+  const cleanCmd = typeof cmd === 'string' ? cmd.replace(/[^\x00-\x7F]/g, "") : cmd;
+  if (!cleanCmd) return false;
+
   if (isDemoMode) {
-    logTerminal(`[${timestamp}] [TX - DEMO]: ${cmd}`, 'tx');
-    handleDemoCommandResponse(cmd);
+    logTerminal(`[${timestamp}] [TX - DEMO]: ${cleanCmd}`, 'tx');
+    handleDemoCommandResponse(cleanCmd);
     return true;
   }
 
@@ -246,12 +250,12 @@ async function sendBLECommand(cmd) {
 
   try {
     const encoder = new TextEncoder();
-    await rxCharacteristic.writeValue(encoder.encode(cmd));
-    logTerminal(`[${timestamp}] [TX]: '${cmd}'`, 'tx');
+    await rxCharacteristic.writeValue(encoder.encode(cleanCmd));
+    logTerminal(`[${timestamp}] [TX]: '${cleanCmd}'`, 'tx');
     return true;
   } catch (error) {
     console.error('Send command error:', error);
-    logSystem(`명령어 전송 에러 ('${cmd}'): ${error.message}`, 'err');
+    logSystem(`명령어 전송 에러 ('${cleanCmd}'): ${error.message}`, 'err');
     return false;
   }
 }
