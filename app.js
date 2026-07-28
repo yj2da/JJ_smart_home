@@ -1522,49 +1522,49 @@ function handleChatSubmit() {
   const query = text.toLowerCase();
   input.value = '';
 
-  if (query.includes('명령어') || query.includes('목록') || query.includes('도움말') || query.includes('기능') || query.includes('list') || query.includes('help') || query.includes('command')) {
-    executeQuickChatAction('LIST', text);
-    return;
+  // 1. 단문 하드웨어 제어 명령어(8자 이하의 정밀 단문)만 퀵 액션 처리
+  if (text.length <= 8) {
+    if (query === '명령어' || query === '목록' || query === '도움말' || query === '기능' || query === 'list' || query === 'help' || query === 'command') {
+      executeQuickChatAction('LIST', text);
+      return;
+    }
+    if (query === '불 켜' || query === '조명 켜' || query === '전등 켜' || query === 'light on') {
+      executeQuickChatAction('LIGHT_ON', text);
+      return;
+    }
+    if (query === '불 꺼' || query === '조명 꺼' || query === '전등 꺼' || query === 'light off') {
+      executeQuickChatAction('LIGHT_OFF', text);
+      return;
+    }
+    if (query === '수면 모드' || query === '수면모드' || query === 'sleep mode') {
+      executeQuickChatAction('SLEEP', text);
+      return;
+    }
+    if (query === '기상 모드' || query === '기상모드' || query === 'wakeup mode') {
+      executeQuickChatAction('WAKEUP', text);
+      return;
+    }
+    if (query === '알람 끄기' || query === '알람 끄' || query === '알람 꺼' || query === 'stop alarm') {
+      executeQuickChatAction('STOP_ALARM', text);
+      return;
+    }
+    if (query === '아기상어' || query === 'baby shark') {
+      executeQuickChatAction('BABY_SHARK', text);
+      return;
+    }
+    if (query === '창문 열기' || query === '블라인드 열기' || query === 'open blind') {
+      executeQuickChatAction('OPEN_BLIND', text);
+      return;
+    }
+    if (query === '창문 닫기' || query === '블라인드 닫기' || query === 'close blind') {
+      executeQuickChatAction('CLOSE_BLIND', text);
+      return;
+    }
   }
 
-  if (query.includes('불 켜') || query.includes('조명 켜') || query.includes('전등 켜') || query.includes('light on') || query.includes('turn on light')) {
-    executeQuickChatAction('LIGHT_ON', text);
-    return;
-  } else if (query.includes('불 꺼') || query.includes('조명 꺼') || query.includes('전등 꺼') || query.includes('light off') || query.includes('turn off light')) {
-    executeQuickChatAction('LIGHT_OFF', text);
-    return;
-  } else if (query.includes('수면') || query.includes('잘자') || query.includes('잠자리') || query.includes('sleep')) {
-    executeQuickChatAction('SLEEP', text);
-    return;
-  } else if (query.includes('기상') || query.includes('일어') || query.includes('모닝') || query.includes('wakeup') || query.includes('wake up')) {
-    executeQuickChatAction('WAKEUP', text);
-    return;
-  } else if (query.includes('알람 끄') || query.includes('소리 끄') || query.includes('알람 꺼') || query.includes('stop alarm') || query.includes('alarm off')) {
-    executeQuickChatAction('STOP_ALARM', text);
-    return;
-  } else if (query.includes('날씨') || query.includes('weather')) {
-    executeQuickChatAction('WEATHER', text);
-    return;
-  } else if (query.includes('상어') || query.includes('아기상어') || query.includes('baby shark') || query.includes('shark')) {
-    executeQuickChatAction('BABY_SHARK', text);
-    return;
-  } else if (query.includes('화면 켜') || query.includes('디스플레이 켜') || query.includes('oled 켜') || query.includes('screen on') || query.includes('oled on')) {
-    executeQuickChatAction('OLED_ON', text);
-    return;
-  } else if (query.includes('화면 꺼') || query.includes('디스플레이 꺼') || query.includes('oled 꺼') || query.includes('screen off') || query.includes('oled off')) {
-    executeQuickChatAction('OLED_OFF', text);
-    return;
-  } else if (query.includes('창문 열') || query.includes('블라인드 열') || query.includes('open blind')) {
-    executeQuickChatAction('OPEN_BLIND', text);
-    return;
-  } else if (query.includes('창문 닫') || query.includes('블라인드 닫') || query.includes('close blind')) {
-    executeQuickChatAction('CLOSE_BLIND', text);
-    return;
-  }
-
-  // 3. 그 외 일반 대화 질문인 경우만 Gemini AI API 호출
+  // 2. 그 외 모든 자연어 질문 및 대화는 100% Gemini AI로 송신
   appendChatBubble(text, 'user');
-  const thinkingBubble = appendChatBubble('🤖 Gemini AI 가 생각 중...', 'bot thinking');
+  const thinkingBubble = appendChatBubble(currentLanguage === 'en' ? '🤖 Gemini AI is thinking...' : '🤖 Gemini AI가 생각 중...', 'bot thinking');
   fetchGeminiAIResponse(text, thinkingBubble);
 }
 

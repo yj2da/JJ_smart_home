@@ -205,8 +205,13 @@ def draw_weather_icon(disp, weather_type):
         
     disp.show()
 
-# 1회성 실내 센서 측정 & OLED 2 화면 갱신 함수
+# 부산 실시간 날씨 데이터 전역 변수
+busan_temp_str = "24"
+busan_humi_str = "58"
+
+# 1회성 실내 센서 측정 & OLED 2 화면 갱신 함수 (OLED에는 부산 실시간 온습도 표시)
 def update_sensors_and_oled2():
+    global busan_temp_str, busan_humi_str
     temp_str = "24"
     humi_str = "55"
     h_val = 55
@@ -226,12 +231,12 @@ def update_sensors_and_oled2():
     p.send("humi : " + humi_str + "\n")
     p.send(str(current_cds) + "\n")
     
-    # OLED 2 디스플레이 갱신 (센서 모드이고 OLED 전원이 ON 일 때만)
+    # OLED 2 디스플레이 갱신 (센서 모드이고 OLED 전원이 ON 일 때 - 부산 온습도 표시)
     if current_display2_mode == 'sensor' and display2 and oled_power_state:
         display2.fill(0)
-        display2.text("=== JINJIN HOME ===", 0, 0)
-        display2.text("Temp: " + temp_str + " C", 0, 16)
-        display2.text("Humi: " + humi_str + " %", 0, 32)
+        display2.text("=== BUSAN WEATHER ===", 0, 0)
+        display2.text("Temp: " + busan_temp_str + " C", 0, 16)
+        display2.text("Humi: " + busan_humi_str + " %", 0, 32)
         if h_val >= humi_threshold and humi_alert_enabled:
             display2.text("⚠️ HIGH HUMI!", 0, 48)
             B.on() # 고습도 경보 시 RGB LED 파란색 불 켜기!
@@ -245,8 +250,9 @@ def update_sensors_and_oled2():
 
 # 날씨 API 파싱 및 OLED 1, 2번 연동 함수
 def update_weather():
+    global busan_temp_str, busan_humi_str
     temp_str = "24"
-    humi_str = "55"
+    humi_str = "58"
     weather_main = "Clouds"
     city_name = CITY
     
@@ -262,6 +268,8 @@ def update_weather():
                 temp_str = str(int(data['main']['temp']))
                 humi_str = str(int(data['main']['humidity']))
                 city_name = data.get('name', CITY)
+                busan_temp_str = temp_str
+                busan_humi_str = humi_str
                 print("API Weather Fetch Success:", weather_main, temp_str + "C", humi_str + "%")
             else:
                 s_res = update_sensors_and_oled2()
@@ -288,10 +296,9 @@ def update_weather():
 
     if display2 and oled_power_state and current_display2_mode == 'sensor':
         display2.fill(0)
-        display2.text("=== WEATHER ===", 0, 0)
-        display2.text("City: " + city_name, 0, 16)
-        display2.text("Temp: " + temp_str + " C", 0, 32)
-        display2.text("Humi: " + humi_str + " %", 0, 48)
+        display2.text("=== BUSAN WEATHER ===", 0, 0)
+        display2.text("Temp: " + busan_temp_str + " C", 0, 16)
+        display2.text("Humi: " + busan_humi_str + " %", 0, 32)
         display2.show()
 
     return temp_str, humi_str, weather_main
