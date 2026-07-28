@@ -834,58 +834,71 @@ function exportAllToGoogleCalendar() {
 window.exportSingleGCal = exportSingleGCal;
 
 function initControls() {
-  document.getElementById('btn-connect').addEventListener('click', connectBLE);
-  document.getElementById('btn-demo').addEventListener('click', () => toggleDemoMode());
+  const btnConnect = document.getElementById('btn-connect');
+  if (btnConnect) btnConnect.addEventListener('click', connectBLE);
 
-  document.getElementById('mode-sleep').addEventListener('click', () => {
-    if (!checkConnectionGuard()) return;
+  const btnDemo = document.getElementById('btn-demo');
+  if (btnDemo) btnDemo.addEventListener('click', () => toggleDemoMode());
 
-    if (currentMode === 'sleep') {
-      sendBLECommand('Q');
-      finishSleepSession();
-    } else {
-      sendBLECommand('S');
-      startSleepSession();
-      setModeUI('sleep');
-    }
-  });
-
-  document.getElementById('mode-wakeup').addEventListener('click', () => {
-    if (!checkConnectionGuard()) return;
-
-    if (currentMode === 'sleep') {
-      sendBLECommand('Q');
-      finishSleepSession();
-    } else if (currentMode === 'wakeup') {
-      setModeUI(null);
-    } else {
-      sendBLECommand('Q');
-      setModeUI('wakeup');
-    }
-  });
-
-  document.getElementById('mode-focus').addEventListener('click', () => {
-    if (currentMode === 'focus') {
-      stopASMR();
-      if (focusTimerInterval) {
-        clearInterval(focusTimerInterval);
-        focusTimerInterval = null;
-        const btnTimer = document.getElementById('btn-start-timer');
-        if (btnTimer) btnTimer.innerText = '시작';
+  const modeSleep = document.getElementById('mode-sleep');
+  if (modeSleep) {
+    modeSleep.addEventListener('click', () => {
+      if (!checkConnectionGuard()) return;
+      if (currentMode === 'sleep') {
+        sendBLECommand('Q');
+        finishSleepSession();
+      } else {
+        sendBLECommand('S');
+        startSleepSession();
+        setModeUI('sleep');
       }
-      setModeUI(null);
-    } else {
-      setModeUI('focus');
-    }
-  });
+    });
+  }
 
-  document.getElementById('toggle-rgb-led').addEventListener('change', (e) => {
-    if (!checkConnectionGuard()) {
-      e.target.checked = !e.target.checked;
-      return;
-    }
-    sendBLECommand(e.target.checked ? '7' : '8');
-  });
+  const modeWakeup = document.getElementById('mode-wakeup');
+  if (modeWakeup) {
+    modeWakeup.addEventListener('click', () => {
+      if (!checkConnectionGuard()) return;
+      if (currentMode === 'sleep') {
+        sendBLECommand('Q');
+        finishSleepSession();
+      } else if (currentMode === 'wakeup') {
+        setModeUI(null);
+      } else {
+        sendBLECommand('Q');
+        setModeUI('wakeup');
+      }
+    });
+  }
+
+  const modeFocus = document.getElementById('mode-focus');
+  if (modeFocus) {
+    modeFocus.addEventListener('click', () => {
+      if (currentMode === 'focus') {
+        stopASMR();
+        if (focusTimerInterval) {
+          clearInterval(focusTimerInterval);
+          focusTimerInterval = null;
+          const btnTimer = document.getElementById('btn-start-timer');
+          if (btnTimer) btnTimer.innerText = '시작';
+        }
+        setModeUI(null);
+      } else {
+        setModeUI('focus');
+      }
+    });
+  }
+
+  const toggleRgbLed = document.getElementById('toggle-rgb-led');
+  if (toggleRgbLed) {
+    toggleRgbLed.addEventListener('change', (e) => {
+      if (!checkConnectionGuard()) {
+        e.target.checked = !e.target.checked;
+        return;
+      }
+      sendBLECommand(e.target.checked ? '7' : '8');
+    });
+  }
 
   // RGB Color Picker & Mood Buttons Event Listeners
   const colorPicker = document.getElementById('rgb-color-picker');
@@ -905,19 +918,23 @@ function initControls() {
   });
 
   const blindSlider = document.getElementById('slider-blind-motor');
-  blindSlider.addEventListener('change', (e) => {
-    if (!checkConnectionGuard()) return;
-    const angle = e.target.value;
-    document.getElementById('blind-angle-val').innerText = `${angle}°`;
-    sendBLECommand(`M${angle}`);
-  });
+  if (blindSlider) {
+    blindSlider.addEventListener('change', (e) => {
+      if (!checkConnectionGuard()) return;
+      const angle = e.target.value;
+      const valBadge = document.getElementById('blind-angle-val');
+      if (valBadge) valBadge.innerText = `${angle}°`;
+      sendBLECommand(`M${angle}`);
+    });
+  }
 
   document.querySelectorAll('.btn-preset').forEach(btn => {
     btn.addEventListener('click', () => {
       if (!checkConnectionGuard()) return;
       const angle = btn.getAttribute('data-angle');
-      blindSlider.value = angle;
-      document.getElementById('blind-angle-val').innerText = `${angle}°`;
+      if (blindSlider) blindSlider.value = angle;
+      const valBadge = document.getElementById('blind-angle-val');
+      if (valBadge) valBadge.innerText = `${angle}°`;
       sendBLECommand(`M${angle}`);
     });
   });
@@ -1007,8 +1024,11 @@ function initControls() {
     });
   }
 
-  document.getElementById('btn-read-cds').addEventListener('click', () => sendBLECommand('2'));
-  document.getElementById('btn-sync-weather').addEventListener('click', () => sendBLECommand('1'));
+  const btnReadCds = document.getElementById('btn-read-cds');
+  if (btnReadCds) btnReadCds.addEventListener('click', () => sendBLECommand('2'));
+
+  const btnSyncWeather = document.getElementById('btn-sync-weather');
+  if (btnSyncWeather) btnSyncWeather.addEventListener('click', () => sendBLECommand('1'));
 
   document.querySelectorAll('.btn-quick-cmd').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -1017,17 +1037,27 @@ function initControls() {
     });
   });
 
-  document.getElementById('btn-send-custom-cmd').addEventListener('click', sendCustomCommand);
-  document.getElementById('custom-cmd-input').addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') sendCustomCommand();
-  });
+  const btnSendCustomCmd = document.getElementById('btn-send-custom-cmd');
+  if (btnSendCustomCmd) btnSendCustomCmd.addEventListener('click', sendCustomCommand);
 
-  document.getElementById('btn-clear-logs').addEventListener('click', () => {
-    document.getElementById('terminal-logs').innerHTML = '';
-    logSystem('로그가 초기화되었습니다.');
-  });
+  const customCmdInput = document.getElementById('custom-cmd-input');
+  if (customCmdInput) {
+    customCmdInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') sendCustomCommand();
+    });
+  }
 
-  document.getElementById('btn-stop-alert').addEventListener('click', () => sendBLECommand('A'));
+  const btnClearLogs = document.getElementById('btn-clear-logs');
+  if (btnClearLogs) {
+    btnClearLogs.addEventListener('click', () => {
+      const logsEl = document.getElementById('terminal-logs');
+      if (logsEl) logsEl.innerHTML = '';
+      logSystem('로그가 초기화되었습니다.');
+    });
+  }
+
+  const btnStopAlert = document.getElementById('btn-stop-alert');
+  if (btnStopAlert) btnStopAlert.addEventListener('click', () => sendBLECommand('A'));
 }
 
 function bootApp() {
