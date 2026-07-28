@@ -1572,7 +1572,7 @@ function appendChatBubble(msg, sender) {
   const container = document.getElementById('chat-messages');
   const div = document.createElement('div');
   div.className = `chat-bubble ${sender}`;
-  if (msg) div.innerText = msg;
+  if (msg) div.innerHTML = msg;
   container.appendChild(div);
   container.scrollTop = container.scrollHeight;
   return div;
@@ -2334,6 +2334,8 @@ function applyLanguage(lang) {
       if (icon) {
         const iconHTML = icon.outerHTML;
         el.innerHTML = `${iconHTML} ${dict[key]}`;
+      } else if (dict[key].includes('<')) {
+        el.innerHTML = dict[key];
       } else {
         el.innerText = dict[key];
       }
