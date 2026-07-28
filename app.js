@@ -170,6 +170,7 @@ async function connectBLE() {
     logSystem(`🎉 기기 (${deviceName}) 연결 성공!`, 'tx');
 
     sendBLECommand('1');
+    syncFullSmartHomeCloudDB();
   } catch (error) {
     console.error('BLE Connection Error:', error);
     logSystem(`BLE 연결 실패: ${error.message || error}`, 'err');
@@ -669,10 +670,18 @@ async function initTodoList() {
   try {
     const res = await fetch('/api/todos');
     const data = await res.json();
-    if (data && data.success && Array.isArray(data.todos)) {
-      todoItems = data.todos;
-      localStorage.setItem(TODO_STORAGE_KEY, JSON.stringify(todoItems));
-      logSystem(`🗄️ [Cloud DB] 서버에서 ${todoItems.length}개의 일정을 로드했습니다.`);
+    if (data && data.success) {
+      if (Array.isArray(data.todos)) {
+        todoItems = data.todos;
+        localStorage.setItem(TODO_STORAGE_KEY, JSON.stringify(todoItems));
+      }
+      if (Array.isArray(data.routines)) {
+        routinesList = data.routines;
+        localStorage.setItem('jj_routines', JSON.stringify(routinesList));
+        if (typeof renderRoutines === 'function') renderRoutines();
+      }
+      const espName = data.espName || 'MPY ESP32';
+      logSystem(`🗄️ [Cloud DB] Vercel DB 데이터 로드 완료 (ESP: '${espName}', 일정 ${todoItems.length}개, 루틴 ${routinesList.length}개)`);
       renderTodoList();
       return;
     }
@@ -713,6 +722,25 @@ function deleteTodo(id) {
   saveAndRenderTodo();
 }
 
+async function syncFullSmartHomeCloudDB() {
+  const currentEspName = (bleDevice && bleDevice.name) ? bleDevice.name : 'MPY ESP32';
+  try {
+    const payload = {
+      todos: todoItems,
+      routines: routinesList,
+      espName: currentEspName
+    };
+    await fetch('/api/todos', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    logSystem(`☁️ [Cloud DB] Vercel DB 동기화 완료 (ESP: '${currentEspName}', 할 일 ${todoItems.length}개, 루틴 ${routinesList.length}개)`);
+  } catch (e) {
+    console.error('Full Cloud DB Sync Error:', e);
+  }
+}
+
 async function saveAndRenderTodo() {
   localStorage.setItem(TODO_STORAGE_KEY, JSON.stringify(todoItems));
   renderTodoList();
@@ -722,16 +750,7 @@ async function saveAndRenderTodo() {
     sendTodoToOLED();
   }
 
-  try {
-    await fetch('/api/todos', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ todos: todoItems })
-    });
-    logSystem(`☁️ [Cloud DB] 할 일 상태(체크/완료 포함 ${todoItems.length}개) DB 동기화 저장 완료.`);
-  } catch (e) {
-    console.error('Cloud DB Sync Error:', e);
-  }
+  await syncFullSmartHomeCloudDB();
 }
 
 function renderTodoList() {
@@ -1483,6 +1502,7 @@ function getDefaultRoutines() {
 function saveRoutines() {
   localStorage.setItem('jj_routines', JSON.stringify(routinesList));
   renderRoutines();
+  syncFullSmartHomeCloudDB();
 }
 
 function renderRoutines() {

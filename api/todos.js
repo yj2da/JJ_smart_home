@@ -1,12 +1,18 @@
 /* ==========================================================================
-   VERCEL SERVERLESS FUNCTION - TODO LIST DATABASE API (/api/todos)
-   Supports Vercel KV, Upstash Redis & REDIS_URL Environment Variables
+   VERCEL SERVERLESS FUNCTION - SMARTHOME CLOUD DATABASE API (/api/todos)
+   Stores Todos, Routines & ESP Device Name in Vercel KV / Upstash Redis
    ========================================================================= */
 
-let localTodoCache = [
-  { id: 1, text: '스마트홈 온습도 체크', completed: true },
-  { id: 2, text: '수면 코골이 분석 모니터링', completed: false }
-];
+let localCache = {
+  todos: [
+    { id: 1, text: '스마트홈 온습도 체크', completed: true },
+    { id: 2, text: '수면 코골이 분석 모니터링', completed: false }
+  ],
+  routines: [
+    { id: 'default_1', time: '08:00', actionKey: 'WAKEUP', enabled: true }
+  ],
+  espName: 'MPY ESP32'
+};
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Credentials', true);
@@ -35,7 +41,6 @@ export default async function handler(req, res) {
                 process.env.STORAGE_KV_REST_API_TOKEN ||
                 process.env.STORAGE_TOKEN;
 
-  // If REDIS_URL or STORAGE_URL is provided as https Upstash REST URL
   if (!kvUrl) {
     if (process.env.REDIS_URL && process.env.REDIS_URL.startsWith('https://')) {
       kvUrl = process.env.REDIS_URL;
@@ -44,11 +49,11 @@ export default async function handler(req, res) {
     }
   }
 
-  // 1. GET Request: Fetch Todos from DB
+  // 1. GET Request: Fetch SmartHome Data (Todos, Routines, ESP Name) from DB
   if (req.method === 'GET') {
     if (kvUrl && kvToken) {
       try {
-        const fetchUrl = `${kvUrl.replace(/\/$/, '')}/get/jinjin_smarthome_todos`;
+        const fetchUrl = `${kvUrl.replace(/\/$/, '')}/get/jinjin_smarthome_data`;
         const apiRes = await fetch(fetchUrl, {
           headers: { Authorization: `Bearer ${kvToken}` }
         });
@@ -56,42 +61,57 @@ export default async function handler(req, res) {
         
         if (data && data.result !== undefined && data.result !== null) {
           let parsedData = typeof data.result === 'string' ? JSON.parse(data.result) : data.result;
-          if (Array.isArray(parsedData)) {
-            return res.status(200).json({ success: true, todos: parsedData, source: 'Vercel_KV' });
+          if (parsedData && typeof parsedData === 'object') {
+            const todos = Array.isArray(parsedData.todos) ? parsedData.todos : (Array.isArray(parsedData) ? parsedData : localCache.todos);
+            const routines = Array.isArray(parsedData.routines) ? parsedData.routines : localCache.routines;
+            const espName = parsedData.espName || localCache.espName;
+
+            localCache = { todos, routines, espName };
+            return res.status(200).json({ success: true, todos, routines, espName, source: 'Vercel_KV' });
           }
         }
       } catch (err) {
         console.error('Vercel KV GET Error:', err);
       }
     }
-    return res.status(200).json({ success: true, todos: localTodoCache, source: 'Local_Cache' });
+    return res.status(200).json({ success: true, ...localCache, source: 'Local_Cache' });
   }
 
-  // 2. POST / PUT Request: Save Todos to DB
+  // 2. POST / PUT Request: Save SmartHome Data to DB
   if (req.method === 'POST' || req.method === 'PUT') {
     try {
-      const { todos } = req.body || {};
-      if (!Array.isArray(todos)) {
-        return res.status(400).json({ error: 'Invalid todos data. Expected array.' });
-      }
+      const { todos, routines, espName } = req.body || {};
 
-      localTodoCache = todos;
+      if (Array.isArray(todos)) localCache.todos = todos;
+      if (Array.isArray(routines)) localCache.routines = routines;
+      if (espName && typeof espName === 'string') localCache.espName = espName;
 
       if (kvUrl && kvToken) {
-        const setUrl = `${kvUrl.replace(/\/$/, '')}/set/jinjin_smarthome_todos`;
+        const setUrl = `${kvUrl.replace(/\/$/, '')}/set/jinjin_smarthome_data`;
         const apiRes = await fetch(setUrl, {
           method: 'POST',
           headers: {
             Authorization: `Bearer ${kvToken}`,
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify(JSON.stringify(todos))
+          body: JSON.stringify(JSON.stringify(localCache))
         });
         const data = await apiRes.json();
-        return res.status(200).json({ success: true, todos, source: 'Vercel_KV', kvResult: data });
+
+        // Save legacy key for backward compatibility
+        if (Array.isArray(todos)) {
+          const legacyUrl = `${kvUrl.replace(/\/$/, '')}/set/jinjin_smarthome_todos`;
+          fetch(legacyUrl, {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${kvToken}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify(JSON.stringify(todos))
+          }).catch(() => {});
+        }
+
+        return res.status(200).json({ success: true, ...localCache, source: 'Vercel_KV', kvResult: data });
       }
 
-      return res.status(200).json({ success: true, todos: localTodoCache, source: 'Local_Cache' });
+      return res.status(200).json({ success: true, ...localCache, source: 'Local_Cache' });
     } catch (err) {
       console.error('Vercel KV POST Error:', err);
       return res.status(500).json({ error: err.message || 'Server Error' });
