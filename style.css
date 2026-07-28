@@ -1230,11 +1230,12 @@ body.light-mode .btn-chat-chip:hover {
    SMARTHOME ROUTINE SCHEDULER UNIFIED UI STYLES
    ========================================================================== */
 .routine-input, .routine-select {
-  width: 100%;
-  max-width: 100%;
-  box-sizing: border-box;
-  display: block;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  display: block !important;
   min-height: 44px;
+  margin: 0 !important;
   padding: 10px 14px;
   border-radius: var(--radius-md);
   border: 1px solid var(--border-glass);
@@ -1248,18 +1249,20 @@ body.light-mode .btn-chat-chip:hover {
 
 /* iOS Safari & WebKit Time Input Overflow Fix */
 input[type="time"].routine-input {
-  width: 100%;
-  max-width: 100%;
-  box-sizing: border-box;
-  display: block;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  display: block !important;
   min-height: 44px;
   line-height: 1.3;
   text-align: center;
+  margin: 0 !important;
 }
 
 input[type="time"].routine-input::-webkit-date-and-time-value {
   text-align: center;
   min-height: 1.3em;
+  margin: 0;
 }
 
 .routine-input:focus, .routine-select:focus {

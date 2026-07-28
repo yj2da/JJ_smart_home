@@ -162,9 +162,9 @@
                   <div style="display:flex; align-items:center; gap:8px;">
                     <!-- 시간 조절 버튼 (- / +) -->
                     <div class="timer-stepper-box">
-                      <button id="btn-timer-minus" class="btn-stepper" title="5분 감수">-</button>
+                      <button id="btn-timer-minus" class="btn-stepper" title="1분 감소">-</button>
                       <span id="focus-timer-display" style="font-family:var(--font-mono); font-weight:700; color:var(--accent-sky); font-size:0.95rem; min-width:44px; text-align:center;">25:00</span>
-                      <button id="btn-timer-plus" class="btn-stepper" title="5분 증가">+</button>
+                      <button id="btn-timer-plus" class="btn-stepper" title="1분 증가">+</button>
                     </div>
 
                     <button id="btn-start-timer" class="btn-glass btn-primary" style="padding:5px 12px; font-size:0.75rem;">시작</button>
@@ -453,10 +453,12 @@
             <div style="font-weight:700; font-size:0.85rem; margin-bottom:8px; color:var(--text-main);">
               <i class="fa-solid fa-plus-circle" style="color:var(--accent-sky);"></i> 새 루틴 추가
             </div>
-            <div style="display:flex; flex-direction:column; gap:10px;">
-              <div>
+            <div style="display:flex; flex-direction:column; gap:10px; width:100%; max-width:100%; box-sizing:border-box;">
+              <div style="width:100%; max-width:100%; box-sizing:border-box;">
                 <label style="font-size:0.78rem; font-weight:700; color:var(--text-muted); display:block; margin-bottom:4px;">시간 선택</label>
-                <input type="time" id="routine-time-input" class="routine-input" value="08:00">
+                <div style="width:100%; max-width:100%; box-sizing:border-box; overflow:hidden; border-radius:var(--radius-md);">
+                  <input type="time" id="routine-time-input" class="routine-input" value="08:00">
+                </div>
               </div>
               <div>
                 <label style="font-size:0.78rem; font-weight:700; color:var(--text-muted); display:block; margin-bottom:4px;">스마트홈 기능</label>

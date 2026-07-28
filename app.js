@@ -1030,6 +1030,7 @@ function initControls() {
   document.getElementById('btn-stop-alert').addEventListener('click', () => sendBLECommand('A'));
 
   initRoutineScheduler();
+  initFocusTimer();
 }
 
 const ENGLISH_WORDS_DB = [
@@ -1602,3 +1603,201 @@ function checkRoutinesTimerEngine() {
 
 window.toggleRoutine = toggleRoutine;
 window.deleteRoutine = deleteRoutine;
+
+// ==========================================================================
+// 집중 모드 1분 단위 타이머 & Web Audio ASMR 빗소리 엔진
+// ==========================================================================
+let focusMinutes = 25;
+let focusSecondsLeft = 25 * 60;
+let focusTimerInterval = null;
+let isFocusTimerRunning = false;
+let isASMRPlaying = false;
+let asmrAudio = null;
+
+function initFocusTimer() {
+  const btnMinus = document.getElementById('btn-timer-minus');
+  const btnPlus = document.getElementById('btn-timer-plus');
+  const btnStart = document.getElementById('btn-start-timer');
+  const btnASMR = document.getElementById('btn-toggle-asmr');
+  const presetBtns = document.querySelectorAll('.btn-preset-min');
+
+  // 1분 감소 (-) 버튼
+  if (btnMinus) {
+    btnMinus.addEventListener('click', () => {
+      if (isFocusTimerRunning) return;
+      if (focusMinutes > 1) {
+        focusMinutes--;
+        focusSecondsLeft = focusMinutes * 60;
+        updateFocusTimerDisplay();
+        logSystem(`🧠 [집중 타이머] 1분 감소 -> ${focusMinutes}분`);
+      }
+    });
+  }
+
+  // 1분 증가 (+) 버튼
+  if (btnPlus) {
+    btnPlus.addEventListener('click', () => {
+      if (isFocusTimerRunning) return;
+      if (focusMinutes < 180) {
+        focusMinutes++;
+        focusSecondsLeft = focusMinutes * 60;
+        updateFocusTimerDisplay();
+        logSystem(`🧠 [집중 타이머] 1분 증가 -> ${focusMinutes}분`);
+      }
+    });
+  }
+
+  // 분 단위 프리셋 버튼 (5, 10, 25, 45, 60분)
+  presetBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (isFocusTimerRunning) return;
+      const min = parseInt(btn.getAttribute('data-min'), 10);
+      if (min) {
+        focusMinutes = min;
+        focusSecondsLeft = focusMinutes * 60;
+        presetBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        updateFocusTimerDisplay();
+        logSystem(`🧠 [집중 타이머] 프리셋 선택 -> ${focusMinutes}분`);
+      }
+    });
+  });
+
+  // 타이머 시작/일시정지 버튼
+  if (btnStart) {
+    btnStart.addEventListener('click', toggleFocusTimer);
+  }
+
+  // ASMR 빗소리 토글 버튼
+  if (btnASMR) {
+    btnASMR.addEventListener('click', toggleASMR);
+  }
+
+  updateFocusTimerDisplay();
+}
+
+function updateFocusTimerDisplay() {
+  const display = document.getElementById('focus-timer-display');
+  if (!display) return;
+  const m = Math.floor(focusSecondsLeft / 60);
+  const s = focusSecondsLeft % 60;
+  display.innerText = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+}
+
+function toggleFocusTimer() {
+  const btnStart = document.getElementById('btn-start-timer');
+
+  if (isFocusTimerRunning) {
+    // 타이머 일시정지
+    clearInterval(focusTimerInterval);
+    focusTimerInterval = null;
+    isFocusTimerRunning = false;
+    if (btnStart) btnStart.innerText = '시작';
+    logSystem('🧠 [집중 타이머] 일시정지 되었습니다.');
+  } else {
+    // 타이머 시작
+    if (focusSecondsLeft <= 0) {
+      focusSecondsLeft = focusMinutes * 60;
+    }
+    isFocusTimerRunning = true;
+    if (btnStart) btnStart.innerText = '정지';
+    logSystem(`🧠 [집중 타이머] ${focusMinutes}분 카운트다운 시작!`);
+
+    focusTimerInterval = setInterval(() => {
+      focusSecondsLeft--;
+      updateFocusTimerDisplay();
+
+      if (focusSecondsLeft <= 0) {
+        clearInterval(focusTimerInterval);
+        focusTimerInterval = null;
+        isFocusTimerRunning = false;
+        if (btnStart) btnStart.innerText = '시작';
+        focusSecondsLeft = focusMinutes * 60;
+        updateFocusTimerDisplay();
+        
+        // 부저 알람 및 알림
+        sendBLECommand('A');
+        logSystem(`🔔 [집중 타이머 완료] 설정한 ${focusMinutes}분 집중 시간이 종료되었습니다! 축하합니다! 🎉`);
+        alert(`🔔 [집중 타이머 종료]\n설정한 ${focusMinutes}분 집중 시간이 완료되었습니다!`);
+      }
+    }, 1000);
+  }
+}
+
+function toggleASMR() {
+  const btnASMR = document.getElementById('btn-toggle-asmr');
+  if (!asmrAudio) {
+    asmrAudio = createRainSoundAudio();
+  }
+
+  if (isASMRPlaying) {
+    if (asmrAudio && asmrAudio.stop) asmrAudio.stop();
+    isASMRPlaying = false;
+    if (btnASMR) btnASMR.innerHTML = '<i class="fa-solid fa-play"></i> 재생';
+    logSystem('🎧 [ASMR 빗소리] 정지되었습니다.');
+  } else {
+    if (asmrAudio && asmrAudio.start) asmrAudio.start();
+    isASMRPlaying = true;
+    if (btnASMR) btnASMR.innerHTML = '<i class="fa-solid fa-pause"></i> 정지';
+    logSystem('🎧 [ASMR 빗소리] 빗소리 백색소음 재생 시작');
+  }
+}
+
+function stopASMR() {
+  const btnASMR = document.getElementById('btn-toggle-asmr');
+  if (isASMRPlaying && asmrAudio && asmrAudio.stop) {
+    asmrAudio.stop();
+    isASMRPlaying = false;
+    if (btnASMR) btnASMR.innerHTML = '<i class="fa-solid fa-play"></i> 재생';
+  }
+}
+
+function createRainSoundAudio() {
+  try {
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const bufferSize = 2 * audioCtx.sampleRate;
+    const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+    const output = noiseBuffer.getChannelData(0);
+
+    let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
+    for (let i = 0; i < bufferSize; i++) {
+      const white = Math.random() * 2 - 1;
+      b0 = 0.99886 * b0 + white * 0.0555179;
+      b1 = 0.99332 * b1 + white * 0.0750759;
+      b2 = 0.96900 * b2 + white * 0.1538520;
+      b3 = 0.86650 * b3 + white * 0.3104856;
+      b4 = 0.55000 * b4 + white * 0.5329522;
+      b5 = -0.7616 * b5 - white * 0.0168980;
+      output[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362) * 0.05;
+      b6 = white * 0.115926;
+    }
+
+    let whiteNoiseSource = null;
+
+    return {
+      start: () => {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        whiteNoiseSource = audioCtx.createBufferSource();
+        whiteNoiseSource.buffer = noiseBuffer;
+        whiteNoiseSource.loop = true;
+        
+        const filter = audioCtx.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(1000, audioCtx.currentTime);
+
+        whiteNoiseSource.connect(filter);
+        filter.connect(audioCtx.destination);
+        whiteNoiseSource.start();
+      },
+      stop: () => {
+        if (whiteNoiseSource) {
+          try { whiteNoiseSource.stop(); } catch(e) {}
+          whiteNoiseSource = null;
+        }
+      }
+    };
+  } catch(e) {
+    console.error('Web Audio Synth Error:', e);
+    return { start: () => {}, stop: () => {} };
+  }
+}
