@@ -1226,3 +1226,122 @@ body.light-mode .btn-chat-chip:hover {
   margin-top: 8px;
 }
 
+/* ==========================================================================
+   SMARTHOME ROUTINE SCHEDULER UNIFIED UI STYLES
+   ========================================================================== */
+.routine-input, .routine-select {
+  width: 100%;
+  padding: 9px 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-glass);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-main);
+  font-size: 0.85rem;
+  font-weight: 600;
+  outline: none;
+  transition: var(--transition-fast);
+}
+
+.routine-input:focus, .routine-select:focus {
+  border-color: var(--accent-purple);
+  box-shadow: 0 0 10px rgba(168, 85, 247, 0.25);
+}
+
+.routine-select option {
+  background: #1E293B;
+  color: #F8FAFC;
+}
+
+body.light-mode .routine-input, 
+body.light-mode .routine-select {
+  background: #FFFFFF;
+  border: 1px solid rgba(203, 213, 225, 0.9);
+  color: #0F172A;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
+}
+
+body.light-mode .routine-select option {
+  background: #FFFFFF;
+  color: #0F172A;
+}
+
+.btn-routine-submit {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  border: none;
+  background: linear-gradient(135deg, #a855f7 0%, #6366f1 100%);
+  color: #FFFFFF;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(168, 85, 247, 0.35);
+  transition: var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.btn-routine-submit:hover, .btn-routine-submit:active {
+  opacity: 0.92;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(168, 85, 247, 0.45);
+}
+
+.routine-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-glass);
+  transition: var(--transition-fast);
+}
+
+body.light-mode .routine-item {
+  background: #FFFFFF;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  box-shadow: 0 3px 10px rgba(15, 23, 42, 0.04);
+}
+
+.routine-time-badge {
+  font-family: var(--font-mono);
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--accent-sky);
+  letter-spacing: 0.5px;
+  background: rgba(56, 189, 248, 0.12);
+  padding: 3px 9px;
+  border-radius: var(--radius-pill);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+}
+
+body.light-mode .routine-time-badge {
+  background: rgba(56, 189, 248, 0.1);
+  color: #0284C7;
+  border-color: rgba(56, 189, 248, 0.3);
+}
+
+.btn-routine-delete {
+  background: rgba(251, 113, 133, 0.1);
+  border: 1px solid rgba(251, 113, 133, 0.2);
+  border-radius: var(--radius-pill);
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-rose);
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.btn-routine-delete:hover {
+  background: rgba(251, 113, 133, 0.25);
+  border-color: var(--accent-rose);
+  transform: scale(1.05);
+}
+

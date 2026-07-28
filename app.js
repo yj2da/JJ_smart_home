@@ -1523,18 +1523,18 @@ function renderRoutines() {
   container.innerHTML = routinesList.map(r => {
     const label = ROUTINE_LABELS[r.actionKey] || r.actionKey;
     return `
-      <div class="sub-panel" style="display:flex; align-items:center; justify-content:space-between; padding:10px 14px; border-radius:var(--radius-md);">
+      <div class="routine-item">
         <div style="display:flex; align-items:center; gap:12px;">
-          <span style="font-family:var(--font-mono); font-size:1.15rem; font-weight:800; color:var(--accent-sky); letter-spacing:0.5px;">${r.time}</span>
-          <span style="font-size:0.85rem; font-weight:700; color:var(--text-main);">${label}</span>
+          <span class="routine-time-badge">${r.time}</span>
+          <span style="font-size:0.88rem; font-weight:700; color:var(--text-main);">${label}</span>
         </div>
         <div style="display:flex; align-items:center; gap:10px;">
           <label class="toggle-switch" style="transform:scale(0.85); margin:0;">
             <input type="checkbox" onchange="toggleRoutine('${r.id}', this.checked)" ${r.enabled ? 'checked' : ''}>
             <span class="slider"></span>
           </label>
-          <button onclick="deleteRoutine('${r.id}')" class="btn-glass" style="padding:4px 8px; color:var(--accent-rose); font-size:0.75rem;" title="삭제">
-            <i class="fa-solid fa-trash"></i>
+          <button onclick="deleteRoutine('${r.id}')" class="btn-routine-delete" title="삭제">
+            <i class="fa-solid fa-trash-can"></i>
           </button>
         </div>
       </div>

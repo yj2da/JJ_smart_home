@@ -457,11 +457,11 @@
               <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
                 <div>
                   <label style="font-size:0.75rem; color:var(--text-muted); display:block; margin-bottom:4px;">시간 선택</label>
-                  <input type="time" id="routine-time-input" value="08:00" style="width:100%; padding:8px 10px; border-radius:var(--radius-md); border:1px solid var(--border-glass); background:rgba(255,255,255,0.08); color:var(--text-main); font-size:0.85rem; font-weight:700;">
+                  <input type="time" id="routine-time-input" class="routine-input" value="08:00">
                 </div>
                 <div>
                   <label style="font-size:0.75rem; color:var(--text-muted); display:block; margin-bottom:4px;">스마트홈 기능</label>
-                  <select id="routine-action-select" style="width:100%; padding:8px 10px; border-radius:var(--radius-md); border:1px solid var(--border-glass); background:rgba(0,0,0,0.3); color:var(--text-main); font-size:0.82rem; font-weight:600;">
+                  <select id="routine-action-select" class="routine-select">
                     <option value="WAKEUP">☀️ 기상 모드 ON</option>
                     <option value="SLEEP">💤 수면 모드 ON</option>
                     <option value="LIGHT_ON">💡 조명 켜기</option>
@@ -474,7 +474,7 @@
                   </select>
                 </div>
               </div>
-              <button id="btn-add-routine" class="btn-primary-glass" style="width:100%; padding:9px; font-size:0.82rem; font-weight:700; margin-top:4px;">
+              <button id="btn-add-routine" class="btn-routine-submit">
                 <i class="fa-solid fa-plus"></i> 루틴 추가하기
               </button>
             </div>
