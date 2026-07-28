@@ -48,18 +48,35 @@ let todoItems = [];
 // ==========================================================================
 // 1. INITIALIZATION & TAB SWITCHING
 // ==========================================================================
-document.addEventListener('DOMContentLoaded', () => {
-  initTabs();
-  initChart();
-  initTodoList();
-  initCalendarIntegration();
-  initControls();
-  initChatbot();
-  initWeather();
-  initASMR();
-  initTheme();
-  logSystem('JINJIN 스마트홈 모바일 대시보드가 준비되었습니다. (야간 모드 OFF 기본 세팅)');
-});
+function bootApp() {
+  const safeRun = (fn, name) => {
+    try {
+      if (typeof fn === 'function') fn();
+    } catch (e) {
+      console.error(`[Boot System Error] ${name}:`, e);
+    }
+  };
+
+  safeRun(initTheme, 'initTheme');
+  safeRun(initTabs, 'initTabs');
+  safeRun(initChart, 'initChart');
+  safeRun(initTodoList, 'initTodoList');
+  safeRun(initCalendarIntegration, 'initCalendarIntegration');
+  safeRun(initControls, 'initControls');
+  safeRun(initChatbot, 'initChatbot');
+  safeRun(initWeather, 'initWeather');
+  safeRun(initASMR, 'initASMR');
+  safeRun(initRoutineScheduler, 'initRoutineScheduler');
+  safeRun(initFocusTimer, 'initFocusTimer');
+
+  logSystem('JINJIN 스마트홈 모바일 대시보드가 준비되었습니다.');
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', bootApp);
+} else {
+  bootApp();
+}
 
 // Tab View Switcher (Mobile Bottom Nav: 오늘 하루 / 홈 제어 / 설정)
 function initTabs() {
@@ -1058,18 +1075,6 @@ function initControls() {
 
   const btnStopAlert = document.getElementById('btn-stop-alert');
   if (btnStopAlert) btnStopAlert.addEventListener('click', () => sendBLECommand('A'));
-}
-
-function bootApp() {
-  initControls();
-  initRoutineScheduler();
-  initFocusTimer();
-}
-
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', bootApp);
-} else {
-  bootApp();
 }
 
 const ENGLISH_WORDS_DB = [
