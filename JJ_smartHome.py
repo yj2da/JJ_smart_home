@@ -38,6 +38,7 @@ snore_flag = False
 
 # 3. 서보 모터 초기화 (Servo Pin 13)
 motor = Servo(pin=13)
+current_blind_angle = -1 # 현재 모터 각도 추적 변수
 
 # 4. 피에조 부저 초기화 (PWM Pin 23)
 buzzer = PWM(Pin(23))
@@ -49,13 +50,9 @@ def play_tone(freq, duration):
         sleep(duration)
         return
     buzzer.freq(freq)
-    buzzer.duty_u16(32768) # 50% duty_u16 (피에조 부저 최대 공성 음량)
+    buzzer.duty_u16(32768) # 50% duty_u16
     sleep(duration)
     buzzer.duty_u16(0)
-
-# 멜로디 주파수 정의 (Hz)
-blindMelody = (524, 659, 784)
-melody1 = (784, 784, 880, 880, 784, 784, 659) # 학교종
 
 # 피에조 부저 음계 정의
 NOTE_C4 = 262
@@ -67,6 +64,18 @@ NOTE_G4 = 392
 NOTE_A4 = 440
 NOTE_B4 = 494
 NOTE_C5 = 523
+
+# 멜로디 주파수 정의
+blindMelody = (524, 659, 784)
+melody1 = (784, 784, 880, 880, 784, 784, 659) # 학교종
+
+# 아기상어 멜로디 (Baby Shark Melody)
+melody2_baby_shark = [
+    (NOTE_D4, 0.25), (NOTE_E4, 0.25), (NOTE_G4, 0.25), (NOTE_G4, 0.25), (NOTE_G4, 0.15), (NOTE_G4, 0.15), (NOTE_G4, 0.25),
+    (NOTE_D4, 0.25), (NOTE_E4, 0.25), (NOTE_G4, 0.25), (NOTE_G4, 0.25), (NOTE_G4, 0.15), (NOTE_G4, 0.15), (NOTE_G4, 0.25),
+    (NOTE_D4, 0.25), (NOTE_E4, 0.25), (NOTE_G4, 0.25), (NOTE_G4, 0.25), (NOTE_G4, 0.15), (NOTE_G4, 0.15), (NOTE_G4, 0.25),
+    (NOTE_G4, 0.25), (NOTE_G4, 0.25), (NOTE_E4, 0.5)
+]
 
 # 5. RGB LED 핀 정의 (빨강 Pin 25, 초록 Pin 26, 파랑 Pin 27)
 R = Pin(25, Pin.OUT)
@@ -109,27 +118,24 @@ except Exception as e:
 
 # OLED 1번 전용: 날씨 상태별 그래픽 아이콘 드로잉 함수
 def draw_weather_icon(disp, weather_type):
-    if not disp:
+    if not disp or not oled_power_state:
         return
     disp.fill(0)
     w = weather_type.lower()
     
     if 'clear' in w or 'sun' in w:
-        # 맑음 (SUNNY) 해 드로잉
         disp.text("WEATHER: SUNNY", 8, 0)
-        disp.fill_rect(54, 24, 20, 20, 1) # 해 중앙
-        disp.line(64, 14, 64, 20, 1) # 상
-        disp.line(64, 48, 64, 54, 1) # 하
-        disp.line(44, 34, 50, 34, 1) # 좌
-        disp.line(78, 34, 84, 34, 1) # 우
-        disp.line(50, 20, 54, 24, 1) # 대각선
+        disp.fill_rect(54, 24, 20, 20, 1)
+        disp.line(64, 14, 64, 20, 1)
+        disp.line(64, 48, 64, 54, 1)
+        disp.line(44, 34, 50, 34, 1)
+        disp.line(78, 34, 84, 34, 1)
+        disp.line(50, 20, 54, 24, 1)
         disp.line(74, 44, 78, 48, 1)
         disp.line(50, 48, 54, 44, 1)
         disp.line(74, 24, 78, 20, 1)
         disp.text("[ CLEAR SKY ]", 12, 54)
-        
     elif 'rain' in w or 'drizzle' in w or 'thunder' in w:
-        # 비 (RAIN) 구름+빗방울 드로잉
         disp.text("WEATHER: RAINING", 0, 0)
         disp.fill_rect(40, 22, 48, 14, 1)
         disp.fill_rect(48, 16, 32, 12, 1)
@@ -137,18 +143,14 @@ def draw_weather_icon(disp, weather_type):
         disp.line(64, 40, 60, 48, 1)
         disp.line(80, 40, 76, 48, 1)
         disp.text("[ HEAVY RAIN ]", 8, 54)
-        
     elif 'snow' in w:
-        # 눈 (SNOW) 눈결정 드로잉
         disp.text("WEATHER: SNOWING", 0, 0)
         disp.line(64, 18, 64, 48, 1)
         disp.line(49, 33, 79, 33, 1)
         disp.line(53, 22, 75, 44, 1)
         disp.line(53, 44, 75, 22, 1)
         disp.text("[ SNOWFALL ]", 16, 54)
-        
     else:
-        # 구름 (CLOUDY / OVERCAST) 드로잉
         disp.text("WEATHER: CLOUDY", 4, 0)
         disp.fill_rect(36, 28, 56, 16, 1)
         disp.fill_rect(46, 20, 36, 14, 1)
@@ -157,7 +159,7 @@ def draw_weather_icon(disp, weather_type):
         
     disp.show()
 
-# 1회성 실내 센서 측정 & OLED 2 화면 갱신 함수 (5초 무한 반복 대신 동기화/기상 시 수동 호출)
+# 1회성 실내 센서 측정 & OLED 2 화면 갱신 함수
 def update_sensors_and_oled2():
     temp_str = "24"
     humi_str = "55"
@@ -178,8 +180,8 @@ def update_sensors_and_oled2():
     p.send("humi : " + humi_str + "\n")
     p.send(str(current_cds) + "\n")
     
-    # OLED 2 디스플레이 갱신 (센서 모드일 때)
-    if current_display2_mode == 'sensor' and display2:
+    # OLED 2 디스플레이 갱신 (센서 모드이고 OLED 전원이 ON 일 때만)
+    if current_display2_mode == 'sensor' and display2 and oled_power_state:
         display2.fill(0)
         display2.text("=== JINJIN HOME ===", 0, 0)
         display2.text("Temp: " + temp_str + " C", 0, 16)
@@ -215,12 +217,10 @@ def update_weather():
         temp_str, humi_str = update_sensors_and_oled2()
         weather_main = "Clear"
 
-    # OLED 1번: 날씨 모양 이쁜 그림/아이콘 출력 (Pin 21, 22)
-    if display1:
+    if display1 and oled_power_state:
         draw_weather_icon(display1, weather_main)
 
-    # OLED 2번: 온도 및 습도 출력 (Pin 4, 16)
-    if display2:
+    if display2 and oled_power_state and current_display2_mode == 'sensor':
         display2.fill(0)
         display2.text("=== WEATHER ===", 0, 0)
         display2.text("City: " + city_name, 0, 16)
@@ -234,11 +234,19 @@ def update_weather():
 ble = bluetooth.BLE()
 p = ble_library.BLESimplePeripheral(ble, "ESP_JJ")
 
-# OLED 화면 상태 관리를 위한 전역 변수 설정
+# OLED 화면 상태 및 캐시 데이터 전역 변수
 current_oled_mode = 'O1'         # 'O1': 날씨/온습도, 'O2': 영단어, 'O3': 날짜/할일
-current_display2_mode = 'sensor' # 'sensor': 온습도/조도 표시, 'kitty': 헬로키티 비트맵 표시
+current_display2_mode = 'sensor' # 'sensor': 온습도/조도, 'word': 영단어문장, 'todo': 할일목록, 'kitty': 키티
+oled_power_state = True          # True: 화면 ON, False: 화면 OFF
 
-# OLED 16자 자동 줄바꿈 헬퍼 함수 (SSD1306 128x64 폰트 핏)
+cached_word_en = "SERENDIPITY"
+cached_word_kr = "뜻밖의 행운"
+cached_word_ex = "Finding joy in unexpected moments."
+
+cached_todo_date = "TODAY"
+cached_todo_text = "Today Fighting!"
+
+# OLED 16자 자동 줄바꿈 헬퍼 함수
 def wrap_text_16(text, max_lines=3):
     clean = ''.join([c if ord(c) < 128 else '' for c in text]).strip()
     words = clean.split(' ')
@@ -259,9 +267,56 @@ def wrap_text_16(text, max_lines=3):
         lines.append(current_line)
     return lines
 
+# 영단어 카드 렌더링 함수
+def render_word_card():
+    if not oled_power_state: return
+    if display1:
+        display1.fill(0)
+        display1.text("== WORD CARD ==", 4, 0)
+        display1.text(cached_word_en[0:16], 0, 24)
+        display1.text("[ VOCABULARY ]", 8, 48)
+        display1.show()
+
+    if display2:
+        display2.fill(0)
+        display2.text("=== EXAMPLE ===", 4, 0)
+        lines = wrap_text_16(cached_word_ex, 3)
+        y_offsets = [18, 32, 46]
+        for idx, line_str in enumerate(lines):
+            display2.text(line_str, 0, y_offsets[idx])
+        display2.show()
+
+# 할 일 카드 렌더링 함수
+def render_todo_card():
+    if not oled_power_state: return
+    if display1:
+        display1.fill(0)
+        display1.text("=== TODAY DATE ===", 0, 0)
+        display1.text(cached_todo_date[0:16], 4, 24)
+        display1.text("[ JINJIN HOME ]", 4, 48)
+        display1.show()
+
+    if display2:
+        display2.fill(0)
+        display2.text("=== TODO LIST ===", 4, 0)
+        clean_todo = ''.join([c if ord(c) < 128 else '' for c in cached_todo_text]).strip()
+        if not clean_todo or clean_todo == "NONE":
+            display2.text("Today Fighting!", 4, 20)
+            display2.text("Good Luck Today!", 0, 36)
+            display2.text("Have a Nice Day!", 0, 50)
+        else:
+            lines = wrap_text_16(clean_todo, 3)
+            y_offsets = [18, 32, 46]
+            for idx, line_str in enumerate(lines):
+                display2.text(line_str, 0, y_offsets[idx])
+        display2.show()
+
 # 블루투스 수신 이벤트 핸들러
 def on_rx(v): 
     global current_oled_mode, current_display2_mode, auto_blind_enabled, humi_alert_enabled, humi_threshold
+    global oled_power_state, cached_word_en, cached_word_kr, cached_word_ex, cached_todo_date, cached_todo_text
+    global mic_active, snore_count, snore_flag, current_blind_angle
+
     if isinstance(v, bytes):
         v = v.decode('utf-8').strip()
     else:
@@ -278,31 +333,48 @@ def on_rx(v):
         p.send("temp : " + temp + "\n")
         p.send("humi : " + humi + "\n")
         
-    # '2' 수신 시: 1번 OLED(TV)에 조도 센서 측정값 1회 표시 및 웹 송신
+    # '2' 수신 시: 1번 OLED에 조도 센서 측정값 1회 표시 및 웹 송신
     if v == '2':
         cds_value = cds.read()
-        if display1:
+        if display1 and oled_power_state:
             display1.fill(0)
             display1.text("CDS: " + str(cds_value), 0, 0)
-            if cds_value > 4000:   
+            if cds_value > 2500:   
                 display1.text("It's dark", 0, 16)
             else:
                 display1.text("It's bright", 0, 16)
             display1.show()
         p.send(str(cds_value) + "\n")
 
-    # '3' / '4' 수신 시: 1번 OLED 화면 켜기 / 끄기
-    if v == '3':
+    # '3' / '4' 또는 'OLED_ON' / 'OLED_OFF' 수신 시: OLED 디스플레이 화면 전원 켜기 / 끄기
+    if v == '3' or v == 'OLED_ON':
+        oled_power_state = True
         if display1: display1.poweron()
-    if v == '4':
+        if display2: display2.poweron()
+        print("📺 [BLE Command] OLED 디스플레이 전원 ON")
+        if current_oled_mode == 'O1': update_weather()
+        elif current_oled_mode == 'O2': render_word_card()
+        elif current_oled_mode == 'O3': render_todo_card()
+
+    if v == '4' or v == 'OLED_OFF':
+        oled_power_state = False
         if display1: display1.poweroff()
+        if display2: display2.poweroff()
+        print("📺 [BLE Command] OLED 디스플레이 전원 OFF")
     
-    # '5' 수신 시: 학교종 멜로디 또는 집중 모드 완료 부저 알람 연주
+    # '5' 수신 시: 학교종 멜로디 연주
     if v == '5' or v == 'F_ALARM':
-        print("🔔 [Piezo Buzzer] 집중 모드 완료 / 알람 멜로디 재생")
+        print("🔔 [Piezo Buzzer] 학교종 멜로디 재생")
         for i in melody1:
             play_tone(i, 0.5)
             sleep(0.05)
+
+    # '6' 또는 'BABY_SHARK' 수신 시: 아기상어 멜로디 연주
+    if v == '6' or v == 'BABY_SHARK' or v == 'shark':
+        print("🦈 [Piezo Buzzer] 아기상어 멜로디 재생")
+        for freq, dur in melody2_baby_shark:
+            play_tone(freq, dur)
+            sleep(0.03)
 
     # '7' / '8' 수신 시: RGB LED 전체 켜기 / 전체 끄기
     if v == '7':
@@ -318,7 +390,7 @@ def on_rx(v):
                 f.readline(); f.readline()
                 data = bytearray(f.read())
             fb = framebuf.FrameBuffer(data, 128, 64, framebuf.MONO_HLSB)
-            if display2:
+            if display2 and oled_power_state:
                 display2.invert(0)
                 display2.fill(0)
                 display2.blit(fb, 0, 0)
@@ -326,49 +398,41 @@ def on_rx(v):
         except Exception as img_err:
             print("Kitty PBM image load error:", img_err)
 
-    # 'S' 수신 시: 수면 모드 시작 -> 불 다 끄기 (RGB OFF) & 코골이 감지 ON
+    # 'S' 수신 시: 수면 모드 시작 -> 불 다 끄기 (RGB OFF) & 블라인드 0° 닫기
     if v == 'S':
-        global mic_active, snore_count, snore_flag
         mic_active = True
         snore_count = 0
         snore_flag = False
-        print("💤 [BLE Command] 수면 모드 시작 -> 불 다 끄기 (RGB ALL OFF)")
+        print("💤 [BLE Command] 수면 모드 시작 -> 불 다 끄기 & 블라인드 0° 닫기")
         p.send("Snore Monitor Started\n")
-        # 수면 모드 시 불 다 끄기
-        R.off()
-        G.off()
-        B.off()
-        if display1:
+        R.off(); G.off(); B.off()
+        motor.move(0)
+        current_blind_angle = 0
+        if display1 and oled_power_state:
             display1.fill(0)
             display1.text("=== SLEEP MODE ===", 0, 0)
-            display1.text("Lights: OFF", 0, 20)
-            display1.text("Snore Monitor: ON", 0, 40)
+            display1.text("Lights: OFF", 0, 16)
+            display1.text("Blind: 0 Closed", 0, 32)
+            display1.text("Snore Monitor: ON", 0, 48)
             display1.show()
 
-    # 'Q' 수신 시: 기상 모드 진입 -> 불 켜기 (RGB ON), 블라인드 걷기 (모터 180°), 1회 센서 동기화
+    # 'Q' 수신 시: 기상 모드 진입 -> 불 켜기 (RGB ON) & 블라인드 180° 개방
     if v == 'Q':
-        global mic_active, snore_count, snore_flag
         mic_active = False
         snore_count = 0
         snore_flag = False
-        buzzer.duty_u16(0) # 알람 소리 정지
+        buzzer.duty_u16(0)
         print("☀️ [BLE Command] 기상 모드 진입 -> 불 켜기 (RGB ON) & 블라인드 180° 개방")
         p.send("Snore Monitor OFF\n")
-        
-        # 기상 모드: 불 켜기 & 블라인드 180도 개방
-        R.on()
-        G.on()
-        B.on()
+        R.on(); G.on(); B.on()
         motor.move(180)
-
-        if display1:
+        current_blind_angle = 180
+        if display1 and oled_power_state:
             display1.fill(0)
             display1.text("=== WAKEUP MODE ===", 0, 0)
-            display1.text("Lights: ON", 0, 20)
-            display1.text("Blind: 180 Open", 0, 40)
+            display1.text("Lights: ON", 0, 16)
+            display1.text("Blind: 180 Open", 0, 32)
             display1.show()
-
-        # 기상 모드 켜면 센서 1회 확인 & 갱신
         update_sensors_and_oled2()
 
     # 'A' 수신 시: 부저 알람 즉시 끄기
@@ -376,77 +440,38 @@ def on_rx(v):
         buzzer.duty_u16(0)
         print("🔔 [BLE Command] 부저 알람 즉시 끄기 완료")
 
-    # 'M'으로 시작하는 서보 모터 직접 제어 (예: M90, M180)
+    # 'M'으로 시작하는 서보 모터 직접 제어 (예: M90, M180, M0)
     if v.startswith('M'):
         try:
             angle = int(v[1:])
             motor.move(angle)
+            current_blind_angle = angle
             print("📐 [BLE Command] 서보 모터 각도:", angle)
         except Exception as e:
             print("Motor angle parse error:", e)
 
-    # 'W:'로 시작하는 오늘의 영단어 & 짧은 활용 문장 수신
+    # 'W:'로 시작하는 오늘의 영단어 & 활용 문장 수신
     if v.startswith('W:'):
         current_oled_mode = 'O2'
+        current_display2_mode = 'word'
         parts = v[2:].split('|')
-        word_en = parts[0] if len(parts) > 0 else "WORD"
-        word_kr = parts[1] if len(parts) > 1 else ""
-        word_ex = parts[2] if len(parts) > 2 else "Finding joy!"
-
-        print("📚 [BLE Command] Word:", word_en, "/ Ex:", word_ex)
-        
-        # OLED 1: 영단어 카드 (16자 핏)
-        if display1:
-            display1.fill(0)
-            display1.text("== WORD CARD ==", 4, 0)
-            display1.text(word_en[0:16], 0, 24)
-            display1.text("[ VOCABULARY ]", 8, 48)
-            display1.show()
-
-        # OLED 2: 짧은 영어 활용 문장 (16자 자동 줄바꿈 핏)
-        if display2:
-            display2.fill(0)
-            display2.text("=== EXAMPLE ===", 4, 0)
-            lines = wrap_text_16(word_ex, 3)
-            y_offsets = [18, 32, 46]
-            for idx, line_str in enumerate(lines):
-                display2.text(line_str, 0, y_offsets[idx])
-            display2.show()
+        cached_word_en = parts[0] if len(parts) > 0 else "WORD"
+        cached_word_kr = parts[1] if len(parts) > 1 else ""
+        cached_word_ex = parts[2] if len(parts) > 2 else "Finding joy!"
+        print("📚 [BLE Command] Word:", cached_word_en, "/ Ex:", cached_word_ex)
+        render_word_card()
 
     # 'T:'로 시작하는 오늘의 날짜 & 할 일 수신
     if v.startswith('T:'):
         current_oled_mode = 'O3'
+        current_display2_mode = 'todo'
         parts = v[2:].split('|')
-        date_str = parts[0] if len(parts) > 0 else "DATE"
-        todo_text = parts[1] if len(parts) > 1 else "NONE"
+        cached_todo_date = parts[0] if len(parts) > 0 else "DATE"
+        cached_todo_text = parts[1] if len(parts) > 1 else "NONE"
+        print("📅 [BLE Command] Date:", cached_todo_date, "/ Todo:", cached_todo_text)
+        render_todo_card()
 
-        print("📅 [BLE Command] Date:", date_str, "/ Todo:", todo_text)
-
-        # OLED 1: 오늘의 날짜 (16자 핏)
-        if display1:
-            display1.fill(0)
-            display1.text("=== TODAY DATE ===", 0, 0)
-            display1.text(date_str, 12, 24)
-            display1.text("[ JINJIN HOME ]", 4, 48)
-            display1.show()
-
-        # OLED 2: 할 일 목록 (할 일 없을 시 "Today Fighting!" 16자 핏 출력)
-        if display2:
-            display2.fill(0)
-            display2.text("=== TODO LIST ===", 4, 0)
-            clean_todo = ''.join([c if ord(c) < 128 else '' for c in todo_text]).strip()
-            if not clean_todo or clean_todo == "NONE" or todo_text == "NONE":
-                display2.text("Today Fighting!", 4, 20)
-                display2.text("Good Luck Today!", 0, 36)
-                display2.text("Have a Nice Day!", 0, 50)
-            else:
-                lines = wrap_text_16(clean_todo, 3)
-                y_offsets = [18, 32, 46]
-                for idx, line_str in enumerate(lines):
-                    display2.text(line_str, 0, y_offsets[idx])
-            display2.show()
-
-    # 'C'로 시작하는 RGB 무드 컬러 지정 (예: C#38BDF8)
+    # 'C'로 시작하는 RGB 무드 컬러 지정
     if v.startswith('C'):
         try:
             color_str = v[2:] if v[1] == '#' else v[1:]
@@ -472,10 +497,14 @@ def on_rx(v):
         update_weather()
     elif v == 'O2':
         print("🖥️ [BLE Command] OLED 모드: 오늘의 영단어")
+        current_display2_mode = 'word'
         current_oled_mode = 'O2'
+        render_word_card()
     elif v == 'O3':
         print("🖥️ [BLE Command] OLED 모드: 오늘 날짜 및 할 일")
+        current_display2_mode = 'todo'
         current_oled_mode = 'O3'
+        render_todo_card()
 
     # 'B_AUTO:1' / 'B_AUTO:0' 조도 센서 기반 모터 자동 개방 옵션
     if v == 'B_AUTO:1':
@@ -508,26 +537,40 @@ p.on_write(on_rx)
 
 print("🚀 JINJIN Smart Home ESP32 Ready! (Manual Sync & Silent Snore Alert Mode)")
 
+last_dht_print_time = ticks_ms()
+
 # 메인 무한 루프
 while True:
+    current_ms = ticks_ms()
+
+    # 0. 10초 주기 온습도 및 조도 쉘 콘솔 로그 출력
+    if ticks_diff(current_ms, last_dht_print_time) >= 10000:
+        last_dht_print_time = current_ms
+        t_str, h_str = update_sensors_and_oled2()
+        c_val = cds.read()
+        print("🌡️ [DHT11 10s Log] 온도: " + t_str + "°C | 습도: " + h_str + "% | 조도(CDS): " + str(c_val))
+
     # 1. 정전식 터치 센서 4핀 실시간 제어
-    if touch1.value(): # 터치 1: 수면 모드 (Sleep Mode)
+    if touch1.value(): # 터치 1: 수면 모드 (Sleep Mode - 불 끄기 & 블라인드 0°)
         if not mic_active:
             mic_active = True
             snore_count = 0
             snore_flag = False
-            print("💤 [Touch 1] 수면 모드 시작 (불 다 끄기)")
+            print("💤 [Touch 1] 수면 모드 시작 (불 다 끄기 & 블라인드 0°)")
             p.send("MODE:SLEEP\n")
             R.off(); G.off(); B.off()
-            if display1:
+            motor.move(0)
+            current_blind_angle = 0
+            if display1 and oled_power_state:
                 display1.fill(0)
                 display1.text("=== SLEEP MODE ===", 0, 0)
-                display1.text("Lights: OFF", 0, 20)
-                display1.text("Snore Monitor: ON", 0, 40)
+                display1.text("Lights: OFF", 0, 16)
+                display1.text("Blind: 0 Closed", 0, 32)
+                display1.text("Snore Monitor: ON", 0, 48)
                 display1.show()
             sleep(0.3)
         
-    elif touch2.value(): # 터치 2: 기상 모드 (Wakeup Mode)
+    elif touch2.value(): # 터치 2: 기상 모드 (Wakeup Mode - 불 켜기 & 블라인드 180°)
         mic_active = False
         snore_count = 0
         snore_flag = False
@@ -536,23 +579,24 @@ while True:
         p.send("MODE:WAKEUP\n")
         R.on(); G.on(); B.on()
         motor.move(180)
-        if display1:
+        current_blind_angle = 180
+        if display1 and oled_power_state:
             display1.fill(0)
             display1.text("=== WAKEUP MODE ===", 0, 0)
-            display1.text("Lights: ON", 0, 20)
-            display1.text("Blind: 180 Open", 0, 40)
+            display1.text("Lights: ON", 0, 16)
+            display1.text("Blind: 180 Open", 0, 32)
             display1.show()
         update_sensors_and_oled2()
         sleep(0.3)
     
-    elif touch3.value(): # 터치 3: 집중 모드 (Focus Mode - 웹 5분 타이머 자동 시작)
+    elif touch3.value(): # 터치 3: 집중 모드
         mic_active = False
         snore_count = 0
         buzzer.duty_u16(0)
-        print("🧠 [Touch 3] 집중 모드 진입 (웹 5분 집중 타이머 & 백색소음 자동 실행)")
+        print("🧠 [Touch 3] 집중 모드 진입")
         p.send("MODE:FOCUS\n")
-        R.on(); G.on(); B.off() # 따뜻한 무드등
-        if display1:
+        R.on(); G.on(); B.off()
+        if display1 and oled_power_state:
             display1.fill(0)
             display1.text("=== FOCUS MODE ===", 0, 0)
             display1.text("Timer: 5 Mins", 0, 20)
@@ -560,7 +604,7 @@ while True:
             display1.show()
         sleep(0.3)
         
-    elif touch4.value(): # 터치 4: 모든 모드 OFF (All Modes OFF)
+    elif touch4.value(): # 터치 4: 모든 모드 OFF
         mic_active = False
         snore_count = 0
         snore_flag = False
@@ -568,25 +612,36 @@ while True:
         print("⚪ [Touch 4] 모든 모드 OFF (스마트홈 대기 상태)")
         p.send("MODE:OFF\n")
         R.off(); G.off(); B.off()
-        if display1:
+        if display1 and oled_power_state:
             display1.fill(0)
             display1.text("=== ALL MODES OFF ===", 0, 0)
             display1.text("JINJIN Smart Home", 0, 24)
             display1.show()
         sleep(0.3)
 
-    # 2. 수면 모드 활성화 시 실시간 코골이 음성 샘플링 & 패턴 분석
+    # 2. 조도 센서 기반 자동 블라인드 제어 (수면 모드가 아닐 때)
+    if auto_blind_enabled and not mic_active:
+        c_val = cds.read()
+        if c_val > 2500 and current_blind_angle != 0:
+            motor.move(0)
+            current_blind_angle = 0
+            print("🌙 [Auto Blind] 어두워짐 (CDS: " + str(c_val) + ") -> 블라인드 0° 닫기")
+        elif c_val < 1500 and current_blind_angle != 180:
+            motor.move(180)
+            current_blind_angle = 180
+            print("☀️ [Auto Blind] 밝아짐 (CDS: " + str(c_val) + ") -> 블라인드 180° 개방")
+
+    # 3. 수면 모드 활성화 시 실시간 코골이 음성 샘플링 & 패턴 분석
     if mic_active:
         min_v = 4095
         max_v = 0
-        for _ in range(150): # 고속 파형 샘플링
+        for _ in range(150):
             v = mic_adc.read()
             if v < min_v: min_v = v
             if v > max_v: max_v = v
         
         sound_level = max_v - min_v
         
-        # 코골이 음량 기준 (60 이상 시 코골이 펄스 카운트)
         if sound_level > 60:
             if not snore_flag:
                 snore_count += 1
@@ -595,20 +650,18 @@ while True:
         else:
             snore_flag = False
 
-        # 코골이 3회 연속 감지 시 (부저 울리지 않고 웹으로 조용히 SNORING_ALERT 카운팅 전송)
         if snore_count >= 3:
-            print("🚨 [SNORING DETECTED] 코골이 3회 감지 (부저 소리 끄고 웹 카운팅만 전송)")
+            print("🚨 [SNORING DETECTED] 코골이 3회 감지")
             p.send("SNORING_ALERT\n")
             
-            if display1:
+            if display1 and oled_power_state:
                 display1.fill(0)
                 display1.text("SNORE DETECTED", 0, 0)
                 display1.text("Counting Sent...", 0, 20)
                 display1.show()
             
-            # 피에조 부저 소리는 울리지 않음 (요청사항 반영)
-            snore_count = 0  # 감지 카운터 초기화
-        elif display1:
+            snore_count = 0
+        elif display1 and oled_power_state:
             display1.fill(0)
             display1.text("Snore Monitor: ON", 0, 0)
             display1.text("Volume: " + str(sound_level), 0, 16)

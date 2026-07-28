@@ -972,6 +972,22 @@ function initControls() {
     btnRefreshWord.addEventListener('click', () => updateRandomWord());
   }
 
+  const btnOledPowerOn = document.getElementById('btn-oled-power-on');
+  if (btnOledPowerOn) {
+    btnOledPowerOn.addEventListener('click', () => {
+      sendBLECommand('3');
+      logSystem('📺 [OLED 전원] 화면 전원을 켰습니다. (OLED ON)');
+    });
+  }
+
+  const btnOledPowerOff = document.getElementById('btn-oled-power-off');
+  if (btnOledPowerOff) {
+    btnOledPowerOff.addEventListener('click', () => {
+      sendBLECommand('4');
+      logSystem('📺 [OLED 전원] 화면 전원을 껐습니다. (OLED OFF)');
+    });
+  }
+
   document.getElementById('btn-read-cds').addEventListener('click', () => sendBLECommand('2'));
   document.getElementById('btn-sync-weather').addEventListener('click', () => sendBLECommand('1'));
 
@@ -1234,6 +1250,12 @@ function executeQuickChatAction(cmdKey, userLabelText) {
   } else if (cmdKey === 'BABY_SHARK') {
     sendBLECommand('6');
     botReply = '피에조 부저로 아기상어 멜로디를 연주합니다! 🦈🎵';
+  } else if (cmdKey === 'OLED_ON') {
+    sendBLECommand('3');
+    botReply = 'OLED 디스플레이 전원을 켰습니다! 📺';
+  } else if (cmdKey === 'OLED_OFF') {
+    sendBLECommand('4');
+    botReply = 'OLED 디스플레이 전원을 껐습니다. 📺';
   } else if (cmdKey === 'OPEN_BLIND') {
     sendBLECommand('M180');
     botReply = '스마트 창문 블라인드를 180° 열었습니다! 🪟';
@@ -1286,6 +1308,12 @@ function handleChatSubmit() {
     return;
   } else if (query.includes('상어') || query.includes('아기상어')) {
     executeQuickChatAction('BABY_SHARK', text);
+    return;
+  } else if (query.includes('화면 켜') || query.includes('디스플레이 켜') || query.includes('oled 켜')) {
+    executeQuickChatAction('OLED_ON', text);
+    return;
+  } else if (query.includes('화면 꺼') || query.includes('디스플레이 꺼') || query.includes('oled 꺼')) {
+    executeQuickChatAction('OLED_OFF', text);
     return;
   } else if (query.includes('창문 열') || query.includes('블라인드 열')) {
     executeQuickChatAction('OPEN_BLIND', text);
