@@ -1231,6 +1231,7 @@ body.light-mode .btn-chat-chip:hover {
    ========================================================================== */
 .routine-input, .routine-select {
   width: 100%;
+  max-width: 100%;
   box-sizing: border-box;
   display: block;
   min-height: 44px;
@@ -1243,6 +1244,22 @@ body.light-mode .btn-chat-chip:hover {
   font-weight: 600;
   outline: none;
   transition: var(--transition-fast);
+}
+
+/* iOS Safari & WebKit Time Input Overflow Fix */
+input[type="time"].routine-input {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  display: block;
+  min-height: 44px;
+  line-height: 1.3;
+  text-align: center;
+}
+
+input[type="time"].routine-input::-webkit-date-and-time-value {
+  text-align: center;
+  min-height: 1.3em;
 }
 
 .routine-input:focus, .routine-select:focus {
