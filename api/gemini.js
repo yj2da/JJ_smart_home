@@ -4,7 +4,6 @@
    ========================================================================== */
 
 export default async function handler(req, res) {
-  // CORS Headers
   res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
@@ -22,7 +21,6 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  // Read API Key from Vercel Environment Variable GEMINI_API_KEY
   const apiKey = process.env.GEMINI_API_KEY || 'AIzaSyDi9Ew17PZ9D4Hi2MHzHJJrwwMGMuOMi0A';
   const { prompt } = req.body || {};
 
@@ -33,19 +31,20 @@ export default async function handler(req, res) {
   try {
     const payload = {
       contents: [
-        { parts: [{ text: prompt }] }
-      ],
-      systemInstruction: {
-        parts: [
-          {
-            text: "당신은 김진아(Jina)와 오예진(Yejin)의 스마트홈 전용 AI 스마트 비서입니다. 한국어로 친절하고 밝고 간결하게 2-3문장으로 답변하세요. 스마트 조명, 수면 모드, 창문 블라인드, 날씨, 멜로디 제어 등의 문의에 상냥하게 응답해주세요."
-          }
-        ]
-      }
+        {
+          parts: [
+            {
+              text: `당신은 김진아(Jina)와 오예진(Yejin)의 JINJIN Smart Home AI 전문 도우미입니다.
+사용자의 질문: "${prompt}"
+한국어로 친절하고 상냥하게 2-3문장으로 간결하고 명확하게 답변해 주세요.`
+            }
+          ]
+        }
+      ]
     };
 
-    const primaryUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`;
-    const backupUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${apiKey}`;
+    const primaryUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+    const backupUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`;
 
     let apiRes = await fetch(primaryUrl, {
       method: 'POST',
@@ -54,6 +53,7 @@ export default async function handler(req, res) {
     });
 
     if (!apiRes.ok) {
+      console.warn("Primary Gemini model failed, calling backup model...");
       apiRes = await fetch(backupUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

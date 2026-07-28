@@ -1,18 +1,27 @@
 /* ==========================================================================
    VERCEL SERVERLESS FUNCTION - SMARTHOME CLOUD DATABASE API (/api/todos)
    Stores Todos, Routines & ESP Device Name in Vercel KV / Upstash Redis
+   Supports Device-Specific DB per ESP Device Name
    ========================================================================= */
 
-let localCache = {
-  todos: [
-    { id: 1, text: '스마트홈 온습도 체크', completed: true },
-    { id: 2, text: '수면 코골이 분석 모니터링', completed: false }
-  ],
-  routines: [
-    { id: 'default_1', time: '08:00', actionKey: 'WAKEUP', enabled: true }
-  ],
-  espName: 'MPY ESP32'
-};
+let localCacheStore = {};
+
+function getESPDefaultData(espName) {
+  const key = String(espName).replace(/[^a-zA-Z0-9_-]/g, '_');
+  if (!localCacheStore[key]) {
+    localCacheStore[key] = {
+      todos: [
+        { id: 101, text: `${espName} 스마트홈 연동 완료`, completed: true },
+        { id: 102, text: '수면 패턴 코골이 분석 모니터링', completed: false }
+      ],
+      routines: [
+        { id: `rt_${key}_1`, time: '08:00', actionKey: 'WAKEUP', enabled: true }
+      ],
+      espName: espName
+    };
+  }
+  return localCacheStore[key];
+}
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Credentials', true);
@@ -54,9 +63,11 @@ export default async function handler(req, res) {
   }
 
   // Extract ESP Device Name from query params or body
-  const rawEspName = req.query.espName || req.body?.espName || localCache.espName || 'MPY_ESP32';
+  const rawEspName = req.query.espName || req.body?.espName || 'MPY ESP32';
   const cleanEspName = String(rawEspName).replace(/[^a-zA-Z0-9_-]/g, '_');
   const dbKey = `jinjin_smarthome_data_${cleanEspName}`;
+
+  const defaultStore = getESPDefaultData(rawEspName);
 
   // 1. GET Request: Fetch SmartHome Data by ESP Name
   if (req.method === 'GET') {
@@ -71,8 +82,8 @@ export default async function handler(req, res) {
         if (data && data.result !== undefined && data.result !== null) {
           let parsedData = typeof data.result === 'string' ? JSON.parse(data.result) : data.result;
           if (parsedData && typeof parsedData === 'object') {
-            const todos = Array.isArray(parsedData.todos) ? parsedData.todos : localCache.todos;
-            const routines = Array.isArray(parsedData.routines) ? parsedData.routines : localCache.routines;
+            const todos = Array.isArray(parsedData.todos) ? parsedData.todos : defaultStore.todos;
+            const routines = Array.isArray(parsedData.routines) ? parsedData.routines : defaultStore.routines;
             const espName = parsedData.espName || rawEspName;
 
             return res.status(200).json({ success: true, todos, routines, espName, source: 'Vercel_KV', dbKey });
@@ -82,7 +93,7 @@ export default async function handler(req, res) {
         console.error('Vercel KV GET Error:', err);
       }
     }
-    return res.status(200).json({ success: true, ...localCache, espName: rawEspName, source: 'Local_Cache', dbKey });
+    return res.status(200).json({ success: true, ...defaultStore, espName: rawEspName, source: 'ESP_Memory_Store', dbKey });
   }
 
   // 2. POST / PUT Request: Save SmartHome Data by ESP Name
@@ -93,11 +104,15 @@ export default async function handler(req, res) {
       const targetDbKey = `jinjin_smarthome_data_${String(targetEspName).replace(/[^a-zA-Z0-9_-]/g, '_')}`;
 
       const saveData = {
-        todos: Array.isArray(todos) ? todos : localCache.todos,
-        routines: Array.isArray(routines) ? routines : localCache.routines,
+        todos: Array.isArray(todos) ? todos : defaultStore.todos,
+        routines: Array.isArray(routines) ? routines : defaultStore.routines,
         espName: targetEspName,
         updatedAt: new Date().toISOString()
       };
+
+      // Update in-memory ESP store
+      const targetKey = String(targetEspName).replace(/[^a-zA-Z0-9_-]/g, '_');
+      localCacheStore[targetKey] = saveData;
 
       if (kvUrl && kvToken) {
         const setUrl = `${kvUrl.replace(/\/$/, '')}/set/${targetDbKey}`;
@@ -114,7 +129,7 @@ export default async function handler(req, res) {
         return res.status(200).json({ success: true, ...saveData, source: 'Vercel_KV', kvResult: data, dbKey: targetDbKey });
       }
 
-      return res.status(200).json({ success: true, ...saveData, source: 'Local_Cache' });
+      return res.status(200).json({ success: true, ...saveData, source: 'ESP_Memory_Store' });
     } catch (err) {
       console.error('Vercel KV POST Error:', err);
       return res.status(500).json({ error: err.message || 'Server Error' });
