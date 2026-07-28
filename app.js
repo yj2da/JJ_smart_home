@@ -1212,7 +1212,8 @@ function updateRandomWord() {
   if (elKr) elKr.innerText = item.kr;
   if (elEx) elEx.innerText = `"${item.ex}"`;
 
-  sendBLECommand(`W:${item.en}|${item.kr}|${item.ex}`);
+  // OLED 디스플레이 렌더링용 BLE 송신 (영문 텍스트 송신으로 인코딩 오류 방지)
+  sendBLECommand(`W:${item.en}|VOCABULARY|${item.ex}`);
   logSystem(`📚 [오늘의 영단어] '${item.en}' (${item.kr}) / 문장: "${item.ex}"`);
 }
 
