@@ -710,13 +710,18 @@ async function saveAndRenderTodo() {
   localStorage.setItem(TODO_STORAGE_KEY, JSON.stringify(todoItems));
   renderTodoList();
 
+  const oledTodoBtn = document.querySelector('.btn-oled-setting[data-mode="todo"]');
+  if (oledTodoBtn && oledTodoBtn.classList.contains('active')) {
+    sendTodoToOLED();
+  }
+
   try {
     await fetch('/api/todos', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ todos: todoItems })
     });
-    logSystem(`☁️ [Cloud DB] 일정 데이터 ${todoItems.length}개 저장 완료.`);
+    logSystem(`☁️ [Cloud DB] 할 일 상태(체크/완료 포함 ${todoItems.length}개) DB 동기화 저장 완료.`);
   } catch (e) {
     console.error('Cloud DB Sync Error:', e);
   }
