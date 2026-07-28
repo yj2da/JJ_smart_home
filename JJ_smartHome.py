@@ -295,11 +295,7 @@ def update_weather():
         draw_weather_icon(display1, weather_main)
 
     if display2 and oled_power_state and current_display2_mode == 'sensor':
-        display2.fill(0)
-        display2.text("=== BUSAN WEATHER ===", 0, 0)
-        display2.text("Temp: " + busan_temp_str + " C", 0, 16)
-        display2.text("Humi: " + busan_humi_str + " %", 0, 32)
-        display2.show()
+        update_sensors_and_oled2()
 
     return temp_str, humi_str, weather_main
 
@@ -583,24 +579,18 @@ def on_rx(v):
         current_oled_mode = 'O3'
         render_todo_card()
 
-    # 'B_WX:'로 시작하는 부산 실시간 OpenWeatherMap API 날씨/온습도 수신
+    # 'B_WX:'로 시작하는 부산 실시간 OpenWeatherMap API 날씨 수신
     if v.startswith('B_WX:'):
         try:
             parts = v[5:].split('|')
-            busan_temp_str = parts[0]
-            busan_humi_str = parts[1]
             weather_main = parts[2] if len(parts) > 2 else "Clear"
-            print("🌤️ [BLE Weather Sync] Busan Temp:", busan_temp_str, "C | Humi:", busan_humi_str, "%")
+            print("🌤️ [BLE Weather Sync] Weather:", weather_main)
 
             if display1 and oled_power_state:
                 draw_weather_icon(display1, weather_main)
 
-            if display2 and oled_power_state:
-                display2.fill(0)
-                display2.text("=== BUSAN WEATHER ===", 0, 0)
-                display2.text("Temp: " + busan_temp_str + " C", 0, 16)
-                display2.text("Humi: " + busan_humi_str + " %", 0, 32)
-                display2.show()
+            if display2 and oled_power_state and current_display2_mode == 'sensor':
+                update_sensors_and_oled2()
         except Exception as wx_err:
             print("B_WX Weather parse error:", wx_err)
 
