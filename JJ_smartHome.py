@@ -238,6 +238,27 @@ p = ble_library.BLESimplePeripheral(ble, "ESP_JJ")
 current_oled_mode = 'O1'         # 'O1': 날씨/온습도, 'O2': 영단어, 'O3': 날짜/할일
 current_display2_mode = 'sensor' # 'sensor': 온습도/조도 표시, 'kitty': 헬로키티 비트맵 표시
 
+# OLED 16자 자동 줄바꿈 헬퍼 함수 (SSD1306 128x64 폰트 핏)
+def wrap_text_16(text, max_lines=3):
+    clean = ''.join([c if ord(c) < 128 else '' for c in text]).strip()
+    words = clean.split(' ')
+    lines = []
+    current_line = ""
+    for w in words:
+        if not w:
+            continue
+        if len(current_line) + len(w) + (1 if current_line else 0) <= 16:
+            current_line += (" " if current_line else "") + w
+        else:
+            if current_line:
+                lines.append(current_line)
+            current_line = w[:16]
+            if len(lines) >= max_lines:
+                break
+    if current_line and len(lines) < max_lines:
+        lines.append(current_line)
+    return lines
+
 # 블루투스 수신 이벤트 핸들러
 def on_rx(v): 
     global current_oled_mode, current_display2_mode, auto_blind_enabled, humi_alert_enabled, humi_threshold
@@ -372,24 +393,24 @@ def on_rx(v):
         word_kr = parts[1] if len(parts) > 1 else ""
         word_ex = parts[2] if len(parts) > 2 else "Finding joy!"
 
-        print("📚 [BLE Command] 영단어:", word_en, "/ 문장:", word_ex)
+        print("📚 [BLE Command] Word:", word_en, "/ Ex:", word_ex)
         
-        # OLED 1: 영단어 표시 (ASCII 안전)
+        # OLED 1: 영단어 카드 (16자 핏)
         if display1:
             display1.fill(0)
-            display1.text("=== WORD CARD ===", 0, 0)
+            display1.text("== WORD CARD ==", 4, 0)
             display1.text(word_en[0:16], 0, 24)
-            display1.text("VOCABULARY", 0, 44)
+            display1.text("[ VOCABULARY ]", 8, 48)
             display1.show()
 
-        # OLED 2: 짧은 영어 활용 문장 표시 (ASCII 안전)
+        # OLED 2: 짧은 영어 활용 문장 (16자 자동 줄바꿈 핏)
         if display2:
             display2.fill(0)
-            display2.text("=== EXAMPLE ===", 0, 0)
-            clean_ex = ''.join([c if ord(c) < 128 else '' for c in word_ex]).strip()
-            if not clean_ex: clean_ex = "Finding joy!"
-            display2.text(clean_ex[0:16], 0, 20)
-            display2.text(clean_ex[16:32], 0, 38)
+            display2.text("=== EXAMPLE ===", 4, 0)
+            lines = wrap_text_16(word_ex, 3)
+            y_offsets = [18, 32, 46]
+            for idx, line_str in enumerate(lines):
+                display2.text(line_str, 0, y_offsets[idx])
             display2.show()
 
     # 'T:'로 시작하는 오늘의 날짜 & 할 일 수신
@@ -399,26 +420,30 @@ def on_rx(v):
         date_str = parts[0] if len(parts) > 0 else "DATE"
         todo_text = parts[1] if len(parts) > 1 else "NONE"
 
-        print("📅 [BLE Command] 날짜:", date_str, "/ 할일:", todo_text)
+        print("📅 [BLE Command] Date:", date_str, "/ Todo:", todo_text)
 
-        # OLED 1: 오늘의 날짜 표시 (ASCII 안전)
+        # OLED 1: 오늘의 날짜 (16자 핏)
         if display1:
             display1.fill(0)
             display1.text("=== TODAY DATE ===", 0, 0)
-            display1.text(date_str, 0, 28)
+            display1.text(date_str, 12, 24)
+            display1.text("[ JINJIN HOME ]", 4, 48)
             display1.show()
 
-        # OLED 2: 할 일 표시 (한글 깨짐 방지 폰트 처리: 할 일 없을 시 "Today Fighting!" 출력)
+        # OLED 2: 할 일 목록 (할 일 없을 시 "Today Fighting!" 16자 핏 출력)
         if display2:
             display2.fill(0)
-            display2.text("=== TODO LIST ===", 0, 0)
+            display2.text("=== TODO LIST ===", 4, 0)
             clean_todo = ''.join([c if ord(c) < 128 else '' for c in todo_text]).strip()
             if not clean_todo or clean_todo == "NONE" or todo_text == "NONE":
-                display2.text("Today Fighting!", 0, 24) # 오늘도 화이팅!
-                display2.text("Good Luck Today!", 0, 42)
+                display2.text("Today Fighting!", 4, 20)
+                display2.text("Good Luck Today!", 0, 36)
+                display2.text("Have a Nice Day!", 0, 50)
             else:
-                display2.text(clean_todo[0:16], 0, 20)
-                display2.text(clean_todo[16:32], 0, 38)
+                lines = wrap_text_16(clean_todo, 3)
+                y_offsets = [18, 32, 46]
+                for idx, line_str in enumerate(lines):
+                    display2.text(line_str, 0, y_offsets[idx])
             display2.show()
 
     # 'C'로 시작하는 RGB 무드 컬러 지정 (예: C#38BDF8)
