@@ -140,13 +140,18 @@ async function connectBLE() {
     updateStatusUI('connecting', '연결 시도...');
 
     bleDevice = await navigator.bluetooth.requestDevice({
-      filters: [{ namePrefix: 'ESP' }, { namePrefix: 'esp' }],
+      filters: [
+        { services: [BLE_SERVICE_UUID] },
+        { namePrefix: 'ESP' },
+        { namePrefix: 'esp' }
+      ],
       optionalServices: [BLE_SERVICE_UUID]
     });
 
     bleDevice.addEventListener('gattserverdisconnected', onDisconnected);
 
-    logSystem(`기기 발견: ${bleDevice.name}. GATT 서버 연결 중...`);
+    const deviceName = bleDevice.name || 'ESP32 (ESP_JJ)';
+    logSystem(`기기 발견: ${deviceName}. GATT 서버 연결 중...`);
     const server = await bleDevice.gatt.connect();
 
     logSystem('BLE NUS 서비스 수신 중...');
@@ -159,8 +164,8 @@ async function connectBLE() {
     txCharacteristic.addEventListener('characteristicvaluechanged', handleBLEData);
 
     isConnected = true;
-    updateStatusUI('connected', 'ESP_JJ 연결됨');
-    logSystem(`🎉 ESP32 (${bleDevice.name}) 연결 성공!`, 'tx');
+    updateStatusUI('connected', `${deviceName} 연결됨`);
+    logSystem(`🎉 ESP32 (${deviceName}) 연결 성공!`, 'tx');
 
     sendBLECommand('1');
   } catch (error) {
