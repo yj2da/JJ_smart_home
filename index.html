@@ -438,6 +438,53 @@
 
       <!-- 3️⃣ TAB 3: 앱 설정 (Settings & Theme) -->
       <section id="view-settings" class="tab-view">
+        <!-- 스마트홈 루틴 세팅기 카드 -->
+        <div class="glass-card">
+          <div class="card-header">
+            <div class="card-title">
+              <i class="fa-solid fa-clock-rotate-left" style="color:var(--accent-purple);"></i>
+              <h3>스마트홈 루틴 세팅기</h3>
+            </div>
+            <span id="routine-count-badge" class="card-subtitle" style="color:var(--accent-purple);">0개 설정됨</span>
+          </div>
+
+          <!-- 루틴 추가 폼 -->
+          <div class="sub-panel" style="margin-bottom:12px;">
+            <div style="font-weight:700; font-size:0.85rem; margin-bottom:8px; color:var(--text-main);">
+              <i class="fa-solid fa-plus-circle" style="color:var(--accent-sky);"></i> 새 루틴 추가
+            </div>
+            <div style="display:flex; flex-direction:column; gap:8px;">
+              <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
+                <div>
+                  <label style="font-size:0.75rem; color:var(--text-muted); display:block; margin-bottom:4px;">시간 선택</label>
+                  <input type="time" id="routine-time-input" value="08:00" style="width:100%; padding:8px 10px; border-radius:var(--radius-md); border:1px solid var(--border-glass); background:rgba(255,255,255,0.08); color:var(--text-main); font-size:0.85rem; font-weight:700;">
+                </div>
+                <div>
+                  <label style="font-size:0.75rem; color:var(--text-muted); display:block; margin-bottom:4px;">스마트홈 기능</label>
+                  <select id="routine-action-select" style="width:100%; padding:8px 10px; border-radius:var(--radius-md); border:1px solid var(--border-glass); background:rgba(0,0,0,0.3); color:var(--text-main); font-size:0.82rem; font-weight:600;">
+                    <option value="WAKEUP">☀️ 기상 모드 ON</option>
+                    <option value="SLEEP">💤 수면 모드 ON</option>
+                    <option value="LIGHT_ON">💡 조명 켜기</option>
+                    <option value="LIGHT_OFF">🌙 조명 끄기</option>
+                    <option value="OPEN_BLIND">🪟 블라인드 열기 (180°)</option>
+                    <option value="CLOSE_BLIND">🪟 블라인드 닫기 (90°)</option>
+                    <option value="OLED_ON">📺 OLED 화면 켜기</option>
+                    <option value="OLED_OFF">📺 OLED 화면 끄기</option>
+                    <option value="BABY_SHARK">🦈 아기상어 노래</option>
+                  </select>
+                </div>
+              </div>
+              <button id="btn-add-routine" class="btn-primary-glass" style="width:100%; padding:9px; font-size:0.82rem; font-weight:700; margin-top:4px;">
+                <i class="fa-solid fa-plus"></i> 루틴 추가하기
+              </button>
+            </div>
+          </div>
+
+          <!-- 루틴 목록 컨테이너 -->
+          <div id="routine-list-container" style="display:flex; flex-direction:column; gap:8px;">
+          </div>
+        </div>
+
         <!-- 테마 설정 카드 (야간 모드 ON / OFF) -->
         <div class="glass-card">
           <div class="card-header">

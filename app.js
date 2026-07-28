@@ -1009,6 +1009,8 @@ function initControls() {
   });
 
   document.getElementById('btn-stop-alert').addEventListener('click', () => sendBLECommand('A'));
+
+  initRoutineScheduler();
 }
 
 const ENGLISH_WORDS_DB = [
@@ -1057,10 +1059,17 @@ function sendTodoToOLED() {
   logSystem(`📅 [오늘의 할 일] 날짜: ${dateStr}, OLED 표시: ${todoText === 'NONE' ? 'Today Fighting!' : todoText}`);
 }
 
+let wakeupTimeout = null;
+
 function setModeUI(mode) {
   currentMode = mode;
   document.querySelectorAll('.mode-card-btn').forEach(b => b.classList.remove('active'));
   const focusPanel = document.getElementById('focus-panel');
+
+  if (wakeupTimeout) {
+    clearTimeout(wakeupTimeout);
+    wakeupTimeout = null;
+  }
 
   if (mode === 'sleep') {
     document.getElementById('mode-sleep').classList.add('active');
@@ -1069,7 +1078,14 @@ function setModeUI(mode) {
   } else if (mode === 'wakeup') {
     document.getElementById('mode-wakeup').classList.add('active');
     focusPanel.style.display = 'none';
-    logSystem('☀️ 기상 모드 전환');
+    logSystem('☀️ 기상 모드 전환 (5초 후 일반 모드로 자동 복귀)');
+
+    wakeupTimeout = setTimeout(() => {
+      if (currentMode === 'wakeup') {
+        setModeUI(null);
+        logSystem('☀️ [기상 모드] 5초 경과로 일반 모드(버튼 OFF)로 복귀했습니다.');
+      }
+    }, 5000);
   } else if (mode === 'focus') {
     document.getElementById('mode-focus').classList.add('active');
     focusPanel.style.display = 'block';
@@ -1413,3 +1429,156 @@ function fallbackChatResponse(userPrompt, thinkingBubble) {
   thinkingBubble.innerText = botReply;
   thinkingBubble.classList.remove('thinking');
 }
+
+// ==========================================================================
+// 스마트홈 루틴 세팅기 (Routine Scheduler Engine)
+// ==========================================================================
+const ROUTINE_LABELS = {
+  'WAKEUP': '☀️ 기상 모드 ON',
+  'SLEEP': '💤 수면 모드 ON',
+  'LIGHT_ON': '💡 조명 켜기',
+  'LIGHT_OFF': '🌙 조명 끄기',
+  'OPEN_BLIND': '🪟 블라인드 열기 (180°)',
+  'CLOSE_BLIND': '🪟 블라인드 닫기 (90°)',
+  'OLED_ON': '📺 OLED 화면 켜기',
+  'OLED_OFF': '📺 OLED 화면 끄기',
+  'BABY_SHARK': '🦈 아기상어 노래'
+};
+
+let routinesList = [];
+let lastTriggeredMinutes = '';
+
+function initRoutineScheduler() {
+  loadRoutines();
+
+  const btnAdd = document.getElementById('btn-add-routine');
+  if (btnAdd) {
+    btnAdd.addEventListener('click', addRoutine);
+  }
+
+  // 10초 주기 루틴 시간 자동 체크 엔진 실행
+  setInterval(checkRoutinesTimerEngine, 10000);
+}
+
+function loadRoutines() {
+  const saved = localStorage.getItem('jj_routines');
+  if (saved) {
+    try {
+      routinesList = JSON.parse(saved);
+    } catch (e) {
+      routinesList = getDefaultRoutines();
+    }
+  } else {
+    routinesList = getDefaultRoutines();
+  }
+  renderRoutines();
+}
+
+function getDefaultRoutines() {
+  return [
+    { id: 'default_1', time: '08:00', actionKey: 'WAKEUP', enabled: true }
+  ];
+}
+
+function saveRoutines() {
+  localStorage.setItem('jj_routines', JSON.stringify(routinesList));
+  renderRoutines();
+}
+
+function renderRoutines() {
+  const container = document.getElementById('routine-list-container');
+  const badge = document.getElementById('routine-count-badge');
+  if (!container) return;
+
+  const activeCount = routinesList.filter(r => r.enabled).length;
+  if (badge) {
+    badge.innerText = `${activeCount}개 활성화됨`;
+  }
+
+  if (routinesList.length === 0) {
+    container.innerHTML = `<div style="text-align:center; padding:16px; color:var(--text-muted); font-size:0.8rem; font-weight:600;">등록된 스마트홈 루틴이 없습니다.<br>위에서 시각과 기능을 선택 후 [+ 루틴 추가]를 눌러보세요!</div>`;
+    return;
+  }
+
+  container.innerHTML = routinesList.map(r => {
+    const label = ROUTINE_LABELS[r.actionKey] || r.actionKey;
+    return `
+      <div class="sub-panel" style="display:flex; align-items:center; justify-content:space-between; padding:10px 14px; border-radius:var(--radius-md);">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <span style="font-family:var(--font-mono); font-size:1.15rem; font-weight:800; color:var(--accent-sky); letter-spacing:0.5px;">${r.time}</span>
+          <span style="font-size:0.85rem; font-weight:700; color:var(--text-main);">${label}</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <label class="toggle-switch" style="transform:scale(0.85); margin:0;">
+            <input type="checkbox" onchange="toggleRoutine('${r.id}', this.checked)" ${r.enabled ? 'checked' : ''}>
+            <span class="slider"></span>
+          </label>
+          <button onclick="deleteRoutine('${r.id}')" class="btn-glass" style="padding:4px 8px; color:var(--accent-rose); font-size:0.75rem;" title="삭제">
+            <i class="fa-solid fa-trash"></i>
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function addRoutine() {
+  const timeInput = document.getElementById('routine-time-input');
+  const actionSelect = document.getElementById('routine-action-select');
+  if (!timeInput || !actionSelect) return;
+
+  const time = timeInput.value.trim();
+  const actionKey = actionSelect.value;
+  if (!time) {
+    alert('시간을 선택해주세요!');
+    return;
+  }
+
+  const newRoutine = {
+    id: 'rt_' + Date.now(),
+    time: time,
+    actionKey: actionKey,
+    enabled: true
+  };
+
+  routinesList.push(newRoutine);
+  saveRoutines();
+  const label = ROUTINE_LABELS[actionKey] || actionKey;
+  logSystem(`⏰ [루틴 추가] 시각: ${time} -> ${label} (등록 완료)`);
+}
+
+function toggleRoutine(id, enabled) {
+  const item = routinesList.find(r => r.id === id);
+  if (item) {
+    item.enabled = enabled;
+    saveRoutines();
+    logSystem(`⏰ [루틴 변경] ${item.time} 루틴이 ${enabled ? '활성화' : '비활성화'} 되었습니다.`);
+  }
+}
+
+function deleteRoutine(id) {
+  routinesList = routinesList.filter(r => r.id !== id);
+  saveRoutines();
+  logSystem('⏰ [루틴 삭제] 선택한 루틴이 삭제되었습니다.');
+}
+
+function checkRoutinesTimerEngine() {
+  const now = new Date();
+  const hh = now.getHours().toString().padStart(2, '0');
+  const mm = now.getMinutes().toString().padStart(2, '0');
+  const currentTimeStr = `${hh}:${mm}`;
+
+  if (lastTriggeredMinutes === currentTimeStr) return;
+
+  routinesList.forEach(r => {
+    if (r.enabled && r.time === currentTimeStr) {
+      lastTriggeredMinutes = currentTimeStr;
+      const label = ROUTINE_LABELS[r.actionKey] || r.actionKey;
+      logSystem(`⏰ [루틴 자동 실행] 시각: ${r.time} -> ${label}`);
+      executeQuickChatAction(r.actionKey, `루틴: ${label}`);
+    }
+  });
+}
+
+window.toggleRoutine = toggleRoutine;
+window.deleteRoutine = deleteRoutine;
