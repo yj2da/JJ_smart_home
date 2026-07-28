@@ -694,7 +694,7 @@ input:checked + .slider:before {
 
 /* Terminal Log Console */
 .terminal-logs {
-  background: rgba(0, 0, 0, 0.5);
+  background: #000000 !important;
   border: 1px solid var(--border-glass);
   border-radius: var(--radius-md);
   padding: 12px;
@@ -705,6 +705,12 @@ input:checked + .slider:before {
   display: flex;
   flex-direction: column;
   gap: 4px;
+}
+
+body.light-mode .terminal-logs {
+  background: #FFFFFF !important;
+  border-color: rgba(0, 0, 0, 0.15) !important;
+  color: #0F172A !important;
 }
 
 .log-entry {
@@ -1257,28 +1263,35 @@ body.light-mode .btn-chat-chip:hover {
   transition: var(--transition-fast);
 }
 
-/* iOS Safari & WebKit Time Input Overflow Fix */
+/* iOS Safari & WebKit Time Input Vertical Center Fix */
 input[type="time"].routine-input {
   width: 100% !important;
   max-width: 100% !important;
   box-sizing: border-box !important;
-  display: block !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
   height: 42px !important;
   min-height: 42px !important;
-  line-height: 1.2 !important;
+  line-height: 42px !important;
   text-align: center !important;
   margin: 0 !important;
-  padding: 4px 8px !important;
-  font-size: 0.85rem !important;
+  padding: 0 8px !important;
+  font-size: 0.88rem !important;
+  vertical-align: middle !important;
   -webkit-appearance: none !important;
   appearance: none !important;
 }
 
 input[type="time"].routine-input::-webkit-date-and-time-value {
   text-align: center !important;
-  min-height: 1.2em !important;
-  margin: 0 !important;
+  min-height: 42px !important;
+  line-height: 42px !important;
+  margin: auto 0 !important;
   padding: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
 
 .routine-input:focus, .routine-select:focus {

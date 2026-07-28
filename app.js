@@ -187,6 +187,9 @@ async function connectBLE() {
     updateStatusUI('connected', `${deviceName} 연결됨`);
     logSystem(`🎉 기기 (${deviceName}) 연결 성공!`, 'tx');
 
+    // ESP 연결 시 스플래시 화면 재출력 및 클라우드 DB 적용
+    showSplashScreen(`⚡ ${deviceName} 연결됨! DB 적용 중...`, 1800);
+
     sendBLECommand('1');
     await fetchCloudDBByESPName(deviceName);
   } catch (error) {
@@ -2133,6 +2136,28 @@ function initLanguage() {
   });
 }
 
+function showSplashScreen(message, durationMs = 1800) {
+  const splash = document.getElementById('splash-screen');
+  const subText = document.querySelector('.splash-sub');
+  if (!splash) return;
+
+  if (subText && message) {
+    subText.innerText = message;
+  }
+
+  splash.style.display = 'flex';
+  splash.style.opacity = '1';
+  splash.style.pointerEvents = 'auto';
+
+  setTimeout(() => {
+    splash.style.opacity = '0';
+    splash.style.pointerEvents = 'none';
+    setTimeout(() => {
+      splash.style.display = 'none';
+    }, 400);
+  }, durationMs);
+}
+
 function applyLanguage(lang) {
   currentLanguage = lang;
   try {
@@ -2152,12 +2177,19 @@ function applyLanguage(lang) {
   document.querySelectorAll('[data-i18n]').forEach(el => {
     const key = el.getAttribute('data-i18n');
     if (dict[key]) {
-      el.innerText = dict[key];
+      const icon = el.querySelector('i');
+      if (icon) {
+        const iconHTML = icon.outerHTML;
+        el.innerHTML = `${iconHTML} ${dict[key]}`;
+      } else {
+        el.innerText = dict[key];
+      }
     }
   });
 
   logSystem(`🌐 [언어 변경] 앱 표시 언어가 '${lang === 'en' ? 'English' : '한국어'}'(으)로 설정되었습니다.`);
 }
 
+window.showSplashScreen = showSplashScreen;
 window.initLanguage = initLanguage;
 window.applyLanguage = applyLanguage;
