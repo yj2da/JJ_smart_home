@@ -365,35 +365,34 @@ def on_rx(v):
             print("Motor angle parse error:", e)
 
     # 'W:'로 시작하는 오늘의 영단어 & 짧은 활용 문장 수신
-    # 규격: W:영단어|뜻|활용문장  (예: W:SERENDIPITY|뜻밖의 행운|Finding joy in unexpected moments.)
     if v.startswith('W:'):
         current_oled_mode = 'O2'
         parts = v[2:].split('|')
         word_en = parts[0] if len(parts) > 0 else "WORD"
         word_kr = parts[1] if len(parts) > 1 else ""
-        word_ex = parts[2] if len(parts) > 2 else "Keep going!"
+        word_ex = parts[2] if len(parts) > 2 else "Finding joy!"
 
         print("📚 [BLE Command] 영단어:", word_en, "/ 문장:", word_ex)
         
-        # OLED 1: 영단어 & 한글 뜻 표시
+        # OLED 1: 영단어 표시 (ASCII 안전)
         if display1:
             display1.fill(0)
             display1.text("=== WORD CARD ===", 0, 0)
-            display1.text(word_en[0:16], 0, 20)
-            display1.text(word_kr[0:16], 0, 40)
+            display1.text(word_en[0:16], 0, 24)
+            display1.text("VOCABULARY", 0, 44)
             display1.show()
 
-        # OLED 2: 짧은 활용 문장 표시
+        # OLED 2: 짧은 영어 활용 문장 표시 (ASCII 안전)
         if display2:
             display2.fill(0)
             display2.text("=== EXAMPLE ===", 0, 0)
-            # 16자 단위 줄바꿈
-            display2.text(word_ex[0:16], 0, 20)
-            display2.text(word_ex[16:32], 0, 38)
+            clean_ex = ''.join([c if ord(c) < 128 else '' for c in word_ex]).strip()
+            if not clean_ex: clean_ex = "Finding joy!"
+            display2.text(clean_ex[0:16], 0, 20)
+            display2.text(clean_ex[16:32], 0, 38)
             display2.show()
 
     # 'T:'로 시작하는 오늘의 날짜 & 할 일 수신
-    # 규격: T:날짜|할일내용 (예: T:2026.07.28|스마트홈 센서 테스트)
     if v.startswith('T:'):
         current_oled_mode = 'O3'
         parts = v[2:].split('|')
@@ -402,22 +401,24 @@ def on_rx(v):
 
         print("📅 [BLE Command] 날짜:", date_str, "/ 할일:", todo_text)
 
-        # OLED 1: 오늘의 날짜 표시
+        # OLED 1: 오늘의 날짜 표시 (ASCII 안전)
         if display1:
             display1.fill(0)
             display1.text("=== TODAY DATE ===", 0, 0)
             display1.text(date_str, 0, 28)
             display1.show()
 
-        # OLED 2: 할 일 표시 (할 일 없을 경우 "오늘도 화이팅!" 출력)
+        # OLED 2: 할 일 표시 (한글 깨짐 방지 폰트 처리: 할 일 없을 시 "Today Fighting!" 출력)
         if display2:
             display2.fill(0)
             display2.text("=== TODO LIST ===", 0, 0)
-            if todo_text == "NONE" or todo_text == "" or todo_text == "undefined":
-                display2.text("Today Fighting!", 0, 28) # 오늘도 화이팅!
+            clean_todo = ''.join([c if ord(c) < 128 else '' for c in todo_text]).strip()
+            if not clean_todo or clean_todo == "NONE" or todo_text == "NONE":
+                display2.text("Today Fighting!", 0, 24) # 오늘도 화이팅!
+                display2.text("Good Luck Today!", 0, 42)
             else:
-                display2.text(todo_text[0:16], 0, 20)
-                display2.text(todo_text[16:32], 0, 38)
+                display2.text(clean_todo[0:16], 0, 20)
+                display2.text(clean_todo[16:32], 0, 38)
             display2.show()
 
     # 'C'로 시작하는 RGB 무드 컬러 지정 (예: C#38BDF8)

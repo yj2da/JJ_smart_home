@@ -1018,10 +1018,15 @@ function sendTodoToOLED() {
   const pending = todoItems.filter(t => !t.completed);
   let todoText = "NONE";
   if (pending.length > 0) {
-    todoText = pending.map(t => t.text).join(", ");
+    const asciiOnly = pending[0].text.replace(/[^\x00-\x7F]/g, "").trim();
+    if (asciiOnly.length >= 2) {
+      todoText = asciiOnly;
+    } else {
+      todoText = `${pending.length} Tasks Pending`;
+    }
   }
   sendBLECommand(`T:${dateStr}|${todoText}`);
-  logSystem(`📅 [오늘의 할 일] 날짜: ${dateStr}, 할 일: ${todoText === 'NONE' ? '오늘도 화이팅!' : todoText}`);
+  logSystem(`📅 [오늘의 할 일] 날짜: ${dateStr}, OLED 표시: ${todoText === 'NONE' ? 'Today Fighting!' : todoText}`);
 }
 
 function setModeUI(mode) {
