@@ -33,12 +33,16 @@ export default async function handler(req, res) {
               process.env.UPSTASH_REDIS_REST_URL ||
               process.env.STORAGE_REST_API_URL ||
               process.env.STORAGE_KV_REST_API_URL ||
+              process.env.STORAGE_REDIS_REST_URL ||
+              process.env.REDIS_REST_API_URL ||
               process.env.STORAGE_URL;
 
   let kvToken = process.env.KV_REST_API_TOKEN ||
                 process.env.UPSTASH_REDIS_REST_TOKEN ||
                 process.env.STORAGE_REST_API_TOKEN ||
                 process.env.STORAGE_KV_REST_API_TOKEN ||
+                process.env.STORAGE_REDIS_REST_TOKEN ||
+                process.env.REDIS_REST_API_TOKEN ||
                 process.env.STORAGE_TOKEN;
 
   if (!kvUrl) {
