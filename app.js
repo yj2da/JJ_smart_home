@@ -1645,6 +1645,27 @@ function deleteRoutine(id) {
   logSystem('⏰ [루틴 삭제] 선택한 루틴이 삭제되었습니다.');
 }
 
+function playWebRoutineChime() {
+  try {
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6 (Do-Mi-Sol-Do)
+    notes.forEach((freq, idx) => {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0.12, audioCtx.currentTime + idx * 0.14);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + idx * 0.14 + 0.35);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start(audioCtx.currentTime + idx * 0.14);
+      osc.stop(audioCtx.currentTime + idx * 0.14 + 0.35);
+    });
+  } catch(e) {
+    console.error('Web Routine Chime Error:', e);
+  }
+}
+
 function checkRoutinesTimerEngine() {
   const now = new Date();
   const hh = now.getHours().toString().padStart(2, '0');
@@ -1657,8 +1678,14 @@ function checkRoutinesTimerEngine() {
     if (r.enabled && r.time === currentTimeStr) {
       lastTriggeredMinutes = currentTimeStr;
       const label = ROUTINE_LABELS[r.actionKey] || r.actionKey;
-      logSystem(`⏰ [루틴 자동 실행] 시각: ${r.time} -> ${label}`);
-      executeQuickChatAction(r.actionKey, `루틴: ${label}`);
+      logSystem(`⏰ [루틴 자동 실행] 시각: ${r.time} -> ${label} (피에조 부저 멜로디 재생 🔔)`);
+      
+      // 1. 피에조 부저 상쾌한 멜로디 전송 (BLE Command '5') & 브라우저 알림음 연주
+      sendBLECommand('5');
+      playWebRoutineChime();
+
+      // 2. 루틴 스마트홈 동작 실행 (기상모드, 조명, 블라인드 등)
+      executeQuickChatAction(r.actionKey, `⏰ 루틴 실행(${r.time}): ${label}`);
     }
   });
 }

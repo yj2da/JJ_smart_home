@@ -91,6 +91,11 @@ NOTE_C5 = 523
 blindMelody = (524, 659, 784)
 melody1 = (784, 784, 880, 880, 784, 784, 659) # 학교종
 
+# 루틴 시간 실행 시 상쾌한 피에조 부저 멜로디 (도-미-솔-도)
+routine_chime_melody = [
+    (NOTE_C4, 0.15), (NOTE_E4, 0.15), (NOTE_G4, 0.15), (NOTE_C5, 0.35)
+]
+
 # 아기상어 멜로디 (Baby Shark Melody)
 melody2_baby_shark = [
     (NOTE_D4, 0.25), (NOTE_E4, 0.25), (NOTE_G4, 0.25), (NOTE_G4, 0.25), (NOTE_G4, 0.15), (NOTE_G4, 0.15), (NOTE_G4, 0.25),
@@ -384,12 +389,12 @@ def on_rx(v):
         if display2: display2.poweroff()
         print("📺 [BLE Command] OLED 디스플레이 전원 OFF")
     
-    # '5' 수신 시: 학교종 멜로디 연주
-    if v == '5' or v == 'F_ALARM':
-        print("🔔 [Piezo Buzzer] 학교종 멜로디 재생")
-        for i in melody1:
-            play_tone(i, 0.5)
-            sleep(0.05)
+    # '5' 또는 'R_CHIME' 수신 시: 상쾌한 기상/루틴 알림 피에조 부저 멜로디 연주
+    if v == '5' or v == 'F_ALARM' or v == 'R_CHIME':
+        print("🔔 [Piezo Buzzer] 루틴 알림 상쾌한 멜로디 재생 (도-미-솔-도)")
+        for freq, dur in routine_chime_melody:
+            play_tone(freq, dur)
+            sleep(0.04)
 
     # '6' 또는 'BABY_SHARK' 수신 시: 아기상어 멜로디 연주
     if v == '6' or v == 'BABY_SHARK' or v == 'shark':
