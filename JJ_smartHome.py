@@ -250,21 +250,38 @@ def update_weather():
     weather_main = "Clouds"
     city_name = CITY
     
-    try:
-        import urequests
-        res = urequests.get(WEATHER_URL)
-        data = res.json()
-        res.close()
-        
-        weather_main = data['weather'][0]['main']
-        temp_str = str(int(data['main']['temp']))
-        humi_str = str(int(data['main']['humidity']))
-        city_name = data['name']
-        print("API Weather Fetch Success:", weather_main, temp_str + "C", humi_str + "%")
-    except Exception as e:
-        print("Weather API Fallback Check:", e)
-        temp_str, humi_str = update_sensors_and_oled2()
-        weather_main = "Clear"
+    if WEATHER_URL:
+        try:
+            import urequests
+            res = urequests.get(WEATHER_URL)
+            data = res.json()
+            res.close()
+            
+            if isinstance(data, dict) and 'weather' in data and 'main' in data:
+                weather_main = data['weather'][0]['main']
+                temp_str = str(int(data['main']['temp']))
+                humi_str = str(int(data['main']['humidity']))
+                city_name = data.get('name', CITY)
+                print("API Weather Fetch Success:", weather_main, temp_str + "C", humi_str + "%")
+            else:
+                s_res = update_sensors_and_oled2()
+                if isinstance(s_res, tuple) and len(s_res) >= 2:
+                    temp_str, humi_str = s_res[0], s_res[1]
+        except Exception as e:
+            print("Weather API Fallback Check:", e)
+            try:
+                s_res = update_sensors_and_oled2()
+                if isinstance(s_res, tuple) and len(s_res) >= 2:
+                    temp_str, humi_str = s_res[0], s_res[1]
+            except Exception as dht_err:
+                print("DHT Fallback Error:", dht_err)
+    else:
+        try:
+            s_res = update_sensors_and_oled2()
+            if isinstance(s_res, tuple) and len(s_res) >= 2:
+                temp_str, humi_str = s_res[0], s_res[1]
+        except Exception as dht_err:
+            print("DHT Fallback Error:", dht_err)
 
     if display1 and oled_power_state:
         draw_weather_icon(display1, weather_main)

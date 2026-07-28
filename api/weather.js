@@ -18,11 +18,13 @@ export default async function handler(req, res) {
     return;
   }
 
-  const apiKey = process.env.OPENWEATHER_API_KEY;
+  // Sanitize Vercel Environment Variable (strip whitespace/quotes)
+  const rawKey = process.env.OPENWEATHER_API_KEY || '';
+  const apiKey = rawKey.replace(/^["']|["']$/g, '').trim();
   const city = req.query.city || 'Busan';
 
   // 1. If Vercel Environment Variable OPENWEATHER_API_KEY is configured, call live API
-  if (apiKey && apiKey.trim() !== '') {
+  if (apiKey && apiKey.length > 5) {
     try {
       const url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${apiKey}&units=metric&lang=kr`;
       const apiRes = await fetch(url);

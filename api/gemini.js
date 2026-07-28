@@ -27,10 +27,12 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Prompt is required' });
   }
 
-  const apiKey = process.env.GEMINI_API_KEY;
+  // Sanitize Vercel Environment Variable (strip whitespace/quotes)
+  const rawKey = process.env.GEMINI_API_KEY || '';
+  const apiKey = rawKey.replace(/^["']|["']$/g, '').trim();
 
   // 1. If Vercel Environment Variable GEMINI_API_KEY is configured, call Google Gemini API
-  if (apiKey && apiKey.trim() !== '') {
+  if (apiKey && apiKey.length > 5) {
     try {
       const payload = {
         contents: [
@@ -53,12 +55,15 @@ export default async function handler(req, res) {
         body: JSON.stringify(payload)
       });
 
-      if (apiRes.ok) {
-        const data = await apiRes.json();
+      const data = await apiRes.json();
+
+      if (apiRes.ok && data.candidates && data.candidates[0] && data.candidates[0].content) {
         return res.status(200).json(data);
+      } else {
+        console.warn("Live Gemini API response notice:", data);
       }
     } catch (e) {
-      console.warn("Live Gemini API call failed, switching to Smart AI Engine:", e);
+      console.warn("Live Gemini API fetch failed, switching to Smart AI Engine:", e);
     }
   }
 
@@ -81,7 +86,7 @@ export default async function handler(req, res) {
   } else if (query.includes("수면") || query.includes("잠") || query.includes("피곤") || query.includes("잘자")) {
     aiText = "💤 오늘 하루도 정말 고생 많으셨어요! 수면 모드를 켜시면 마이크 센서가 코골이를 실시간 감지해 최적의 수면 질을 기록해 드립니다. 🌙";
   } else if (query.includes("기상") || query.includes("모닝") || query.includes("일어")) {
-    aiText = "☀️ 기분 좋은 아침입니다! 기상 모드를 통해 브라인드가 열리고 밝은 조명이 켜졌어요. 오늘도 멋진 하루 보내세요! 🎈";
+    aiText = "☀️ 기분 좋은 아침입니다! 기상 모드를 통해 블라인드가 열리고 밝은 조명이 켜졌어요. 오늘도 멋진 하루 보내세요! 🎈";
   } else if (query.includes("누구") || query.includes("이름") || query.includes("제작")) {
     aiText = "🤖 저는 김진아(Jina)와 오예진(Yejin) 님이 제작한 JINJIN Smart Home 전용 AI 스마트 비서입니다! ✨";
   } else {
