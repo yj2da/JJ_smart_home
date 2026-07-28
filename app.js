@@ -1257,8 +1257,8 @@ function executeQuickChatAction(cmdKey, userLabelText) {
     sendBLECommand('4');
     botReply = 'OLED 디스플레이 전원을 껐습니다. 📺';
   } else if (cmdKey === 'OPEN_BLIND') {
-    sendBLECommand('M270');
-    botReply = '스마트 창문 블라인드를 270° 열었습니다! 🪟';
+    sendBLECommand('M180');
+    botReply = '스마트 창문 블라인드를 180° 열었습니다! 🪟';
   } else if (cmdKey === 'CLOSE_BLIND') {
     sendBLECommand('M90');
     botReply = '스마트 창문 블라인드를 90° 닫았습니다! 🪟';
@@ -1361,7 +1361,7 @@ function executeHardwarePattern(text) {
   } else if (query.includes('키티') || query.includes('고양이')) {
     sendBLECommand('9');
   } else if (query.includes('블라인드 열') || query.includes('창문 열')) {
-    sendBLECommand('M270');
+    sendBLECommand('M180');
   } else if (query.includes('블라인드 닫') || query.includes('창문 닫')) {
     sendBLECommand('M90');
   }
