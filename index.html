@@ -89,9 +89,9 @@
           <div class="card-header">
             <div class="card-title">
               <i class="fa-solid fa-star" style="color:var(--accent-amber);"></i>
-              <h3>수면 분석 점수</h3>
+              <h3 data-i18n="sleepAnalysisTitle">수면 분석 점수</h3>
             </div>
-            <span id="last-sleep-time-badge" class="card-subtitle">측정 대기</span>
+            <span id="last-sleep-time-badge" class="card-subtitle" data-i18n="scoreWaiting">측정 대기</span>
           </div>
           <div style="display:flex; align-items:center; justify-content:space-around; padding:6px 0;">
             <div class="score-circle-badge" style="margin:0;">
@@ -99,12 +99,12 @@
               <span class="score-label">SCORE</span>
             </div>
             <div style="display:flex; flex-direction:column; gap:6px;">
-              <div id="card-sleep-grade" style="font-weight:700; font-size:0.95rem; color:var(--text-main);">수면 모드를 켜서 점수를 체크하세요!</div>
+              <div id="card-sleep-grade" style="font-weight:700; font-size:0.95rem; color:var(--text-main);" data-i18n="sleepPromptMsg">수면 모드를 켜서 점수를 체크하세요!</div>
               <div style="font-size:0.75rem; color:var(--text-muted);">
-                코골이 감지: <strong id="card-sleep-snore-count" style="color:var(--accent-rose);">0회</strong>
+                <span data-i18n="snoreDetectCount">코골이 감지:</span> <strong id="card-sleep-snore-count" style="color:var(--accent-rose);">0회</strong>
               </div>
               <div style="font-size:0.75rem; color:var(--text-muted);">
-                수면 시간: <strong id="card-sleep-duration">--</strong>
+                <span data-i18n="sleepDuration">수면 시간:</span> <strong id="card-sleep-duration">--</strong>
               </div>
             </div>
           </div>
@@ -115,24 +115,24 @@
           <div class="card-header">
             <div class="card-title">
               <i class="fa-solid fa-moon"></i>
-              <h3>스마트 모드 설정</h3>
+              <h3 data-i18n="smartModeTitle">스마트 모드 설정</h3>
             </div>
           </div>
           <div class="mode-grid-mobile">
             <div id="mode-sleep" class="mode-card-btn sleep">
               <i class="fa-solid fa-bed"></i>
-              <div class="mode-title">수면 모드</div>
-              <div class="card-subtitle">코골이 분석</div>
+              <div class="mode-title" data-i18n="modeSleepTitle">수면 모드</div>
+              <div class="card-subtitle" data-i18n="modeSleepSub">코골이 분석</div>
             </div>
             <div id="mode-wakeup" class="mode-card-btn wakeup">
               <i class="fa-solid fa-sun"></i>
-              <div class="mode-title">기상 모드</div>
-              <div class="card-subtitle">모닝 알람</div>
+              <div class="mode-title" data-i18n="modeWakeupTitle">기상 모드</div>
+              <div class="card-subtitle" data-i18n="modeWakeupSub">모닝 알람</div>
             </div>
             <div id="mode-focus" class="mode-card-btn focus">
               <i class="fa-solid fa-brain"></i>
-              <div class="mode-title">집중 모드</div>
-              <div class="card-subtitle">ASMR 빗소리</div>
+              <div class="mode-title" data-i18n="modeFocusTitle">집중 모드</div>
+              <div class="card-subtitle" data-i18n="modeFocusSub">ASMR 빗소리</div>
             </div>
           </div>
 
@@ -256,7 +256,7 @@
           <div class="card-header">
             <div class="card-title">
               <i id="led-icon-el" class="fa-solid fa-lightbulb"></i>
-              <h3>스마트 조명 (RGB LED)</h3>
+              <h3 data-i18n="lightingControlTitle">스마트 조명 (RGB LED)</h3>
             </div>
             <div style="display:flex; align-items:center; gap:6px;">
               <div id="led-color-preview" style="width:14px; height:14px; border-radius:50%; background:#38BDF8; display:inline-block; border:1px solid var(--border-glass); box-shadow:0 0 8px #38BDF8;"></div>
@@ -265,8 +265,8 @@
           </div>
           <div class="control-switch-card" style="margin-bottom:12px;">
             <div>
-              <div style="font-weight:700; font-size:0.9rem;">전등 Switch</div>
-              <div style="font-size:0.75rem; color:var(--text-muted);">스마트 조명 ON / OFF</div>
+              <div style="font-weight:700; font-size:0.9rem;" data-i18n="rgbLedToggleLabel">전등 메인 스위치 (RGB LED)</div>
+              <div style="font-size:0.75rem; color:var(--text-muted);" data-i18n="rgbLedToggleSub">스마트홈 메인 전등 ON / OFF</div>
             </div>
             <label class="toggle-switch">
               <input type="checkbox" id="toggle-rgb-led">
@@ -277,9 +277,9 @@
           <!-- 무드 맞춤 RGB 컬러 팔레트 & 커스텀 컬러 피커 -->
           <div style="border-top:1px solid var(--border-glass); padding-top:12px;">
             <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
-              <span style="font-size:0.8rem; font-weight:700; color:var(--text-main);"><i class="fa-solid fa-palette" style="color:var(--accent-purple);"></i> 무드 컬러 선택</span>
+              <span style="font-size:0.8rem; font-weight:700; color:var(--text-main);" data-i18n="moodPresetLabel"><i class="fa-solid fa-palette" style="color:var(--accent-purple);"></i> 무드 컬러 선택</span>
               <div style="display:flex; align-items:center; gap:6px;">
-                <label for="rgb-color-picker" style="font-size:0.72rem; color:var(--text-muted); cursor:pointer;">직접 선택</label>
+                <label for="rgb-color-picker" style="font-size:0.72rem; color:var(--text-muted); cursor:pointer;" data-i18n="colorPickerLabel">직접 선택</label>
                 <input type="color" id="rgb-color-picker" value="#38BDF8" style="width:26px; height:26px; border:none; background:none; cursor:pointer; border-radius:6px;">
               </div>
             </div>
@@ -301,22 +301,22 @@
           <div class="card-header">
             <div class="card-title">
               <i class="fa-solid fa-blinds"></i>
-              <h3>스마트 창문 블라인드</h3>
+              <h3 data-i18n="blindTitle">스마트 창문 블라인드</h3>
             </div>
             <span id="blind-angle-val" class="angle-badge">90°</span>
           </div>
           <div style="padding:6px 0;">
             <input type="range" id="slider-blind-motor" class="glass-range" min="90" max="180" value="90">
             <div class="range-presets">
-              <button class="btn-preset" data-angle="90">90° 닫힘</button>
-              <button class="btn-preset" data-angle="135">135° 절반</button>
-              <button class="btn-preset" data-angle="180">180° 열림</button>
+              <button class="btn-preset" data-angle="90" data-i18n="presetClose">90° 닫기</button>
+              <button class="btn-preset" data-angle="135" data-i18n="presetHalf">135° 반개</button>
+              <button class="btn-preset" data-angle="180" data-i18n="presetOpen">180° 열기</button>
             </div>
           </div>
           <div class="control-switch-card" style="margin-top:10px; border-top:1px solid var(--border-glass); padding-top:10px;">
             <div>
-              <div style="font-weight:700; font-size:0.9rem;">어두우면 블라인드 열기</div>
-              <div style="font-size:0.75rem; color:var(--text-muted);">조도 센서 감지 시 자동 개방</div>
+              <div style="font-weight:700; font-size:0.9rem;" data-i18n="autoBlindLabel">어두우면 블라인드 열기</div>
+              <div style="font-size:0.75rem; color:var(--text-muted);" data-i18n="autoBlindSub">조도 센서 감지 시 자동 개방</div>
             </div>
             <label class="toggle-switch">
               <input type="checkbox" id="toggle-auto-blind">
@@ -330,14 +330,14 @@
           <div class="card-header">
             <div class="card-title">
               <i class="fa-solid fa-droplet-slash" style="color:var(--accent-rose);"></i>
-              <h3>스마트 습도 경보</h3>
+              <h3 data-i18n="humiAlertTitle">스마트 습도 경보</h3>
             </div>
             <span id="humi-alert-status" class="card-subtitle" style="color:var(--accent-green);">정상 (쾌적)</span>
           </div>
           <div class="control-switch-card" style="margin-bottom:12px;">
             <div>
-              <div style="font-weight:700; font-size:0.9rem;">고습도 전등 안내 경보</div>
-              <div style="font-size:0.75rem; color:var(--text-muted);">습도 높을 시 스마트 조명으로 경고 점등</div>
+              <div style="font-weight:700; font-size:0.9rem;" data-i18n="humiAlertLabel">고습도 감지 경보</div>
+              <div style="font-size:0.75rem; color:var(--text-muted);" data-i18n="humiAlertSub">습도 높을 시 스마트 조명으로 경고 점등</div>
             </div>
             <label class="toggle-switch">
               <input type="checkbox" id="toggle-humi-alert">
@@ -347,7 +347,7 @@
           
           <div style="border-top:1px solid var(--border-glass); padding-top:10px;">
             <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.78rem; color:var(--text-muted); margin-bottom:6px;">
-              <span>경보 작동 기준 습도</span>
+              <span data-i18n="humiThresholdLabel">경보 작동 기준 습도</span>
               <strong id="humi-threshold-val" style="color:var(--accent-rose); font-size:0.9rem;">70% 이상</strong>
             </div>
             <input type="range" id="slider-humi-threshold" class="glass-range" min="50" max="90" value="70">
@@ -359,21 +359,21 @@
           <div class="card-header">
             <div class="card-title">
               <i class="fa-solid fa-desktop" style="color:var(--accent-sky);"></i>
-              <h3>스마트 디스플레이 세팅</h3>
+              <h3 data-i18n="smartOledTitle">스마트 디스플레이 세팅</h3>
             </div>
             <span id="oled-mode-badge" class="card-subtitle" style="color:var(--accent-sky);">날씨/미세먼지</span>
           </div>
           <div style="display:flex; flex-direction:column; gap:8px;">
             <button class="btn-oled-setting active" data-mode="weather" style="display:flex; align-items:center; justify-content:space-between; width:100%; padding:10px 14px; border-radius:var(--radius-md); border:1px solid var(--border-glass); background:rgba(255,255,255,0.05); color:var(--text-main); font-size:0.82rem; cursor:pointer; transition:var(--transition-fast);">
-              <span style="display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-cloud-sun-rain" style="color:var(--accent-amber); font-size:1rem;"></i> 실시간 미세먼지 / 날씨 정보</span>
+              <span style="display:flex; align-items:center; gap:8px;" data-i18n="oledModeWeather"><i class="fa-solid fa-cloud-sun-rain" style="color:var(--accent-amber); font-size:1rem;"></i> 실시간 미세먼지 / 날씨 정보</span>
               <i class="fa-solid fa-chevron-right" style="font-size:0.7rem; color:var(--text-muted);"></i>
             </button>
             <button class="btn-oled-setting" data-mode="word" style="display:flex; align-items:center; justify-content:space-between; width:100%; padding:10px 14px; border-radius:var(--radius-md); border:1px solid var(--border-glass); background:rgba(255,255,255,0.05); color:var(--text-main); font-size:0.82rem; cursor:pointer; transition:var(--transition-fast);">
-              <span style="display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-book-bookmark" style="color:var(--accent-purple); font-size:1rem;"></i> 오늘의 영단어 / 암기 카드</span>
+              <span style="display:flex; align-items:center; gap:8px;" data-i18n="oledModeWord"><i class="fa-solid fa-book-bookmark" style="color:var(--accent-purple); font-size:1rem;"></i> 오늘의 영단어 / 암기 카드</span>
               <i class="fa-solid fa-chevron-right" style="font-size:0.7rem; color:var(--text-muted);"></i>
             </button>
             <button class="btn-oled-setting" data-mode="todo" style="display:flex; align-items:center; justify-content:space-between; width:100%; padding:10px 14px; border-radius:var(--radius-md); border:1px solid var(--border-glass); background:rgba(255,255,255,0.05); color:var(--text-main); font-size:0.82rem; cursor:pointer; transition:var(--transition-fast);">
-              <span style="display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-calendar-check" style="color:var(--accent-rose); font-size:1rem;"></i> 오늘의 할 일 / D-Day</span>
+              <span style="display:flex; align-items:center; gap:8px;" data-i18n="oledModeTodo"><i class="fa-solid fa-calendar-check" style="color:var(--accent-rose); font-size:1rem;"></i> 오늘의 할 일 / D-Day</span>
               <i class="fa-solid fa-chevron-right" style="font-size:0.7rem; color:var(--text-muted);"></i>
             </button>
           </div>
@@ -443,25 +443,25 @@
           <div class="card-header">
             <div class="card-title">
               <i class="fa-solid fa-clock-rotate-left" style="color:var(--accent-purple);"></i>
-              <h3>스마트홈 루틴 세팅기</h3>
+              <h3 data-i18n="routineTitle">스마트홈 루틴 세팅기</h3>
             </div>
             <span id="routine-count-badge" class="card-subtitle" style="color:var(--accent-purple);">0개 설정됨</span>
           </div>
 
           <!-- 루틴 추가 폼 -->
           <div class="sub-panel" style="margin-bottom:12px; padding:10px;">
-            <div style="font-weight:700; font-size:0.85rem; margin-bottom:8px; color:var(--text-main);">
+            <div style="font-weight:700; font-size:0.85rem; margin-bottom:8px; color:var(--text-main);" data-i18n="addNewRoutine">
               <i class="fa-solid fa-plus-circle" style="color:var(--accent-sky);"></i> 새 루틴 추가
             </div>
             <div style="display:flex; flex-direction:column; gap:10px; width:100%; max-width:100%; box-sizing:border-box;">
               <div style="width:100%; max-width:100%; box-sizing:border-box;">
-                <label style="font-size:0.78rem; font-weight:700; color:var(--text-muted); display:block; margin-bottom:4px;">시간 선택</label>
+                <label style="font-size:0.78rem; font-weight:700; color:var(--text-muted); display:block; margin-bottom:4px;" data-i18n="timeSelectLabel">시간 선택</label>
                 <div class="time-picker-wrapper">
                   <input type="time" id="routine-time-input" class="routine-input" value="08:00">
                 </div>
               </div>
               <div>
-                <label style="font-size:0.78rem; font-weight:700; color:var(--text-muted); display:block; margin-bottom:4px;">스마트홈 기능</label>
+                <label style="font-size:0.78rem; font-weight:700; color:var(--text-muted); display:block; margin-bottom:4px;" data-i18n="featureSelectLabel">스마트홈 기능</label>
                 <select id="routine-action-select" class="routine-select">
                   <option value="WAKEUP">☀️ 기상 모드 ON</option>
                   <option value="SLEEP">💤 수면 모드 ON</option>
@@ -474,7 +474,7 @@
                   <option value="BABY_SHARK">🦈 아기상어 노래</option>
                 </select>
               </div>
-              <button id="btn-add-routine" class="btn-routine-submit">
+              <button id="btn-add-routine" class="btn-routine-submit" data-i18n="btnAddRoutine">
                 <i class="fa-solid fa-plus"></i> 루틴 추가하기
               </button>
             </div>
@@ -511,14 +511,14 @@
           <div class="card-header">
             <div class="card-title">
               <i class="fa-solid fa-sun"></i>
-              <h3>앱 디스플레이 테마</h3>
+              <h3 data-i18n="themeTitle">앱 디스플레이 테마</h3>
             </div>
             <span id="theme-status-badge" class="card-subtitle">야간 모드 OFF (화이트)</span>
           </div>
           <div class="control-switch-card">
             <div>
-              <div style="font-weight:700; font-size:0.9rem;">야간 모드 (Dark Mode)</div>
-              <div style="font-size:0.75rem; color:var(--text-muted);">ON: 검은색 배경 / OFF: 흰색 배경</div>
+              <div style="font-weight:700; font-size:0.9rem;" data-i18n="darkModeLabel">야간 모드 (Dark Mode)</div>
+              <div style="font-size:0.75rem; color:var(--text-muted);" data-i18n="darkModeSub">ON: 검은색 배경 / OFF: 흰색 배경</div>
             </div>
             <label class="toggle-switch">
               <input type="checkbox" id="toggle-theme-mode">
@@ -532,21 +532,21 @@
           <div class="card-header">
             <div class="card-title">
               <i class="fa-solid fa-circle-info"></i>
-              <h3>스마트홈 기기 정보</h3>
+              <h3 data-i18n="deviceInfoTitle">스마트홈 기기 정보</h3>
             </div>
           </div>
           <div class="sub-panel" style="font-size:0.8rem; display:flex; flex-direction:column; gap:6px;">
             <div style="display:flex; justify-content:space-between;">
-              <span style="color:var(--text-muted);">BLE 디바이스:</span>
+              <span style="color:var(--text-muted);" data-i18n="bleDeviceLabel">BLE 디바이스:</span>
               <strong style="color:var(--accent-sky);">ESP_JJ</strong>
             </div>
             <div style="display:flex; justify-content:space-between;">
-              <span style="color:var(--text-muted);">통신 프로토콜:</span>
+              <span style="color:var(--text-muted);" data-i18n="protocolLabel">통신 프로토콜:</span>
               <strong>Nordic UART Service (NUS)</strong>
             </div>
             <div style="display:flex; justify-content:space-between;">
-              <span style="color:var(--text-muted);">프로젝트 제작자:</span>
-              <strong>김진아 (Jina), 오예진 (Yejin)</strong>
+              <span style="color:var(--text-muted);" data-i18n="creatorsLabel">프로젝트 제작자:</span>
+              <strong data-i18n="creatorsNames">김진아 (Jina), 오예진 (Yejin)</strong>
             </div>
           </div>
         </div>
@@ -556,10 +556,10 @@
           <div class="card-header">
             <div class="card-title">
               <i class="fa-solid fa-terminal"></i>
-              <h3>Web Bluetooth 로그</h3>
+              <h3 data-i18n="logTitle">Web Bluetooth 로그</h3>
             </div>
             <button id="btn-clear-logs" class="btn-glass" style="padding:4px 10px; font-size:0.7rem;">
-              <i class="fa-solid fa-trash"></i> 지우기
+              <i class="fa-solid fa-trash"></i> <span data-i18n="btnClearLog">지우기</span>
             </button>
           </div>
           <div id="terminal-logs" class="terminal-logs">
@@ -569,32 +569,8 @@
           </div>
 
           <div style="display:flex; gap:8px; margin-top:10px;">
-            <input type="text" id="custom-cmd-input" class="glass-input" placeholder="커스텀 명령 전송...">
-            <button id="btn-send-custom-cmd" class="btn-glass btn-primary" style="padding:8px 16px;">전송</button>
-          </div>
-        </div>
-
-        <!-- 빠른 제어 버튼 Grid -->
-        <div class="glass-card">
-          <div class="card-header">
-            <div class="card-title">
-              <i class="fa-solid fa-bolt"></i>
-              <h3>빠른 제어 버튼</h3>
-            </div>
-          </div>
-          <div class="quick-action-grid">
-            <button class="btn-quick-cmd" data-cmd="1"><i class="fa-solid fa-cloud"></i> 날씨 정보</button>
-            <button class="btn-quick-cmd" data-cmd="2"><i class="fa-solid fa-sun"></i> 조도 센서</button>
-            <button class="btn-quick-cmd" data-cmd="3"><i class="fa-solid fa-tv"></i> 화면 켜기</button>
-            <button class="btn-quick-cmd" data-cmd="4"><i class="fa-solid fa-tv"></i> 화면 끄기</button>
-            <button class="btn-quick-cmd" data-cmd="5"><i class="fa-solid fa-music"></i> 학교종</button>
-            <button class="btn-quick-cmd" data-cmd="6"><i class="fa-solid fa-fish"></i> 아기상어</button>
-            <button class="btn-quick-cmd" data-cmd="7"><i class="fa-solid fa-lightbulb"></i> 조명 켜기</button>
-            <button class="btn-quick-cmd" data-cmd="8"><i class="fa-regular fa-lightbulb"></i> 조명 끄기</button>
-            <button class="btn-quick-cmd" data-cmd="9"><i class="fa-solid fa-cat"></i> Kitty 그림</button>
-            <button class="btn-quick-cmd" data-cmd="S"><i class="fa-solid fa-moon"></i> 수면 모드</button>
-            <button class="btn-quick-cmd" data-cmd="Q"><i class="fa-solid fa-sun"></i> 기상 모드</button>
-            <button class="btn-quick-cmd" data-cmd="A"><i class="fa-solid fa-bell-slash"></i> 알람 끄기</button>
+            <input type="text" id="custom-cmd-input" class="glass-input" placeholder="커스텀 명령 전송..." data-i18n-placeholder="cmdInputPlaceholder">
+            <button id="btn-send-custom-cmd" class="btn-glass btn-primary" style="padding:8px 16px;" data-i18n="btnSendCmd">전송</button>
           </div>
         </div>
       </section>
@@ -605,15 +581,15 @@
     <nav class="mobile-bottom-nav">
       <a class="nav-item active" data-target="view-today">
         <i class="fa-solid fa-calendar-day"></i>
-        <span>오늘 하루</span>
+        <span data-i18n="tabToday">오늘 하루</span>
       </a>
       <a class="nav-item" data-target="view-control">
         <i class="fa-solid fa-sliders"></i>
-        <span>홈 제어</span>
+        <span data-i18n="tabHomeControl">홈 제어</span>
       </a>
       <a class="nav-item" data-target="view-settings">
         <i class="fa-solid fa-gear"></i>
-        <span>설정</span>
+        <span data-i18n="tabSettings">설정</span>
       </a>
     </nav>
   </div>

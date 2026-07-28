@@ -2045,7 +2045,12 @@ const I18N_TRANSLATIONS = {
     deviceInfoTitle: "스마트홈 기기 정보",
     bleDeviceLabel: "BLE 디바이스:",
     protocolLabel: "통신 프로토콜:",
-    creatorsLabel: "프로젝트 제작자:"
+    creatorsLabel: "프로젝트 제작자:",
+    creatorsNames: "김진아 (Jina), 오예진 (Yejin)",
+    logTitle: "Web Bluetooth 로그",
+    btnClearLog: "지우기",
+    btnSendCmd: "전송",
+    cmdInputPlaceholder: "커스텀 명령 전송..."
   },
   en: {
     appName: "JINJIN Smart Home",
@@ -2120,7 +2125,12 @@ const I18N_TRANSLATIONS = {
     deviceInfoTitle: "Device Information",
     bleDeviceLabel: "BLE Device:",
     protocolLabel: "Protocol:",
-    creatorsLabel: "Creators:"
+    creatorsLabel: "Creators:",
+    creatorsNames: "Jina Kim, Yejin Oh",
+    logTitle: "Web Bluetooth Logs",
+    btnClearLog: "Clear",
+    btnSendCmd: "Send",
+    cmdInputPlaceholder: "Send custom command..."
   }
 };
 
