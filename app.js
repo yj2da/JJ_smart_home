@@ -1320,6 +1320,36 @@ function logSystem(text, type = 'sys') {
   logTerminal(`[${timeStr}] [System]: ${text}`, type);
 }
 
+let currentRawWeatherDesc = '구름조금';
+
+function updateWeatherDescDisplay() {
+  const descEl = document.getElementById('weather-desc-val');
+  if (!descEl) return;
+
+  const descMap = {
+    'Clear': { en: 'Clear Sky', kr: '맑음' },
+    'Clouds': { en: 'Partly Cloudy', kr: '구름조금' },
+    'Few Clouds': { en: 'Few Clouds', kr: '구름조금' },
+    'Scattered Clouds': { en: 'Scattered Clouds', kr: '구름조금' },
+    'Broken Clouds': { en: 'Broken Clouds', kr: '구름조금' },
+    'Rain': { en: 'Rainy', kr: '비' },
+    'Drizzle': { en: 'Light Rain', kr: '이슬비' },
+    'Thunderstorm': { en: 'Thunderstorm', kr: '뇌우' },
+    'Snow': { en: 'Snowy', kr: '눈' },
+    'Overcast': { en: 'Overcast', kr: '온흐림' }
+  };
+
+  let translatedDesc = currentRawWeatherDesc;
+  for (const [key, obj] of Object.entries(descMap)) {
+    if (currentRawWeatherDesc.toLowerCase().includes(key.toLowerCase())) {
+      translatedDesc = currentLanguage === 'en' ? obj.en : obj.kr;
+      break;
+    }
+  }
+
+  descEl.innerText = `${translatedDesc} (Busan)`;
+}
+
 async function initWeather() {
   try {
     const res = await fetch('/api/weather?city=Busan');
@@ -1327,19 +1357,20 @@ async function initWeather() {
     if (data && data.main) {
       const temp = Math.round(data.main.temp);
       const humi = data.main.humidity;
-      const desc = data.weather && data.weather[0] ? data.weather[0].description : '온흐림';
+      const desc = data.weather && data.weather[0] ? data.weather[0].description : 'Clouds';
+      currentRawWeatherDesc = desc;
 
       const tempEl = document.getElementById('weather-temp-val');
       const humiEl = document.getElementById('weather-humi-val');
       const sensorTempEl = document.getElementById('sensor-temp');
       const sensorHumiEl = document.getElementById('sensor-humi');
-      const descEl = document.getElementById('weather-desc-val');
 
       if (tempEl) tempEl.innerText = temp;
       if (humiEl) humiEl.innerText = humi;
       if (sensorTempEl) sensorTempEl.innerText = `${temp} °C`;
       if (sensorHumiEl) sensorHumiEl.innerText = `${humi} %`;
-      if (descEl) descEl.innerText = `${desc} (Busan)`;
+      
+      updateWeatherDescDisplay();
 
       const iconEl = document.getElementById('weather-icon-el');
       if (iconEl && data.weather && data.weather[0]) {
@@ -1354,6 +1385,7 @@ async function initWeather() {
     }
   } catch (e) {
     console.log('Weather API fallback used:', e);
+    updateWeatherDescDisplay();
   }
 }
 
@@ -1611,6 +1643,18 @@ const ROUTINE_LABELS = {
   'BABY_SHARK': '🦈 아기상어 노래'
 };
 
+const ROUTINE_LABELS_EN = {
+  'WAKEUP': '☀️ Wakeup Mode ON',
+  'SLEEP': '💤 Sleep Mode ON',
+  'LIGHT_ON': '💡 Turn Light ON',
+  'LIGHT_OFF': '🌙 Turn Light OFF',
+  'OPEN_BLIND': '🪟 Open Blind (180°)',
+  'CLOSE_BLIND': '🪟 Close Blind (90°)',
+  'OLED_ON': '📺 OLED Screen ON',
+  'OLED_OFF': '📺 OLED Screen OFF',
+  'BABY_SHARK': '🦈 Baby Shark Melody'
+};
+
 let routinesList = [];
 let lastTriggeredMinutes = '';
 
@@ -1659,16 +1703,17 @@ function renderRoutines() {
 
   const activeCount = routinesList.filter(r => r.enabled).length;
   if (badge) {
-    badge.innerText = `${activeCount}개 활성화됨`;
+    badge.innerText = currentLanguage === 'en' ? `${activeCount} Active` : `${activeCount}개 활성화됨`;
   }
 
   if (routinesList.length === 0) {
-    container.innerHTML = `<div style="text-align:center; padding:16px; color:var(--text-muted); font-size:0.8rem; font-weight:600;">등록된 스마트홈 루틴이 없습니다.<br>위에서 시각과 기능을 선택 후 [+ 루틴 추가]를 눌러보세요!</div>`;
+    container.innerHTML = `<div style="text-align:center; padding:16px; color:var(--text-muted); font-size:0.8rem; font-weight:600;">${currentLanguage === 'en' ? 'No routines added yet.<br>Select time and action above to add!' : '등록된 스마트홈 루틴이 없습니다.<br>위에서 시각과 기능을 선택 후 [+ 루틴 추가]를 눌러보세요!'}</div>`;
     return;
   }
 
+  const labelsMap = currentLanguage === 'en' ? ROUTINE_LABELS_EN : ROUTINE_LABELS;
   container.innerHTML = routinesList.map(r => {
-    const label = ROUTINE_LABELS[r.actionKey] || r.actionKey;
+    const label = labelsMap[r.actionKey] || ROUTINE_LABELS[r.actionKey] || r.actionKey;
     return `
       <div class="routine-item">
         <div style="display:flex; align-items:center; gap:12px;">
@@ -2074,7 +2119,23 @@ const I18N_TRANSLATIONS = {
     logTitle: "Web Bluetooth 로그",
     btnClearLog: "지우기",
     btnSendCmd: "전송",
-    cmdInputPlaceholder: "커스텀 명령 전송..."
+    cmdInputPlaceholder: "커스텀 명령 전송...",
+
+    asmrTitle: "ASMR 빗소리",
+    focusTimerTitle: "집중 타이머",
+    btnStartTimer: "시작",
+    chatHeaderTitle: "JINJIN AI 도우미",
+    chipList: "명령어 모음",
+    chipLightOn: "조명 켜기",
+    chipLightOff: "조명 끄기",
+    chipSleep: "수면 모드",
+    chipWakeup: "기상 모드",
+    chipWeather: "실시간 날씨",
+    chipBabyShark: "아기상어",
+    chipOpenBlind: "창문 열기",
+    chipStopAlarm: "알람 끄기",
+    chatBotGreeting: "안녕하세요! 👋 스마트홈 AI 도우미입니다.<br>위 <strong>명령어 버튼</strong>을 누르면 API 호출 없이 즉시 제어되며, \"명령어 모음\"을 누르면 전체 기능 목록을 확인하실 수 있습니다!",
+    chatInputPlaceholder: "메시지 입력..."
   },
   en: {
     appName: "JINJIN Smart Home",
@@ -2170,7 +2231,23 @@ const I18N_TRANSLATIONS = {
     logTitle: "Web Bluetooth Logs",
     btnClearLog: "Clear",
     btnSendCmd: "Send",
-    cmdInputPlaceholder: "Send custom command..."
+    cmdInputPlaceholder: "Send custom command...",
+
+    asmrTitle: "ASMR Rain Ambient",
+    focusTimerTitle: "Focus Timer",
+    btnStartTimer: "Start",
+    chatHeaderTitle: "JINJIN AI Assistant",
+    chipList: "Commands List",
+    chipLightOn: "Light ON",
+    chipLightOff: "Light OFF",
+    chipSleep: "Sleep Mode",
+    chipWakeup: "Wakeup Mode",
+    chipWeather: "Weather",
+    chipBabyShark: "Baby Shark",
+    chipOpenBlind: "Open Blind",
+    chipStopAlarm: "Stop Alarm",
+    chatBotGreeting: "Hello! 👋 I am your Smart Home AI Assistant.<br>Click the <strong>command buttons</strong> above for instant control!",
+    chatInputPlaceholder: "Type a message..."
   }
 };
 
@@ -2224,6 +2301,7 @@ function applyLanguage(lang) {
   }
 
   const dict = I18N_TRANSLATIONS[lang] || I18N_TRANSLATIONS.kr;
+
   document.querySelectorAll('[data-i18n]').forEach(el => {
     const key = el.getAttribute('data-i18n');
     if (dict[key]) {
@@ -2236,6 +2314,70 @@ function applyLanguage(lang) {
       }
     }
   });
+
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    const key = el.getAttribute('data-i18n-placeholder');
+    if (dict[key]) {
+      el.placeholder = dict[key];
+    }
+  });
+
+  // 1. 집중 타이머 분 단위 프리셋 버튼 (5m, 10m... / 5분, 10분...)
+  document.querySelectorAll('.btn-preset-min').forEach(btn => {
+    const min = btn.getAttribute('data-min');
+    if (min) btn.innerText = lang === 'en' ? `${min}m` : `${min}분`;
+  });
+
+  // 2. 스마트홈 루틴 드롭다운 드롭박스 (<select id="routine-action-select">)
+  const actionSelect = document.getElementById('routine-action-select');
+  if (actionSelect) {
+    const labelsMap = lang === 'en' ? ROUTINE_LABELS_EN : ROUTINE_LABELS;
+    Array.from(actionSelect.options).forEach(opt => {
+      if (labelsMap[opt.value]) opt.text = labelsMap[opt.value];
+    });
+  }
+
+  // 3. 헤더 상단 BLE/데모 상태 알림 알약
+  const statusText = document.getElementById('header-status-text');
+  if (statusText) {
+    if (isDemoMode) {
+      statusText.innerText = lang === 'en' ? 'Demo Mode' : '데모 모드';
+    } else if (!isConnected) {
+      statusText.innerText = lang === 'en' ? 'Disconnected' : '연결 안됨';
+    }
+  }
+
+  // 4. 테마 설정 카드 배지 (#theme-status-badge)
+  const themeBadge = document.getElementById('theme-status-badge');
+  if (themeBadge) {
+    const isDark = document.body.classList.contains('dark-mode');
+    themeBadge.innerText = lang === 'en'
+      ? (isDark ? 'Dark Mode ON' : 'Dark Mode OFF (White)')
+      : (isDark ? '야간 모드 ON (다크)' : '야간 모드 OFF (화이트)');
+  }
+
+  // 5. 스마트 습도 경보 상태 배지 및 임계값 텍스트
+  const humiBadge = document.getElementById('humi-alert-status');
+  if (humiBadge) {
+    humiBadge.innerText = lang === 'en' ? 'Normal (Comfortable)' : '정상 (쾌적)';
+  }
+  const humiTh = document.getElementById('humi-threshold-val');
+  if (humiTh) {
+    const val = document.getElementById('slider-humi-threshold')?.value || 70;
+    humiTh.innerText = lang === 'en' ? `${val}% or higher` : `${val}% 이상`;
+  }
+
+  // 6. 스마트 디스플레이 OLED 모드 배지
+  const oledBadge = document.getElementById('oled-mode-badge');
+  if (oledBadge) {
+    oledBadge.innerText = lang === 'en' ? 'Weather / Air Quality' : '날씨/미세먼지';
+  }
+
+  // 7. 동적 목록 및 날씨 설명 재렌더링
+  renderRoutines();
+  renderTodoList();
+  updateSnoreBadge();
+  updateWeatherDescDisplay();
 
   logSystem(`🌐 [언어 변경] 앱 표시 언어가 '${lang === 'en' ? 'English' : '한국어'}'(으)로 설정되었습니다.`);
 }

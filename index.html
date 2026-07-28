@@ -144,7 +144,7 @@
               <div style="display:flex; align-items:center; justify-content:space-between;">
                 <div style="display:flex; align-items:center; gap:8px; font-size:0.82rem; font-weight:600;">
                   <i class="fa-solid fa-headphones" style="color:var(--accent-sky); font-size:0.95rem;"></i>
-                  <span>ASMR 빗소리</span>
+                  <span data-i18n="asmrTitle">ASMR 빗소리</span>
                 </div>
                 <button id="btn-toggle-asmr" class="btn-glass" style="padding:5px 12px; font-size:0.75rem;">
                   <i class="fa-solid fa-play"></i> <span data-i18n="btnPlay">재생</span>
@@ -156,7 +156,7 @@
                 <div style="display:flex; align-items:center; justify-content:space-between;">
                   <div style="display:flex; align-items:center; gap:8px; font-size:0.82rem; font-weight:600;">
                     <i class="fa-solid fa-stopwatch" style="color:var(--accent-indigo); font-size:0.95rem;"></i>
-                    <span>집중 타이머</span>
+                    <span data-i18n="focusTimerTitle">집중 타이머</span>
                   </div>
                   
                   <div style="display:flex; align-items:center; gap:8px;">
@@ -167,7 +167,7 @@
                       <button id="btn-timer-plus" class="btn-stepper" title="1분 증가">+</button>
                     </div>
 
-                    <button id="btn-start-timer" class="btn-glass btn-primary" style="padding:5px 12px; font-size:0.75rem;">시작</button>
+                    <button id="btn-start-timer" class="btn-glass btn-primary" style="padding:5px 12px; font-size:0.75rem;" data-i18n="btnStartTimer">시작</button>
                   </div>
                 </div>
 
@@ -603,31 +603,31 @@
     <div class="chat-header">
       <div style="display:flex; align-items:center; gap:8px; font-weight:700; font-size:0.9rem;">
         <i class="fa-solid fa-robot" style="color:var(--accent-sky);"></i>
-        <span>JINJIN AI 도우미</span>
+        <span data-i18n="chatHeaderTitle">JINJIN AI 도우미</span>
       </div>
       <button id="btn-chat-close" style="background:none; border:none; color:var(--text-muted); cursor:pointer;"><i class="fa-solid fa-xmark"></i></button>
     </div>
 
     <!-- AI 빠른 질문 및 즉시 제어 버튼 바 -->
     <div class="chat-quick-bar">
-      <button class="btn-chat-chip" data-chat-cmd="LIST"><i class="fa-solid fa-list-check" style="color:var(--accent-sky);"></i> 명령어 모음</button>
-      <button class="btn-chat-chip" data-chat-cmd="LIGHT_ON"><i class="fa-solid fa-lightbulb" style="color:var(--accent-amber);"></i> 조명 켜기</button>
-      <button class="btn-chat-chip" data-chat-cmd="LIGHT_OFF"><i class="fa-regular fa-lightbulb"></i> 조명 끄기</button>
-      <button class="btn-chat-chip" data-chat-cmd="SLEEP"><i class="fa-solid fa-moon" style="color:var(--accent-indigo);"></i> 수면 모드</button>
-      <button class="btn-chat-chip" data-chat-cmd="WAKEUP"><i class="fa-solid fa-sun" style="color:var(--accent-amber);"></i> 기상 모드</button>
-      <button class="btn-chat-chip" data-chat-cmd="WEATHER"><i class="fa-solid fa-cloud-sun" style="color:var(--accent-sky);"></i> 실시간 날씨</button>
-      <button class="btn-chat-chip" data-chat-cmd="BABY_SHARK"><i class="fa-solid fa-music" style="color:var(--accent-rose);"></i> 아기상어</button>
-      <button class="btn-chat-chip" data-chat-cmd="OPEN_BLIND"><i class="fa-solid fa-blinds"></i> 창문 열기</button>
-      <button class="btn-chat-chip" data-chat-cmd="STOP_ALARM"><i class="fa-solid fa-bell-slash"></i> 알람 끄기</button>
+      <button class="btn-chat-chip" data-chat-cmd="LIST" data-i18n="chipList"><i class="fa-solid fa-list-check" style="color:var(--accent-sky);"></i> 명령어 모음</button>
+      <button class="btn-chat-chip" data-chat-cmd="LIGHT_ON" data-i18n="chipLightOn"><i class="fa-solid fa-lightbulb" style="color:var(--accent-amber);"></i> 조명 켜기</button>
+      <button class="btn-chat-chip" data-chat-cmd="LIGHT_OFF" data-i18n="chipLightOff"><i class="fa-regular fa-lightbulb"></i> 조명 끄기</button>
+      <button class="btn-chat-chip" data-chat-cmd="SLEEP" data-i18n="chipSleep"><i class="fa-solid fa-moon" style="color:var(--accent-indigo);"></i> 수면 모드</button>
+      <button class="btn-chat-chip" data-chat-cmd="WAKEUP" data-i18n="chipWakeup"><i class="fa-solid fa-sun" style="color:var(--accent-amber);"></i> 기상 모드</button>
+      <button class="btn-chat-chip" data-chat-cmd="WEATHER" data-i18n="chipWeather"><i class="fa-solid fa-cloud-sun" style="color:var(--accent-sky);"></i> 실시간 날씨</button>
+      <button class="btn-chat-chip" data-chat-cmd="BABY_SHARK" data-i18n="chipBabyShark"><i class="fa-solid fa-music" style="color:var(--accent-rose);"></i> 아기상어</button>
+      <button class="btn-chat-chip" data-chat-cmd="OPEN_BLIND" data-i18n="chipOpenBlind"><i class="fa-solid fa-blinds"></i> 창문 열기</button>
+      <button class="btn-chat-chip" data-chat-cmd="STOP_ALARM" data-i18n="chipStopAlarm"><i class="fa-solid fa-bell-slash"></i> 알람 끄기</button>
     </div>
 
     <div id="chat-messages" class="chat-messages">
-      <div class="chat-bubble bot">
+      <div class="chat-bubble bot" data-i18n="chatBotGreeting">
         안녕하세요! 👋 스마트홈 AI 도우미입니다.<br>위 <strong>명령어 버튼</strong>을 누르면 API 호출 없이 즉시 제어되며, "명령어 모음"을 누르면 전체 기능 목록을 확인하실 수 있습니다!
       </div>
     </div>
     <div class="chat-input-box">
-      <input type="text" id="chat-input" class="glass-input" placeholder="메시지 입력..." style="padding:8px 12px;">
+      <input type="text" id="chat-input" class="glass-input" placeholder="메시지 입력..." style="padding:8px 12px;" data-i18n-placeholder="chatInputPlaceholder">
       <button id="btn-send-chat" class="btn-glass btn-primary" style="padding:8px 12px;"><i class="fa-solid fa-paper-plane"></i></button>
     </div>
   </div>
