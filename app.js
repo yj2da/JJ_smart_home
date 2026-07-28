@@ -1616,9 +1616,10 @@ async function fetchGeminiAIResponse(userPrompt, thinkingBubble) {
 
     const data = await response.json();
 
-    if (data.candidates && data.candidates[0] && data.candidates[0].content) {
-      const replyText = data.candidates[0].content.parts[0].text.trim();
-      thinkingBubble.innerText = replyText;
+    if (data && data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0]) {
+      let replyText = data.candidates[0].content.parts[0].text.trim();
+      replyText = replyText.replace(/\n/g, '<br>');
+      thinkingBubble.innerHTML = replyText;
       thinkingBubble.classList.remove('thinking');
     } else {
       fallbackChatResponse(userPrompt, thinkingBubble);

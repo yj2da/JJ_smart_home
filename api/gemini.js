@@ -34,9 +34,9 @@ export default async function handler(req, res) {
         {
           parts: [
             {
-              text: `당신은 김진아(Jina)와 오예진(Yejin)의 JINJIN Smart Home AI 전문 도우미입니다.
+              text: `당신은 JINJIN Smart Home 전용 친절한 AI 스마트 도우미입니다.
 사용자의 질문: "${prompt}"
-한국어로 친절하고 상냥하게 2-3문장으로 간결하고 명확하게 답변해 주세요.`
+한국어로 친절하고 상냥하고 자연스럽게 2~3문장으로 간결하고 명확하게 답변해 주세요.`
             }
           ]
         }
@@ -45,6 +45,7 @@ export default async function handler(req, res) {
 
     const primaryUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
     const backupUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`;
+    const thirdUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${apiKey}`;
 
     let apiRes = await fetch(primaryUrl, {
       method: 'POST',
@@ -53,8 +54,17 @@ export default async function handler(req, res) {
     });
 
     if (!apiRes.ok) {
-      console.warn("Primary Gemini model failed, calling backup model...");
+      console.warn("Primary Gemini model failed, trying backup url...");
       apiRes = await fetch(backupUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+    }
+
+    if (!apiRes.ok) {
+      console.warn("Backup Gemini model failed, trying third url...");
+      apiRes = await fetch(thirdUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
