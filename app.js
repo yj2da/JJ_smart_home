@@ -517,7 +517,9 @@ function addChartData(level) {
 function updateSnoreBadge() {
   const badge = document.getElementById('snore-count-badge');
   if (badge) {
-    badge.innerText = `코골이: ${sleepSessionSnoreCount}회`;
+    badge.innerText = currentLanguage === 'en'
+      ? `Snores: ${sleepSessionSnoreCount}`
+      : `코골이: ${sleepSessionSnoreCount}회`;
   }
 }
 
@@ -530,38 +532,40 @@ function startSleepSession() {
 
 function finishSleepSession() {
   const sleepEndTime = new Date();
-  let durationStr = '1분 미만';
+  let durationStr = currentLanguage === 'en' ? 'Under 1m' : '1분 미만';
 
   if (sleepStartTime) {
     const elapsedSeconds = Math.max(1, Math.floor((sleepEndTime - sleepStartTime) / 1000));
     if (elapsedSeconds < 60) {
-      durationStr = `${elapsedSeconds}초`;
+      durationStr = currentLanguage === 'en' ? `${elapsedSeconds}s` : `${elapsedSeconds}초`;
     } else {
       const mins = Math.floor(elapsedSeconds / 60);
       const hours = Math.floor(mins / 60);
-      durationStr = hours > 0 ? `${hours}시간 ${mins % 60}분` : `${mins}분`;
+      durationStr = hours > 0 
+        ? (currentLanguage === 'en' ? `${hours}h ${mins % 60}m` : `${hours}시간 ${mins % 60}분`)
+        : (currentLanguage === 'en' ? `${mins}m` : `${mins}분`);
     }
   }
 
   const score = Math.max(50, Math.min(100, 100 - (sleepSessionSnoreCount * 6)));
   lastSleepScore = score;
 
-  let gradeTitle = '😴 꿀잠! 최상의 수면';
+  let gradeTitle = currentLanguage === 'en' ? '😴 Excellent Sleep' : '😴 꿀잠! 최상의 수면 상태';
 
   if (score >= 90) {
-    gradeTitle = '😴 꿀잠! 최상의 수면 상태';
+    gradeTitle = currentLanguage === 'en' ? '😴 Excellent Sleep' : '😴 꿀잠! 최상의 수면 상태';
   } else if (score >= 75) {
-    gradeTitle = '😌 편안하고 양호한 수면';
+    gradeTitle = currentLanguage === 'en' ? '😌 Good Sleep' : '😌 편안하고 양호한 수면';
   } else if (score >= 60) {
-    gradeTitle = '🥱 주의: 약간의 코골이 감지';
+    gradeTitle = currentLanguage === 'en' ? '🥱 Mild Snoring' : '🥱 주의: 약간의 코골이 감지';
   } else {
-    gradeTitle = '⚠️ 경고: 잦은 코골이 발생';
+    gradeTitle = currentLanguage === 'en' ? '⚠️ Frequent Snoring' : '⚠️ 경고: 잦은 코골이 발생';
   }
 
   const scoreCard = document.getElementById('sleep-score-card');
   document.getElementById('card-sleep-score-num').innerText = score;
   document.getElementById('card-sleep-grade').innerText = gradeTitle;
-  document.getElementById('card-sleep-snore-count').innerText = `${sleepSessionSnoreCount}회`;
+  document.getElementById('card-sleep-snore-count').innerText = currentLanguage === 'en' ? `${sleepSessionSnoreCount}` : `${sleepSessionSnoreCount}회`;
   document.getElementById('card-sleep-duration').innerText = durationStr;
   document.getElementById('last-sleep-time-badge').innerText = sleepEndTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
@@ -853,7 +857,11 @@ function renderTodoList() {
   container.innerHTML = '';
 
   const activeCount = todoItems.filter(i => !i.completed).length;
-  if (countBadge) countBadge.innerText = `${activeCount}개 남음`;
+  if (countBadge) {
+    countBadge.innerText = currentLanguage === 'en'
+      ? `${activeCount} remaining`
+      : `${activeCount}개 남음`;
+  }
 
   todoItems.forEach(item => {
     const div = document.createElement('div');
@@ -1994,6 +2002,27 @@ const I18N_TRANSLATIONS = {
     modeWakeupSub: "5초 오토 리셋",
     modeFocusTitle: "집중 모드",
     modeFocusSub: "뽀모도로 & ASMR",
+    btnPlay: "재생",
+    btnPause: "정지",
+
+    weatherCardTitle: "부산 실시간 날씨",
+    btnSyncWeather: "화면에 띄우기",
+    weatherHumiLabel: "습도:",
+    weatherLocLabel: "위치: 부산 (Busan)",
+
+    todoTitle: "오늘 하루 일정",
+    btnGCal: "구글 캘린더로 보내기",
+    todoPlaceholder: "새 일정 입력...",
+    btnAddTodo: "추가",
+
+    chartTitle: "실시간 수면 질 차트",
+
+    sensorCardTitle: "실시간 센서 정보",
+    btnReadCds: "조도 측정",
+    sensorTempTitle: "실내 온도",
+    sensorHumiTitle: "실내 습도",
+    sensorCdsTitle: "조도 센서",
+    sensorMicTitle: "코골이 음량",
 
     lightingControlTitle: "스마트 조명 & 앰비언트",
     rgbLedToggleLabel: "전등 메인 스위치 (RGB LED)",
@@ -2024,11 +2053,6 @@ const I18N_TRANSLATIONS = {
     oledModeTodo: "오늘의 할 일 / D-Day",
     oledPowerOn: "OLED 켜기",
     oledPowerOff: "OLED 끄기",
-
-    sensorTempTitle: "온도 센서",
-    sensorHumiTitle: "습도 센서",
-    sensorCdsTitle: "조도 센서",
-    sensorMicTitle: "코골이 음량",
 
     routineTitle: "스마트홈 루틴 세팅기",
     addNewRoutine: "새 루틴 추가",
@@ -2065,7 +2089,7 @@ const I18N_TRANSLATIONS = {
     scoreWaiting: "Awaiting Measurement",
     snoreDetectCount: "Snore Count:",
     sleepDuration: "Sleep Duration:",
-    sleepPromptMsg: "Turn on Sleep Mode to analyze your sleep score!",
+    sleepPromptMsg: "Enable Sleep Mode to check score",
 
     smartModeTitle: "Smart Mode Control",
     modeSleepTitle: "Sleep Mode",
@@ -2074,6 +2098,27 @@ const I18N_TRANSLATIONS = {
     modeWakeupSub: "5s Auto Reset",
     modeFocusTitle: "Focus Mode",
     modeFocusSub: "Pomodoro & ASMR",
+    btnPlay: "Play",
+    btnPause: "Pause",
+
+    weatherCardTitle: "Busan Realtime Weather",
+    btnSyncWeather: "Show on OLED",
+    weatherHumiLabel: "Humidity:",
+    weatherLocLabel: "Location: Busan",
+
+    todoTitle: "Today's Tasks",
+    btnGCal: "Export GCal",
+    todoPlaceholder: "Enter new task...",
+    btnAddTodo: "Add",
+
+    chartTitle: "Realtime Sleep Quality Chart",
+
+    sensorCardTitle: "Realtime Sensor Data",
+    btnReadCds: "Read Light",
+    sensorTempTitle: "Indoor Temp",
+    sensorHumiTitle: "Indoor Humidity",
+    sensorCdsTitle: "Light Sensor",
+    sensorMicTitle: "Mic Volume",
 
     lightingControlTitle: "Smart Lighting & Ambient",
     rgbLedToggleLabel: "Main Lighting Switch (RGB LED)",
@@ -2104,11 +2149,6 @@ const I18N_TRANSLATIONS = {
     oledModeTodo: "Today's Tasks & D-Day",
     oledPowerOn: "OLED Power ON",
     oledPowerOff: "OLED Power OFF",
-
-    sensorTempTitle: "Temperature",
-    sensorHumiTitle: "Humidity",
-    sensorCdsTitle: "Light (CDS)",
-    sensorMicTitle: "Mic Level",
 
     routineTitle: "Smart Home Routine Scheduler",
     addNewRoutine: "Add New Routine",

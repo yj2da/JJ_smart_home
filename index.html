@@ -69,7 +69,7 @@
       </div>
 
       <div style="display:flex; gap:8px; align-items:center;">
-        <button id="btn-demo" class="btn-glass" style="padding:6px 10px; font-size:0.7rem;">
+        <button id="btn-demo" class="btn-glass" style="padding:6px 10px; font-size:0.7rem;" data-i18n="demoBtn">
           <i class="fa-solid fa-wand-magic-sparkles"></i> 데모
         </button>
         <button id="btn-connect" class="header-ble-pill">
@@ -147,7 +147,7 @@
                   <span>ASMR 빗소리</span>
                 </div>
                 <button id="btn-toggle-asmr" class="btn-glass" style="padding:5px 12px; font-size:0.75rem;">
-                  <i class="fa-solid fa-play"></i> 재생
+                  <i class="fa-solid fa-play"></i> <span data-i18n="btnPlay">재생</span>
                 </button>
               </div>
 
@@ -190,9 +190,9 @@
           <div class="card-header">
             <div class="card-title">
               <i class="fa-solid fa-cloud-sun"></i>
-              <h3>부산 실시간 날씨</h3>
+              <h3 data-i18n="weatherCardTitle">부산 실시간 날씨</h3>
             </div>
-            <button id="btn-sync-weather" class="btn-glass" style="padding:4px 10px; font-size:0.7rem;">
+            <button id="btn-sync-weather" class="btn-glass" style="padding:4px 10px; font-size:0.7rem;" data-i18n="btnSyncWeather">
               <i class="fa-solid fa-tv"></i> 화면에 띄우기
             </button>
           </div>
@@ -206,8 +206,8 @@
             </div>
           </div>
           <div style="display:flex; justify-content:space-between; font-size:0.8rem; color:var(--text-muted); margin-top:8px; border-top:1px solid var(--border-glass); padding-top:8px;">
-            <span>습도: <strong id="weather-humi-val">80</strong>%</span>
-            <span>위치: 부산 (Busan)</span>
+            <span><span data-i18n="weatherHumiLabel">습도:</span> <strong id="weather-humi-val">80</strong>%</span>
+            <span data-i18n="weatherLocLabel">위치: 부산 (Busan)</span>
           </div>
         </div>
 
@@ -216,15 +216,15 @@
           <div class="card-header">
             <div class="card-title">
               <i class="fa-solid fa-list-check"></i>
-              <h3>오늘 하루 일정</h3>
+              <h3 data-i18n="todoTitle">오늘 하루 일정</h3>
             </div>
-            <button id="btn-export-all-gcal" class="btn-glass" style="padding:4px 10px; font-size:0.72rem;" title="전체 일정 구글 캘린더 등록">
+            <button id="btn-export-all-gcal" class="btn-glass" style="padding:4px 10px; font-size:0.72rem;" title="전체 일정 구글 캘린더 등록" data-i18n="btnGCal">
               <i class="fa-brands fa-google" style="color:#4285F4;"></i> 구글 캘린더로 보내기
             </button>
           </div>
           <div class="todo-input-box">
-            <input type="text" id="todo-input" class="glass-input" placeholder="새 일정 입력...">
-            <button id="btn-add-todo" class="btn-glass btn-primary" style="padding:8px 14px; font-size:0.8rem;">추가</button>
+            <input type="text" id="todo-input" class="glass-input" placeholder="새 일정 입력..." data-i18n-placeholder="todoPlaceholder">
+            <button id="btn-add-todo" class="btn-glass btn-primary" style="padding:8px 14px; font-size:0.8rem;" data-i18n="btnAddTodo">추가</button>
           </div>
           <div id="todo-list" class="todo-list"></div>
           <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:var(--text-muted); margin-top:8px; border-top:1px solid var(--border-glass); padding-top:8px;">
@@ -237,7 +237,7 @@
           <div class="card-header">
             <div class="card-title">
               <i class="fa-solid fa-chart-line"></i>
-              <h3>실시간 수면 질 차트</h3>
+              <h3 data-i18n="chartTitle">실시간 수면 질 차트</h3>
             </div>
             <span id="snore-count-badge" class="angle-badge" style="font-size:0.75rem; color:var(--accent-rose);">
               코골이: 0회
@@ -380,10 +380,10 @@
 
           <!-- OLED 화면 켜기 / 끄기 제어 버튼 -->
           <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:10px;">
-            <button id="btn-oled-power-on" class="btn-glass" style="padding:8px; font-size:0.8rem; display:flex; align-items:center; justify-content:center; gap:6px; color:var(--accent-emerald);">
+            <button id="btn-oled-power-on" class="btn-glass" style="padding:8px; font-size:0.8rem; display:flex; align-items:center; justify-content:center; gap:6px; color:var(--accent-emerald);" data-i18n="oledPowerOn">
               <i class="fa-solid fa-power-off"></i> OLED 켜기
             </button>
-            <button id="btn-oled-power-off" class="btn-glass" style="padding:8px; font-size:0.8rem; display:flex; align-items:center; justify-content:center; gap:6px; color:var(--accent-rose);">
+            <button id="btn-oled-power-off" class="btn-glass" style="padding:8px; font-size:0.8rem; display:flex; align-items:center; justify-content:center; gap:6px; color:var(--accent-rose);" data-i18n="oledPowerOff">
               <i class="fa-solid fa-power-off"></i> OLED 끄기
             </button>
           </div>
@@ -409,27 +409,27 @@
           <div class="card-header">
             <div class="card-title">
               <i class="fa-solid fa-microchip"></i>
-              <h3>실시간 센서 정보</h3>
+              <h3 data-i18n="sensorCardTitle">실시간 센서 정보</h3>
             </div>
-            <button id="btn-read-cds" class="btn-glass" style="padding:4px 10px; font-size:0.7rem;">
+            <button id="btn-read-cds" class="btn-glass" style="padding:4px 10px; font-size:0.7rem;" data-i18n="btnReadCds">
               <i class="fa-solid fa-sun"></i> 조도 측정
             </button>
           </div>
           <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap:10px; text-align:center;">
             <div class="sensor-sub-panel">
-              <div style="font-size:0.72rem; color:var(--text-muted);">실내 온도</div>
+              <div style="font-size:0.72rem; color:var(--text-muted);" data-i18n="sensorTempTitle">실내 온도</div>
               <div id="sensor-temp" style="font-family:var(--font-mono); font-size:1.3rem; font-weight:800; color:var(--accent-sky);">24 °C</div>
             </div>
             <div class="sensor-sub-panel">
-              <div style="font-size:0.72rem; color:var(--text-muted);">실내 습도</div>
+              <div style="font-size:0.72rem; color:var(--text-muted);" data-i18n="sensorHumiTitle">실내 습도</div>
               <div id="sensor-humi" style="font-family:var(--font-mono); font-size:1.3rem; font-weight:800; color:var(--accent-indigo);">55 %</div>
             </div>
             <div class="sensor-sub-panel">
-              <div style="font-size:0.72rem; color:var(--text-muted);">조도 센서</div>
+              <div style="font-size:0.72rem; color:var(--text-muted);" data-i18n="sensorCdsTitle">조도 센서</div>
               <div id="sensor-cds" style="font-family:var(--font-mono); font-size:1.3rem; font-weight:800; color:var(--accent-amber);">3200</div>
             </div>
             <div class="sensor-sub-panel">
-              <div style="font-size:0.72rem; color:var(--text-muted);">코골이 음량</div>
+              <div style="font-size:0.72rem; color:var(--text-muted);" data-i18n="sensorMicTitle">코골이 음량</div>
               <div id="sensor-mic" style="font-family:var(--font-mono); font-size:1.3rem; font-weight:800; color:var(--accent-rose);">12</div>
             </div>
           </div>
