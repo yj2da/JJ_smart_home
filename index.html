@@ -453,26 +453,24 @@
             <div style="font-weight:700; font-size:0.85rem; margin-bottom:8px; color:var(--text-main);">
               <i class="fa-solid fa-plus-circle" style="color:var(--accent-sky);"></i> 새 루틴 추가
             </div>
-            <div style="display:flex; flex-direction:column; gap:8px;">
-              <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
-                <div>
-                  <label style="font-size:0.75rem; color:var(--text-muted); display:block; margin-bottom:4px;">시간 선택</label>
-                  <input type="time" id="routine-time-input" class="routine-input" value="08:00">
-                </div>
-                <div>
-                  <label style="font-size:0.75rem; color:var(--text-muted); display:block; margin-bottom:4px;">스마트홈 기능</label>
-                  <select id="routine-action-select" class="routine-select">
-                    <option value="WAKEUP">☀️ 기상 모드 ON</option>
-                    <option value="SLEEP">💤 수면 모드 ON</option>
-                    <option value="LIGHT_ON">💡 조명 켜기</option>
-                    <option value="LIGHT_OFF">🌙 조명 끄기</option>
-                    <option value="OPEN_BLIND">🪟 블라인드 열기 (180°)</option>
-                    <option value="CLOSE_BLIND">🪟 블라인드 닫기 (90°)</option>
-                    <option value="OLED_ON">📺 OLED 화면 켜기</option>
-                    <option value="OLED_OFF">📺 OLED 화면 끄기</option>
-                    <option value="BABY_SHARK">🦈 아기상어 노래</option>
-                  </select>
-                </div>
+            <div style="display:flex; flex-direction:column; gap:10px;">
+              <div>
+                <label style="font-size:0.78rem; font-weight:700; color:var(--text-muted); display:block; margin-bottom:4px;">시간 선택</label>
+                <input type="time" id="routine-time-input" class="routine-input" value="08:00">
+              </div>
+              <div>
+                <label style="font-size:0.78rem; font-weight:700; color:var(--text-muted); display:block; margin-bottom:4px;">스마트홈 기능</label>
+                <select id="routine-action-select" class="routine-select">
+                  <option value="WAKEUP">☀️ 기상 모드 ON</option>
+                  <option value="SLEEP">💤 수면 모드 ON</option>
+                  <option value="LIGHT_ON">💡 조명 켜기</option>
+                  <option value="LIGHT_OFF">🌙 조명 끄기</option>
+                  <option value="OPEN_BLIND">🪟 블라인드 열기 (180°)</option>
+                  <option value="CLOSE_BLIND">🪟 블라인드 닫기 (90°)</option>
+                  <option value="OLED_ON">📺 OLED 화면 켜기</option>
+                  <option value="OLED_OFF">📺 OLED 화면 끄기</option>
+                  <option value="BABY_SHARK">🦈 아기상어 노래</option>
+                </select>
               </div>
               <button id="btn-add-routine" class="btn-routine-submit">
                 <i class="fa-solid fa-plus"></i> 루틴 추가하기

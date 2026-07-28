@@ -1231,12 +1231,15 @@ body.light-mode .btn-chat-chip:hover {
    ========================================================================== */
 .routine-input, .routine-select {
   width: 100%;
-  padding: 9px 12px;
+  box-sizing: border-box;
+  display: block;
+  min-height: 44px;
+  padding: 10px 14px;
   border-radius: var(--radius-md);
   border: 1px solid var(--border-glass);
   background: rgba(255, 255, 255, 0.06);
   color: var(--text-main);
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   font-weight: 600;
   outline: none;
   transition: var(--transition-fast);
