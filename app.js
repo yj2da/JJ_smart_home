@@ -29,7 +29,7 @@ let sleepStartTime = null;
 let lastSleepScore = null;
 
 // ASMR & Focus Timer States
-let isAsmrPlaying = false;
+let isASMRPlaying = false;
 let asmrAudioCtx = null;
 let asmrGainNode = null;
 let focusTimerInterval = null;
@@ -1653,9 +1653,7 @@ window.deleteRoutine = deleteRoutine;
 // ==========================================================================
 let focusMinutes = 25;
 let focusSecondsLeft = 25 * 60;
-let focusTimerInterval = null;
 let isFocusTimerRunning = false;
-let isASMRPlaying = false;
 let asmrAudio = null;
 
 function initFocusTimer() {
