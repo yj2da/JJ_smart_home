@@ -1,4 +1,4 @@
-from machine import ADC, Pin, PWM, SoftI2C
+from machine import ADC, Pin, PWM, SoftI2C, time_pulse_us
 from time import sleep, ticks_ms, ticks_diff
 from servo import Servo
 
@@ -14,7 +14,7 @@ import framebuf
 # Creators: Jina & Yejin
 # Hardware: ESP32, LDR CDS (36), Mic ADC (34), Servo (13), Piezo (23),
 #           RGB LED (25, 26, 27), DHT11 (14), Touch (17, 5, 18, 19),
-#           OLED 1 (I2C 21, 22), OLED 2 (I2C 4, 16)
+#           Ultrasonic Trig (12), Echo (32), OLED 1 (I2C 21, 22), OLED 2 (I2C 4, 16)
 # ==========================================================================
 
 # OpenWeatherMap API 키 설정 (Busan / Seoul)
@@ -27,6 +27,28 @@ cds = ADC(Pin(36))
 cds.atten(ADC.ATTN_11DB)
 cds_flag = 0
 auto_blind_enabled = False # 조도 자동 블라인드 연동 플래그 (기본 OFF)
+
+# 1.1 초음파 센서 초기화 (HC-SR04: Trig Pin 12, Echo Pin 32) & 자동 기상 추적 (3cm 미만)
+trig_pin = Pin(12, Pin.OUT)
+echo_pin = Pin(32, Pin.IN)
+auto_wakeup_enabled = True # 초음파 3cm 미만 자동 기상 추적 (기본 ON)
+last_auto_wakeup_time = 0
+
+def get_ultrasonic_distance():
+    try:
+        trig_pin.value(0)
+        sleep(0.000002)
+        trig_pin.value(1)
+        sleep(0.00001)
+        trig_pin.value(0)
+        
+        duration = time_pulse_us(echo_pin, 1, 20000)
+        if duration < 0:
+            return 999.0
+        distance = (duration * 0.0343) / 2.0
+        return distance
+    except Exception as e:
+        return 999.0
 
 # 2. 마이크(사운드) 센서 초기화 (ADC Pin 34)
 mic_adc = ADC(Pin(34))
@@ -532,6 +554,14 @@ def on_rx(v):
         except Exception as e:
             print("Humi threshold parse error:", e)
 
+    # 'W_AUTO:1' / 'W_AUTO:0' 초음파 3cm 미만 자동 기상 추적 옵션
+    if v == 'W_AUTO:1':
+        auto_wakeup_enabled = True
+        print("☀️ [BLE Command] 초음파 3cm 미만 자동 기상 추적 ON")
+    elif v == 'W_AUTO:0':
+        auto_wakeup_enabled = False
+        print("☀️ [BLE Command] 초음파 3cm 미만 자동 기상 추적 OFF")
+
 # 블루투스 수신 데이터 바인딩
 p.on_write(on_rx)
 
@@ -630,6 +660,32 @@ while True:
             motor.move(90)
             current_blind_angle = 90
             print("☀️ [Auto Blind] 밝아짐 (CDS: " + str(c_val) + ") -> 블라인드 90° 닫기")
+
+    # 2.1 초음파 센서 감지: 3cm 미만 근접 시 기상 모드 자동 활성화 (auto_wakeup_enabled ON 일 때)
+    if auto_wakeup_enabled:
+        dist_cm = get_ultrasonic_distance()
+        if 0.1 <= dist_cm < 3.0:
+            if ticks_diff(current_ms, last_auto_wakeup_time) > 5000:
+                last_auto_wakeup_time = current_ms
+                print("☀️ [Auto Wakeup] 초음파 센서 3cm 미만 감지 (" + str(round(dist_cm, 1)) + "cm) -> 기상모드 자동 활성화!")
+                p.send("AUTO_WAKEUP_TRIGGERED\n")
+                mic_active = False
+                snore_count = 0
+                snore_flag = False
+                buzzer.duty_u16(0)
+                R.on(); G.on(); B.on()
+                motor.move(180)
+                current_blind_angle = 180
+                if display1 and oled_power_state:
+                    display1.fill(0)
+                    display1.text("=== AUTO WAKEUP ===", 0, 0)
+                    display1.text("Distance: " + str(round(dist_cm, 1)) + "cm", 0, 16)
+                    display1.text("Blind: 180 Open", 0, 32)
+                    display1.text("Lights: ON", 0, 48)
+                    display1.show()
+                for freq in melody1:
+                    play_tone(freq, 0.12)
+                    sleep(0.05)
 
     # 3. 수면 모드 활성화 시 실시간 코골이 음성 샘플링 & 패턴 분석
     if mic_active:

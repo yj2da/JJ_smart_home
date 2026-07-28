@@ -449,14 +449,14 @@
           </div>
 
           <!-- 루틴 추가 폼 -->
-          <div class="sub-panel" style="margin-bottom:12px;">
+          <div class="sub-panel" style="margin-bottom:12px; padding:10px;">
             <div style="font-weight:700; font-size:0.85rem; margin-bottom:8px; color:var(--text-main);">
               <i class="fa-solid fa-plus-circle" style="color:var(--accent-sky);"></i> 새 루틴 추가
             </div>
             <div style="display:flex; flex-direction:column; gap:10px; width:100%; max-width:100%; box-sizing:border-box;">
               <div style="width:100%; max-width:100%; box-sizing:border-box;">
                 <label style="font-size:0.78rem; font-weight:700; color:var(--text-muted); display:block; margin-bottom:4px;">시간 선택</label>
-                <div style="width:100%; max-width:100%; box-sizing:border-box; overflow:hidden; border-radius:var(--radius-md);">
+                <div class="time-picker-wrapper">
                   <input type="time" id="routine-time-input" class="routine-input" value="08:00">
                 </div>
               </div>
@@ -482,6 +482,27 @@
 
           <!-- 루틴 목록 컨테이너 -->
           <div id="routine-list-container" style="display:flex; flex-direction:column; gap:8px;">
+          </div>
+        </div>
+
+        <!-- 자동 기상 추적 기능 카드 (초음파 3cm 미만 감지 시 기상모드 ON) -->
+        <div class="glass-card">
+          <div class="card-header">
+            <div class="card-title">
+              <i class="fa-solid fa-person-rays" style="color:var(--accent-amber);"></i>
+              <h3>자동 기상 추적 기능</h3>
+            </div>
+            <span id="auto-wakeup-status-badge" class="card-subtitle" style="color:var(--accent-emerald);">자동 추적 ON</span>
+          </div>
+          <div class="control-switch-card">
+            <div>
+              <div style="font-weight:700; font-size:0.9rem;">초음파 3cm 미만 기상모드 자동 활성화</div>
+              <div style="font-size:0.75rem; color:var(--text-muted);">손/물체가 3cm 미만 접근 시 기상 모드 자동 켜기</div>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="toggle-auto-wakeup" checked>
+              <span class="slider"></span>
+            </label>
           </div>
         </div>
 

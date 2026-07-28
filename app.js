@@ -267,11 +267,14 @@ function parseDeviceMessage(msg) {
     setModeUI('sleep');
   }
 
-  if (msg.includes('MODE:WAKEUP') || msg.includes('Snore Monitor OFF')) {
+  if (msg.includes('MODE:WAKEUP') || msg.includes('Snore Monitor OFF') || msg.includes('AUTO_WAKEUP_TRIGGERED')) {
     if (currentMode === 'sleep') {
       finishSleepSession();
     } else {
       setModeUI('wakeup');
+    }
+    if (msg.includes('AUTO_WAKEUP_TRIGGERED')) {
+      logSystem('☀️ [자동 기상 추적] ESP32 초음파 센서(3cm 미만) 감지로 기상 모드가 자동 실행되었습니다!');
     }
   }
 
@@ -963,6 +966,21 @@ function initControls() {
       const isChecked = e.target.checked;
       sendBLECommand(isChecked ? 'B_AUTO:1' : 'B_AUTO:0');
       logSystem(`🪟 [스마트 블라인드] 어두우면 자동 열기 ${isChecked ? 'ON (활성화)' : 'OFF (비활성화)'}`);
+    });
+  }
+
+  // 초음파 센서 3cm 미만 자동 기상 추적 토글
+  const toggleAutoWakeup = document.getElementById('toggle-auto-wakeup');
+  if (toggleAutoWakeup) {
+    toggleAutoWakeup.addEventListener('change', (e) => {
+      const isChecked = e.target.checked;
+      sendBLECommand(isChecked ? 'W_AUTO:1' : 'W_AUTO:0');
+      const badge = document.getElementById('auto-wakeup-status-badge');
+      if (badge) {
+        badge.innerText = isChecked ? '자동 추적 ON' : '자동 추적 OFF';
+        badge.style.color = isChecked ? 'var(--accent-emerald)' : 'var(--text-muted)';
+      }
+      logSystem(`☀️ [자동 기상 추적] 초음파 센서(3cm 미만) 기상모드 자동 켜기가 ${isChecked ? 'ON (활성화)' : 'OFF (비활성화)'} 되었습니다.`);
     });
   }
 

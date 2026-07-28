@@ -1229,19 +1229,29 @@ body.light-mode .btn-chat-chip:hover {
 /* ==========================================================================
    SMARTHOME ROUTINE SCHEDULER UNIFIED UI STYLES
    ========================================================================== */
+.time-picker-wrapper {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  border-radius: var(--radius-md) !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
 .routine-input, .routine-select {
   width: 100% !important;
   max-width: 100% !important;
   box-sizing: border-box !important;
   display: block !important;
-  min-height: 44px;
+  min-height: 42px;
   margin: 0 !important;
-  padding: 10px 14px;
+  padding: 8px 12px;
   border-radius: var(--radius-md);
   border: 1px solid var(--border-glass);
   background: rgba(255, 255, 255, 0.06);
   color: var(--text-main);
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   font-weight: 600;
   outline: none;
   transition: var(--transition-fast);
@@ -1253,16 +1263,22 @@ input[type="time"].routine-input {
   max-width: 100% !important;
   box-sizing: border-box !important;
   display: block !important;
-  min-height: 44px;
-  line-height: 1.3;
-  text-align: center;
+  height: 42px !important;
+  min-height: 42px !important;
+  line-height: 1.2 !important;
+  text-align: center !important;
   margin: 0 !important;
+  padding: 4px 8px !important;
+  font-size: 0.85rem !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
 }
 
 input[type="time"].routine-input::-webkit-date-and-time-value {
-  text-align: center;
-  min-height: 1.3em;
-  margin: 0;
+  text-align: center !important;
+  min-height: 1.2em !important;
+  margin: 0 !important;
+  padding: 0 !important;
 }
 
 .routine-input:focus, .routine-select:focus {
