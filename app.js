@@ -275,8 +275,8 @@ function parseDeviceMessage(msg) {
     const match = msg.match(/temp\s*:\s*(\d+)/i);
     if (match) {
       const temp = match[1];
-      document.getElementById('weather-temp-val').innerText = temp;
-      document.getElementById('sensor-temp').innerText = `${temp} °C`;
+      const sensorTempEl = document.getElementById('sensor-temp');
+      if (sensorTempEl) sensorTempEl.innerText = `${temp} °C`;
     }
   }
 
@@ -284,8 +284,8 @@ function parseDeviceMessage(msg) {
     const match = msg.match(/humi\s*:\s*(\d+)/i);
     if (match) {
       const humi = match[1];
-      document.getElementById('weather-humi-val').innerText = humi;
-      document.getElementById('sensor-humi').innerText = `${humi} %`;
+      const sensorHumiEl = document.getElementById('sensor-humi');
+      if (sensorHumiEl) sensorHumiEl.innerText = `${humi} %`;
     }
   }
 
