@@ -18,10 +18,10 @@ import framebuf
 #           Ultrasonic Trig (12), Echo (32), OLED 1 (I2C 21, 22), OLED 2 (I2C 4, 16)
 # ==========================================================================
 
-# OpenWeatherMap API 키 설정 (Busan / Seoul)
-API_KEY = "225582847ec75d5bfc26517638e79c64"
+# OpenWeatherMap API 키 설정 (필요 시 할당, 미설정 시 실내 DHT11 센서 자동 연동)
+API_KEY = ""
 CITY = "Busan"
-WEATHER_URL = "http://api.openweathermap.org/data/2.5/weather?q=" + CITY + "&appid=" + API_KEY + "&units=metric"
+WEATHER_URL = "http://api.openweathermap.org/data/2.5/weather?q=" + CITY + "&appid=" + API_KEY + "&units=metric" if API_KEY else ""
 
 # 1. 조도 센서 초기화 (LDR Pin 36)
 cds = ADC(Pin(36))
