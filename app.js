@@ -195,13 +195,36 @@ async function connectBLE() {
   }
 }
 
+function resetSmartHomeDefaults() {
+  todoItems = [
+    { id: 101, text: '스마트홈 대시보드 연결 확인하기', date: '오늘', completed: false }
+  ];
+  try {
+    localStorage.setItem(TODO_STORAGE_KEY, JSON.stringify(todoItems));
+  } catch (e) {}
+  if (typeof renderTodoList === 'function') renderTodoList();
+
+  routinesList = [
+    { id: 'rt_default_1', time: '08:00', actionKey: 'WAKEUP', enabled: true }
+  ];
+  try {
+    localStorage.setItem('jj_routines', JSON.stringify(routinesList));
+  } catch (e) {}
+  if (typeof renderRoutinesList === 'function') renderRoutinesList();
+
+  logSystem('🔄 [기본 세팅 초기화] ESP 장치 연결 해제로 Todo 일정 및 루틴 목록이 기본 세팅으로 재설정되었습니다.');
+}
+
 function onDisconnected() {
   isConnected = false;
   rxCharacteristic = null;
   txCharacteristic = null;
   updateStatusUI('disconnected', 'ESP_JJ');
   logSystem('⚠️ ESP32 기기 연결이 해제되었습니다.', 'err');
+  resetSmartHomeDefaults();
 }
+
+window.resetSmartHomeDefaults = resetSmartHomeDefaults;
 
 async function sendBLECommand(cmd) {
   const timestamp = new Date().toLocaleTimeString();
