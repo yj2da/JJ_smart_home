@@ -1371,6 +1371,7 @@ async function initWeather() {
       const temp = Math.round(data.main.temp);
       const humi = data.main.humidity;
       const desc = data.weather && data.weather[0] ? data.weather[0].description : 'Clouds';
+      const mainState = data.weather && data.weather[0] ? data.weather[0].main : 'Clear';
       currentRawWeatherDesc = desc;
 
       const tempEl = document.getElementById('weather-temp-val');
@@ -1387,13 +1388,19 @@ async function initWeather() {
 
       const iconEl = document.getElementById('weather-icon-el');
       if (iconEl && data.weather && data.weather[0]) {
-        const mainState = data.weather[0].main.toLowerCase();
-        if (mainState.includes('clear')) iconEl.className = 'fa-solid fa-sun';
-        else if (mainState.includes('cloud')) iconEl.className = 'fa-solid fa-cloud';
-        else if (mainState.includes('rain') || mainState.includes('drizzle')) iconEl.className = 'fa-solid fa-cloud-showers-heavy';
-        else if (mainState.includes('thunder')) iconEl.className = 'fa-solid fa-cloud-bolt';
-        else if (mainState.includes('snow')) iconEl.className = 'fa-solid fa-snowflake';
+        const ms = mainState.toLowerCase();
+        if (ms.includes('clear')) iconEl.className = 'fa-solid fa-sun';
+        else if (ms.includes('cloud')) iconEl.className = 'fa-solid fa-cloud';
+        else if (ms.includes('rain') || ms.includes('drizzle')) iconEl.className = 'fa-solid fa-cloud-showers-heavy';
+        else if (ms.includes('thunder')) iconEl.className = 'fa-solid fa-cloud-bolt';
+        else if (ms.includes('snow')) iconEl.className = 'fa-solid fa-snowflake';
       }
+
+      // ESP32 OLED 2번 화면으로 부산 Weather API 실시간 온습도 데이터 BLE 송신
+      if (isConnected) {
+        sendBLECommand(`B_WX:${temp}|${humi}|${mainState}`);
+      }
+
       logSystem(`🌤️ [OpenWeatherMap] 부산 실시간 날씨 수신 완료 (${temp}°C, ${desc}, 습도 ${humi}%)`);
     }
   } catch (e) {
