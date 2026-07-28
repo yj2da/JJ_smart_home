@@ -340,7 +340,7 @@
               <div style="font-size:0.75rem; color:var(--text-muted);">습도 높을 시 스마트 조명으로 경고 점등</div>
             </div>
             <label class="toggle-switch">
-              <input type="checkbox" id="toggle-humi-alert" checked>
+              <input type="checkbox" id="toggle-humi-alert">
               <span class="slider"></span>
             </label>
           </div>
@@ -485,17 +485,24 @@
           </div>
         </div>
 
-        <!-- 자동 기상 추적 기능 카드 -->
+        <!-- 언어 설정 카드 (Language Setting: KR / EN) -->
         <div class="glass-card">
-          <div class="card-header" style="margin-bottom:0;">
+          <div class="card-header">
             <div class="card-title">
-              <i class="fa-solid fa-person-rays" style="color:var(--accent-amber);"></i>
-              <h3>자동 기상 추적 기능</h3>
+              <i class="fa-solid fa-language" style="color:var(--accent-sky);"></i>
+              <h3 data-i18n="langSettingTitle">언어 설정 (Language)</h3>
             </div>
-            <label class="toggle-switch">
-              <input type="checkbox" id="toggle-auto-wakeup" checked>
-              <span class="slider"></span>
-            </label>
+            <span id="lang-status-badge" class="card-subtitle" style="color:var(--accent-sky);">🇰🇷 한국어</span>
+          </div>
+          <div class="control-switch-card">
+            <div>
+              <div style="font-weight:700; font-size:0.9rem;" data-i18n="langOptionLabel">앱 표시 언어 (App Language)</div>
+              <div style="font-size:0.75rem; color:var(--text-muted);" data-i18n="langOptionSub">한국어 또는 English 선택</div>
+            </div>
+            <div style="display:flex; gap:6px;">
+              <button class="btn-lang-select active" data-lang="kr">🇰🇷 한국어</button>
+              <button class="btn-lang-select" data-lang="en">🇺🇸 English</button>
+            </div>
           </div>
         </div>
 

@@ -58,6 +58,7 @@ function bootApp() {
   };
 
   safeRun(initTheme, 'initTheme');
+  safeRun(initLanguage, 'initLanguage');
   safeRun(initTabs, 'initTabs');
   safeRun(initChart, 'initChart');
   safeRun(initTodoList, 'initTodoList');
@@ -1929,3 +1930,84 @@ function createRainSoundAudio() {
     return { start: () => {}, stop: () => {} };
   }
 }
+
+// ==========================================================================
+// INTERNATIONALIZATION (i18n) LANGUAGE SYSTEM (Korean / English)
+// ==========================================================================
+let currentLanguage = 'kr';
+
+const I18N_TRANSLATIONS = {
+  kr: {
+    langSettingTitle: "언어 설정 (Language)",
+    langOptionLabel: "앱 표시 언어 (App Language)",
+    langOptionSub: "한국어 또는 English 선택",
+    tabToday: "오늘 하루",
+    tabHomeControl: "홈 제어",
+    tabSettings: "설정",
+    routineTitle: "스마트홈 루틴 세팅기",
+    addNewRoutine: "새 루틴 추가",
+    timeSelectLabel: "시간 선택",
+    featureSelectLabel: "스마트홈 기능",
+    btnAddRoutine: "루틴 추가하기",
+    autoWakeupTitle: "자동 기상 추적 기능",
+    themeTitle: "앱 디스플레이 테마",
+    deviceInfoTitle: "스마트홈 기기 정보"
+  },
+  en: {
+    langSettingTitle: "Language Settings",
+    langOptionLabel: "App Language",
+    langOptionSub: "Select Korean or English",
+    tabToday: "Today",
+    tabHomeControl: "Controls",
+    tabSettings: "Settings",
+    routineTitle: "Smart Home Routine Scheduler",
+    addNewRoutine: "Add New Routine",
+    timeSelectLabel: "Select Time",
+    featureSelectLabel: "Smart Home Action",
+    btnAddRoutine: "Add Routine",
+    autoWakeupTitle: "Automatic Wakeup Tracking",
+    themeTitle: "Display Theme",
+    deviceInfoTitle: "Device Information"
+  }
+};
+
+function initLanguage() {
+  const savedLang = localStorage.getItem('jinjin_lang') || 'kr';
+  applyLanguage(savedLang);
+
+  document.querySelectorAll('.btn-lang-select').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const lang = btn.getAttribute('data-lang');
+      applyLanguage(lang);
+    });
+  });
+}
+
+function applyLanguage(lang) {
+  currentLanguage = lang;
+  try {
+    localStorage.setItem('jinjin_lang', lang);
+  } catch(e) {}
+
+  document.querySelectorAll('.btn-lang-select').forEach(btn => {
+    btn.classList.toggle('active', btn.getAttribute('data-lang') === lang);
+  });
+
+  const badge = document.getElementById('lang-status-badge');
+  if (badge) {
+    badge.innerText = lang === 'en' ? '🇺🇸 English' : '🇰🇷 한국어';
+  }
+
+  const dict = I18N_TRANSLATIONS[lang] || I18N_TRANSLATIONS.kr;
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (dict[key]) {
+      el.innerText = dict[key];
+    }
+  });
+
+  logSystem(`🌐 [언어 변경] 앱 표시 언어가 '${lang === 'en' ? 'English' : '한국어'}'(으)로 설정되었습니다.`);
+}
+
+window.initLanguage = initLanguage;
+window.applyLanguage = applyLanguage;

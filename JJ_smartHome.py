@@ -117,8 +117,8 @@ touch4 = Pin(19, Pin.IN)
 
 # 7. DHT11 온습도 센서 초기화 (Pin 14)
 d = dht.DHT11(Pin(14))
-humi_alert_enabled = True # 습도 경보 연동 플래그
-humi_threshold = 70       # 습도 경보 기준 (기본 70%)
+humi_alert_enabled = False # 습도 경보 연동 플래그 (기본 OFF)
+humi_threshold = 70        # 습도 경보 기준 (기본 70%)
 
 # 8. OLED 1번 디스플레이 초기화 (SDA Pin 21, SCL Pin 22 - 날씨 아이콘/영단어/날짜용)
 display1 = None
