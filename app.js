@@ -140,7 +140,7 @@ async function connectBLE() {
     updateStatusUI('connecting', '연결 시도...');
 
     bleDevice = await navigator.bluetooth.requestDevice({
-      acceptAllDevices: true,
+      filters: [{ namePrefix: 'ESP' }, { namePrefix: 'esp' }],
       optionalServices: [BLE_SERVICE_UUID]
     });
 
