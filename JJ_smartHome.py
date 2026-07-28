@@ -622,14 +622,14 @@ while True:
     # 2. 조도 센서 기반 자동 블라인드 제어 (수면 모드가 아닐 때)
     if auto_blind_enabled and not mic_active:
         c_val = cds.read()
-        if c_val > 2500 and current_blind_angle != 0:
-            motor.move(0)
-            current_blind_angle = 0
-            print("🌙 [Auto Blind] 어두워짐 (CDS: " + str(c_val) + ") -> 블라인드 0° 닫기")
-        elif c_val < 1500 and current_blind_angle != 180:
+        if c_val > 2500 and current_blind_angle != 180:
             motor.move(180)
             current_blind_angle = 180
-            print("☀️ [Auto Blind] 밝아짐 (CDS: " + str(c_val) + ") -> 블라인드 180° 개방")
+            print("🌙 [Auto Blind] 어두워짐 (CDS: " + str(c_val) + ") -> 블라인드 180° 열기")
+        elif c_val < 1500 and current_blind_angle != 0:
+            motor.move(0)
+            current_blind_angle = 0
+            print("☀️ [Auto Blind] 밝아짐 (CDS: " + str(c_val) + ") -> 블라인드 0° 닫기")
 
     # 3. 수면 모드 활성화 시 실시간 코골이 음성 샘플링 & 패턴 분석
     if mic_active:
