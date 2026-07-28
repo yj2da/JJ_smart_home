@@ -398,40 +398,40 @@ def on_rx(v):
         except Exception as img_err:
             print("Kitty PBM image load error:", img_err)
 
-    # 'S' 수신 시: 수면 모드 시작 -> 불 다 끄기 (RGB OFF) & 블라인드 0° 닫기
+    # 'S' 수신 시: 수면 모드 시작 -> 불 다 끄기 (RGB OFF) & 블라인드 90° 닫기
     if v == 'S':
         mic_active = True
         snore_count = 0
         snore_flag = False
-        print("💤 [BLE Command] 수면 모드 시작 -> 불 다 끄기 & 블라인드 0° 닫기")
+        print("💤 [BLE Command] 수면 모드 시작 -> 불 다 끄기 & 블라인드 90° 닫기")
         p.send("Snore Monitor Started\n")
         R.off(); G.off(); B.off()
-        motor.move(0)
-        current_blind_angle = 0
+        motor.move(90)
+        current_blind_angle = 90
         if display1 and oled_power_state:
             display1.fill(0)
             display1.text("=== SLEEP MODE ===", 0, 0)
             display1.text("Lights: OFF", 0, 16)
-            display1.text("Blind: 0 Closed", 0, 32)
+            display1.text("Blind: 90 Closed", 0, 32)
             display1.text("Snore Monitor: ON", 0, 48)
             display1.show()
 
-    # 'Q' 수신 시: 기상 모드 진입 -> 불 켜기 (RGB ON) & 블라인드 180° 개방
+    # 'Q' 수신 시: 기상 모드 진입 -> 불 켜기 (RGB ON) & 블라인드 270° 개방
     if v == 'Q':
         mic_active = False
         snore_count = 0
         snore_flag = False
         buzzer.duty_u16(0)
-        print("☀️ [BLE Command] 기상 모드 진입 -> 불 켜기 (RGB ON) & 블라인드 180° 개방")
+        print("☀️ [BLE Command] 기상 모드 진입 -> 불 켜기 (RGB ON) & 블라인드 270° 개방")
         p.send("Snore Monitor OFF\n")
         R.on(); G.on(); B.on()
-        motor.move(180)
-        current_blind_angle = 180
+        motor.move(270)
+        current_blind_angle = 270
         if display1 and oled_power_state:
             display1.fill(0)
             display1.text("=== WAKEUP MODE ===", 0, 0)
             display1.text("Lights: ON", 0, 16)
-            display1.text("Blind: 180 Open", 0, 32)
+            display1.text("Blind: 270 Open", 0, 32)
             display1.show()
         update_sensors_and_oled2()
 
@@ -551,40 +551,40 @@ while True:
         print("🌡️ [DHT11 10s Log] 온도: " + t_str + "°C | 습도: " + h_str + "% | 조도(CDS): " + str(c_val))
 
     # 1. 정전식 터치 센서 4핀 실시간 제어
-    if touch1.value(): # 터치 1: 수면 모드 (Sleep Mode - 불 끄기 & 블라인드 0°)
+    if touch1.value(): # 터치 1: 수면 모드 (Sleep Mode - 불 끄기 & 블라인드 90°)
         if not mic_active:
             mic_active = True
             snore_count = 0
             snore_flag = False
-            print("💤 [Touch 1] 수면 모드 시작 (불 다 끄기 & 블라인드 0°)")
+            print("💤 [Touch 1] 수면 모드 시작 (불 다 끄기 & 블라인드 90°)")
             p.send("MODE:SLEEP\n")
             R.off(); G.off(); B.off()
-            motor.move(0)
-            current_blind_angle = 0
+            motor.move(90)
+            current_blind_angle = 90
             if display1 and oled_power_state:
                 display1.fill(0)
                 display1.text("=== SLEEP MODE ===", 0, 0)
                 display1.text("Lights: OFF", 0, 16)
-                display1.text("Blind: 0 Closed", 0, 32)
+                display1.text("Blind: 90 Closed", 0, 32)
                 display1.text("Snore Monitor: ON", 0, 48)
                 display1.show()
             sleep(0.3)
         
-    elif touch2.value(): # 터치 2: 기상 모드 (Wakeup Mode - 불 켜기 & 블라인드 180°)
+    elif touch2.value(): # 터치 2: 기상 모드 (Wakeup Mode - 불 켜기 & 블라인드 270°)
         mic_active = False
         snore_count = 0
         snore_flag = False
         buzzer.duty_u16(0)
-        print("☀️ [Touch 2] 기상 모드 진입 (불 켜기 & 블라인드 180°)")
+        print("☀️ [Touch 2] 기상 모드 진입 (불 켜기 & 블라인드 270°)")
         p.send("MODE:WAKEUP\n")
         R.on(); G.on(); B.on()
-        motor.move(180)
-        current_blind_angle = 180
+        motor.move(270)
+        current_blind_angle = 270
         if display1 and oled_power_state:
             display1.fill(0)
             display1.text("=== WAKEUP MODE ===", 0, 0)
             display1.text("Lights: ON", 0, 16)
-            display1.text("Blind: 180 Open", 0, 32)
+            display1.text("Blind: 270 Open", 0, 32)
             display1.show()
         update_sensors_and_oled2()
         sleep(0.3)
@@ -622,14 +622,14 @@ while True:
     # 2. 조도 센서 기반 자동 블라인드 제어 (수면 모드가 아닐 때)
     if auto_blind_enabled and not mic_active:
         c_val = cds.read()
-        if c_val > 2500 and current_blind_angle != 180:
-            motor.move(180)
-            current_blind_angle = 180
-            print("🌙 [Auto Blind] 어두워짐 (CDS: " + str(c_val) + ") -> 블라인드 180° 열기")
-        elif c_val < 1500 and current_blind_angle != 0:
-            motor.move(0)
-            current_blind_angle = 0
-            print("☀️ [Auto Blind] 밝아짐 (CDS: " + str(c_val) + ") -> 블라인드 0° 닫기")
+        if c_val > 2500 and current_blind_angle != 270:
+            motor.move(270)
+            current_blind_angle = 270
+            print("🌙 [Auto Blind] 어두워짐 (CDS: " + str(c_val) + ") -> 블라인드 270° 열기")
+        elif c_val < 1500 and current_blind_angle != 90:
+            motor.move(90)
+            current_blind_angle = 90
+            print("☀️ [Auto Blind] 밝아짐 (CDS: " + str(c_val) + ") -> 블라인드 90° 닫기")
 
     # 3. 수면 모드 활성화 시 실시간 코골이 음성 샘플링 & 패턴 분석
     if mic_active:
