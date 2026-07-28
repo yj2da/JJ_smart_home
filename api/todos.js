@@ -22,13 +22,26 @@ export default async function handler(req, res) {
     return;
   }
 
-  // Resolve Vercel KV / Upstash / REDIS Env Vars
-  let kvUrl = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
-  let kvToken = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
+  // Resolve Vercel KV / Upstash / REDIS / STORAGE Env Vars
+  let kvUrl = process.env.KV_REST_API_URL ||
+              process.env.UPSTASH_REDIS_REST_URL ||
+              process.env.STORAGE_REST_API_URL ||
+              process.env.STORAGE_KV_REST_API_URL ||
+              process.env.STORAGE_URL;
 
-  // If REDIS_URL is provided as https Upstash REST URL
-  if (!kvUrl && process.env.REDIS_URL && process.env.REDIS_URL.startsWith('https://')) {
-    kvUrl = process.env.REDIS_URL;
+  let kvToken = process.env.KV_REST_API_TOKEN ||
+                process.env.UPSTASH_REDIS_REST_TOKEN ||
+                process.env.STORAGE_REST_API_TOKEN ||
+                process.env.STORAGE_KV_REST_API_TOKEN ||
+                process.env.STORAGE_TOKEN;
+
+  // If REDIS_URL or STORAGE_URL is provided as https Upstash REST URL
+  if (!kvUrl) {
+    if (process.env.REDIS_URL && process.env.REDIS_URL.startsWith('https://')) {
+      kvUrl = process.env.REDIS_URL;
+    } else if (process.env.STORAGE_URL && process.env.STORAGE_URL.startsWith('https://')) {
+      kvUrl = process.env.STORAGE_URL;
+    }
   }
 
   // 1. GET Request: Fetch Todos from DB
