@@ -53,11 +53,16 @@ export default async function handler(req, res) {
     }
   }
 
-  // 1. GET Request: Fetch SmartHome Data (Todos, Routines, ESP Name) from DB
+  // Extract ESP Device Name from query params or body
+  const rawEspName = req.query.espName || req.body?.espName || localCache.espName || 'MPY_ESP32';
+  const cleanEspName = String(rawEspName).replace(/[^a-zA-Z0-9_-]/g, '_');
+  const dbKey = `jinjin_smarthome_data_${cleanEspName}`;
+
+  // 1. GET Request: Fetch SmartHome Data by ESP Name
   if (req.method === 'GET') {
     if (kvUrl && kvToken) {
       try {
-        const fetchUrl = `${kvUrl.replace(/\/$/, '')}/get/jinjin_smarthome_data`;
+        const fetchUrl = `${kvUrl.replace(/\/$/, '')}/get/${dbKey}`;
         const apiRes = await fetch(fetchUrl, {
           headers: { Authorization: `Bearer ${kvToken}` }
         });
@@ -66,56 +71,50 @@ export default async function handler(req, res) {
         if (data && data.result !== undefined && data.result !== null) {
           let parsedData = typeof data.result === 'string' ? JSON.parse(data.result) : data.result;
           if (parsedData && typeof parsedData === 'object') {
-            const todos = Array.isArray(parsedData.todos) ? parsedData.todos : (Array.isArray(parsedData) ? parsedData : localCache.todos);
+            const todos = Array.isArray(parsedData.todos) ? parsedData.todos : localCache.todos;
             const routines = Array.isArray(parsedData.routines) ? parsedData.routines : localCache.routines;
-            const espName = parsedData.espName || localCache.espName;
+            const espName = parsedData.espName || rawEspName;
 
-            localCache = { todos, routines, espName };
-            return res.status(200).json({ success: true, todos, routines, espName, source: 'Vercel_KV' });
+            return res.status(200).json({ success: true, todos, routines, espName, source: 'Vercel_KV', dbKey });
           }
         }
       } catch (err) {
         console.error('Vercel KV GET Error:', err);
       }
     }
-    return res.status(200).json({ success: true, ...localCache, source: 'Local_Cache' });
+    return res.status(200).json({ success: true, ...localCache, espName: rawEspName, source: 'Local_Cache', dbKey });
   }
 
-  // 2. POST / PUT Request: Save SmartHome Data to DB
+  // 2. POST / PUT Request: Save SmartHome Data by ESP Name
   if (req.method === 'POST' || req.method === 'PUT') {
     try {
       const { todos, routines, espName } = req.body || {};
+      const targetEspName = espName || rawEspName;
+      const targetDbKey = `jinjin_smarthome_data_${String(targetEspName).replace(/[^a-zA-Z0-9_-]/g, '_')}`;
 
-      if (Array.isArray(todos)) localCache.todos = todos;
-      if (Array.isArray(routines)) localCache.routines = routines;
-      if (espName && typeof espName === 'string') localCache.espName = espName;
+      const saveData = {
+        todos: Array.isArray(todos) ? todos : localCache.todos,
+        routines: Array.isArray(routines) ? routines : localCache.routines,
+        espName: targetEspName,
+        updatedAt: new Date().toISOString()
+      };
 
       if (kvUrl && kvToken) {
-        const setUrl = `${kvUrl.replace(/\/$/, '')}/set/jinjin_smarthome_data`;
+        const setUrl = `${kvUrl.replace(/\/$/, '')}/set/${targetDbKey}`;
         const apiRes = await fetch(setUrl, {
           method: 'POST',
           headers: {
             Authorization: `Bearer ${kvToken}`,
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify(JSON.stringify(localCache))
+          body: JSON.stringify(JSON.stringify(saveData))
         });
         const data = await apiRes.json();
 
-        // Save legacy key for backward compatibility
-        if (Array.isArray(todos)) {
-          const legacyUrl = `${kvUrl.replace(/\/$/, '')}/set/jinjin_smarthome_todos`;
-          fetch(legacyUrl, {
-            method: 'POST',
-            headers: { Authorization: `Bearer ${kvToken}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify(JSON.stringify(todos))
-          }).catch(() => {});
-        }
-
-        return res.status(200).json({ success: true, ...localCache, source: 'Vercel_KV', kvResult: data });
+        return res.status(200).json({ success: true, ...saveData, source: 'Vercel_KV', kvResult: data, dbKey: targetDbKey });
       }
 
-      return res.status(200).json({ success: true, ...localCache, source: 'Local_Cache' });
+      return res.status(200).json({ success: true, ...saveData, source: 'Local_Cache' });
     } catch (err) {
       console.error('Vercel KV POST Error:', err);
       return res.status(500).json({ error: err.message || 'Server Error' });

@@ -188,7 +188,7 @@ async function connectBLE() {
     logSystem(`🎉 기기 (${deviceName}) 연결 성공!`, 'tx');
 
     sendBLECommand('1');
-    syncFullSmartHomeCloudDB();
+    await fetchCloudDBByESPName(deviceName);
   } catch (error) {
     console.error('BLE Connection Error:', error);
     logSystem(`BLE 연결 실패: ${error.message || error}`, 'err');
@@ -779,6 +779,38 @@ function toggleTodo(id) {
 function deleteTodo(id) {
   todoItems = todoItems.filter(item => item.id !== id);
   saveAndRenderTodo();
+}
+
+async function fetchCloudDBByESPName(espName) {
+  const targetName = espName || (bleDevice && bleDevice.name) || 'MPY ESP32';
+  try {
+    logSystem(`☁️ [DB 조회] ESP 장치 ('${targetName}') 전용 데이터베이스 조회 중...`);
+    const res = await fetch(`/api/todos?espName=${encodeURIComponent(targetName)}`);
+    const data = await res.json();
+
+    if (data && data.success) {
+      if (Array.isArray(data.todos) && data.todos.length > 0) {
+        todoItems = data.todos;
+        try {
+          localStorage.setItem(TODO_STORAGE_KEY, JSON.stringify(todoItems));
+        } catch(e) {}
+        if (typeof renderTodoList === 'function') renderTodoList();
+      }
+
+      if (Array.isArray(data.routines) && data.routines.length > 0) {
+        routinesList = data.routines;
+        try {
+          localStorage.setItem('jj_routines', JSON.stringify(routinesList));
+        } catch(e) {}
+        if (typeof renderRoutinesList === 'function') renderRoutinesList();
+      }
+
+      logSystem(`☁️ [DB 로드 완료] ESP 장치('${targetName}')의 일정(${todoItems.length}개) 및 루틴(${routinesList.length}개) 데이터를 로드했습니다!`);
+    }
+  } catch (err) {
+    console.error('fetchCloudDBByESPName Error:', err);
+    logSystem(`☁️ [DB 조회 실패] 클라우드 동기화 실패: ${err.message}`, 'err');
+  }
 }
 
 async function syncFullSmartHomeCloudDB() {
@@ -1938,36 +1970,154 @@ let currentLanguage = 'kr';
 
 const I18N_TRANSLATIONS = {
   kr: {
-    langSettingTitle: "언어 설정 (Language)",
-    langOptionLabel: "앱 표시 언어 (App Language)",
-    langOptionSub: "한국어 또는 English 선택",
+    appName: "JINJIN 스마트홈",
+    statusConn: "연결 안됨",
+    statusConnSuccess: "연결됨",
+    demoBtn: "🪄 데모",
     tabToday: "오늘 하루",
     tabHomeControl: "홈 제어",
     tabSettings: "설정",
+
+    sleepAnalysisTitle: "수면 분석 점수",
+    scoreWaiting: "측정 대기",
+    snoreDetectCount: "코골이 감지:",
+    sleepDuration: "수면 시간:",
+    sleepPromptMsg: "수면 모드를 켜서 점수를 체크하세요!",
+
+    smartModeTitle: "스마트 모드 설정",
+    modeSleepTitle: "수면 모드",
+    modeSleepSub: "코골이 분석",
+    modeWakeupTitle: "기상 모드",
+    modeWakeupSub: "5초 오토 리셋",
+    modeFocusTitle: "집중 모드",
+    modeFocusSub: "뽀모도로 & ASMR",
+
+    lightingControlTitle: "스마트 조명 & 앰비언트",
+    rgbLedToggleLabel: "전등 메인 스위치 (RGB LED)",
+    rgbLedToggleSub: "스마트홈 메인 전등 ON / OFF",
+    colorPickerLabel: "RGB 컬러 조절 픽커",
+    moodPresetLabel: "무드등 원터치 프리셋",
+    presetWarm: "Warm 웜톤",
+    presetCool: "Cool 쿨톤",
+    presetPurple: "Purple 보라",
+    presetRose: "Rose 로즈",
+
+    blindTitle: "스마트 창문 블라인드",
+    autoBlindLabel: "어두우면 자동으로 열기",
+    autoBlindSub: "조도 센서(CDS) 연동 180° 자동 개방",
+    blindAngleLabel: "서보 모터 각도 제어",
+    presetClose: "90° 닫기",
+    presetHalf: "135° 반개",
+    presetOpen: "180° 열기",
+
+    humiAlertTitle: "스마트 습도 안내 경보",
+    humiAlertLabel: "고습도 감지 경보",
+    humiAlertSub: "습도 높을 시 스마트 조명으로 경고 점등",
+    humiThresholdLabel: "경보 작동 기준 습도",
+
+    smartOledTitle: "스마트 디스플레이 세팅",
+    oledModeWeather: "실시간 미세먼지 / 날씨 정보",
+    oledModeWord: "오늘의 영단어 / 암기 카드",
+    oledModeTodo: "오늘의 할 일 / D-Day",
+    oledPowerOn: "OLED 켜기",
+    oledPowerOff: "OLED 끄기",
+
+    sensorTempTitle: "온도 센서",
+    sensorHumiTitle: "습도 센서",
+    sensorCdsTitle: "조도 센서",
+    sensorMicTitle: "코골이 음량",
+
     routineTitle: "스마트홈 루틴 세팅기",
     addNewRoutine: "새 루틴 추가",
     timeSelectLabel: "시간 선택",
     featureSelectLabel: "스마트홈 기능",
     btnAddRoutine: "루틴 추가하기",
     autoWakeupTitle: "자동 기상 추적 기능",
+    langSettingTitle: "언어 설정 (Language)",
+    langOptionLabel: "앱 표시 언어 (App Language)",
+    langOptionSub: "한국어 또는 English 선택",
     themeTitle: "앱 디스플레이 테마",
-    deviceInfoTitle: "스마트홈 기기 정보"
+    darkModeLabel: "야간 모드 (Dark Mode)",
+    darkModeSub: "ON: 검은색 배경 / OFF: 흰색 배경",
+    deviceInfoTitle: "스마트홈 기기 정보",
+    bleDeviceLabel: "BLE 디바이스:",
+    protocolLabel: "통신 프로토콜:",
+    creatorsLabel: "프로젝트 제작자:"
   },
   en: {
-    langSettingTitle: "Language Settings",
-    langOptionLabel: "App Language",
-    langOptionSub: "Select Korean or English",
+    appName: "JINJIN Smart Home",
+    statusConn: "Disconnected",
+    statusConnSuccess: "Connected",
+    demoBtn: "🪄 Demo",
     tabToday: "Today",
     tabHomeControl: "Controls",
     tabSettings: "Settings",
+
+    sleepAnalysisTitle: "Sleep Score Analysis",
+    scoreWaiting: "Awaiting Measurement",
+    snoreDetectCount: "Snore Count:",
+    sleepDuration: "Sleep Duration:",
+    sleepPromptMsg: "Turn on Sleep Mode to analyze your sleep score!",
+
+    smartModeTitle: "Smart Mode Control",
+    modeSleepTitle: "Sleep Mode",
+    modeSleepSub: "Snore Monitor",
+    modeWakeupTitle: "Wakeup Mode",
+    modeWakeupSub: "5s Auto Reset",
+    modeFocusTitle: "Focus Mode",
+    modeFocusSub: "Pomodoro & ASMR",
+
+    lightingControlTitle: "Smart Lighting & Ambient",
+    rgbLedToggleLabel: "Main Lighting Switch (RGB LED)",
+    rgbLedToggleSub: "Smart Home Main Lights ON / OFF",
+    colorPickerLabel: "RGB Color Picker",
+    moodPresetLabel: "One-Touch Mood Presets",
+    presetWarm: "Warm Tone",
+    presetCool: "Cool Tone",
+    presetPurple: "Purple",
+    presetRose: "Rose",
+
+    blindTitle: "Smart Window Blind",
+    autoBlindLabel: "Auto Open When Dark",
+    autoBlindSub: "CDS Sensor 180° Auto Open",
+    blindAngleLabel: "Servo Motor Angle Control",
+    presetClose: "90° Closed",
+    presetHalf: "135° Half",
+    presetOpen: "180° Open",
+
+    humiAlertTitle: "Smart Humidity Warning",
+    humiAlertLabel: "High Humidity Alarm",
+    humiAlertSub: "Warn with Smart Light on High Humidity",
+    humiThresholdLabel: "Alert Humidity Threshold",
+
+    smartOledTitle: "Smart Display Settings",
+    oledModeWeather: "Realtime Weather & Air Quality",
+    oledModeWord: "Daily Vocabulary Card",
+    oledModeTodo: "Today's Tasks & D-Day",
+    oledPowerOn: "OLED Power ON",
+    oledPowerOff: "OLED Power OFF",
+
+    sensorTempTitle: "Temperature",
+    sensorHumiTitle: "Humidity",
+    sensorCdsTitle: "Light (CDS)",
+    sensorMicTitle: "Mic Level",
+
     routineTitle: "Smart Home Routine Scheduler",
     addNewRoutine: "Add New Routine",
     timeSelectLabel: "Select Time",
     featureSelectLabel: "Smart Home Action",
     btnAddRoutine: "Add Routine",
     autoWakeupTitle: "Automatic Wakeup Tracking",
+    langSettingTitle: "Language Settings",
+    langOptionLabel: "App Language",
+    langOptionSub: "Select Korean or English",
     themeTitle: "Display Theme",
-    deviceInfoTitle: "Device Information"
+    darkModeLabel: "Dark Mode",
+    darkModeSub: "ON: Dark Background / OFF: White Background",
+    deviceInfoTitle: "Device Information",
+    bleDeviceLabel: "BLE Device:",
+    protocolLabel: "Protocol:",
+    creatorsLabel: "Creators:"
   }
 };
 
