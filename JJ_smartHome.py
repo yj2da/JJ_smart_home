@@ -1,6 +1,7 @@
 from machine import ADC, Pin, PWM, SoftI2C, time_pulse_us
 from time import sleep, ticks_ms, ticks_diff
 from servo import Servo
+from neopixel import NeoPixel
 
 import dht
 import ble_library
@@ -104,10 +105,28 @@ melody2_baby_shark = [
     (NOTE_G4, 0.25), (NOTE_G4, 0.25), (NOTE_E4, 0.5)
 ]
 
-# 5. RGB LED 핀 정의 (빨강 Pin 25, 초록 Pin 26, 파랑 Pin 27)
+# 5. NeoPixel LED 스트립 초기화 (Pin 15, 12개 LED) 및 습도 경보용 RGB LED 핀
+neo_pin = Pin(15, Pin.OUT)
+np = NeoPixel(neo_pin, 12)
+
+# 습도 경보 전용 RGB LED (B.on() 유지)
 R = Pin(25, Pin.OUT)
 G = Pin(26, Pin.OUT)
 B = Pin(27, Pin.OUT)
+
+# NeoPixel 제어 헬퍼 함수 (RGB 모두 50을 MAX로 제한)
+def set_neopixel_color(r, g, b):
+    r_val = min(50, int(r * 50 / 255)) if r > 50 else min(50, max(0, int(r)))
+    g_val = min(50, int(g * 50 / 255)) if g > 50 else min(50, max(0, int(g)))
+    b_val = min(50, int(b * 50 / 255)) if b > 50 else min(50, max(0, int(b)))
+    for i in range(12):
+        np[i] = (r_val, g_val, b_val)
+    np.write()
+
+def neopixel_off():
+    for i in range(12):
+        np[i] = (0, 0, 0)
+    np.write()
 
 # 6. 정전식 터치 센서 4핀 정의 (touch1 Pin 17, touch2 Pin 5, touch3 Pin 18, touch4 Pin 19)
 touch1 = Pin(17, Pin.IN)
@@ -406,11 +425,13 @@ def on_rx(v):
             play_tone(freq, dur)
             sleep(0.03)
 
-    # '7' / '8' 수신 시: RGB LED 전체 켜기 / 전체 끄기
+    # '7' / '8' 수신 시: NeoPixel 조명 전체 켜기 / 전체 끄기
     if v == '7':
-        R.on(); G.on(); B.on()
+        set_neopixel_color(50, 50, 50)
+        print("💡 [BLE Command] NeoPixel 조명 ON (Max 50)")
     if v == '8':
-        R.off(); G.off(); B.off()
+        neopixel_off()
+        print("🌙 [BLE Command] NeoPixel 조명 OFF")
     
     # '9' 수신 시: 2번 OLED에 Kitty PBM 이미지 드로잉
     if v == '9':
@@ -428,14 +449,15 @@ def on_rx(v):
         except Exception as img_err:
             print("Kitty PBM image load error:", img_err)
 
-    # 'S' 수신 시: 수면 모드 시작 -> 불 다 끄기 (RGB OFF) & 블라인드 90° 닫기
+    # 'S' 수신 시: 수면 모드 시작 -> 불 다 끄기 (NeoPixel OFF) & 블라인드 90° 닫기
     if v == 'S':
         mic_active = True
         snore_count = 0
         snore_flag = False
         print("💤 [BLE Command] 수면 모드 시작 -> 불 다 끄기 & 블라인드 90° 닫기")
         p.send("Snore Monitor Started\n")
-        R.off(); G.off(); B.off()
+        neopixel_off()
+        R.off(); G.off()
         motor.move(90)
         current_blind_angle = 90
         if display1 and oled_power_state:
@@ -446,15 +468,16 @@ def on_rx(v):
             display1.text("Snore Monitor: ON", 0, 48)
             display1.show()
 
-    # 'Q' 수신 시: 기상 모드 진입 -> 불 켜기 (RGB ON) & 블라인드 180° 개방
+    # 'Q' 수신 시: 기상 모드 진입 -> 불 켜기 (NeoPixel ON) & 블라인드 180° 개방
     if v == 'Q':
         mic_active = False
         snore_count = 0
         snore_flag = False
         buzzer.duty_u16(0)
-        print("☀️ [BLE Command] 기상 모드 진입 -> 불 켜기 (RGB ON) & 블라인드 180° 개방")
+        print("☀️ [BLE Command] 기상 모드 진입 -> 불 켜기 (NeoPixel ON) & 블라인드 180° 개방")
         p.send("Snore Monitor OFF\n")
-        R.on(); G.on(); B.on()
+        set_neopixel_color(50, 50, 50)
+        R.off(); G.off()
         motor.move(180)
         current_blind_angle = 180
         if display1 and oled_power_state:
@@ -501,21 +524,15 @@ def on_rx(v):
         print("📅 [BLE Command] Date:", cached_todo_date, "/ Todo:", cached_todo_text)
         render_todo_card()
 
-    # 'C'로 시작하는 RGB 무드 컬러 지정
+    # 'C'로 시작하는 NeoPixel 무드 컬러 지정 (RGB 50 MAX 제한)
     if v.startswith('C'):
         try:
             color_str = v[2:] if v[1] == '#' else v[1:]
             r_val = int(color_str[0:2], 16)
             g_val = int(color_str[2:4], 16)
             b_val = int(color_str[4:6], 16)
-            
-            if r_val > 127: R.on()
-            else: R.off()
-            if g_val > 127: G.on()
-            else: G.off()
-            if b_val > 127: B.on()
-            else: B.off()
-            print("💡 [BLE Command] RGB LED 컬러 세팅: R", r_val, "G", g_val, "B", b_val)
+            set_neopixel_color(r_val, g_val, b_val)
+            print("💡 [BLE Command] NeoPixel 컬러 세팅: R", r_val, "G", g_val, "B", b_val)
         except Exception as e:
             print("RGB color parse error:", e)
 
@@ -596,7 +613,8 @@ while True:
             snore_flag = False
             print("💤 [Touch 1] 수면 모드 시작 (불 다 끄기 & 블라인드 90°)")
             p.send("MODE:SLEEP\n")
-            R.off(); G.off(); B.off()
+            neopixel_off()
+            R.off(); G.off()
             motor.move(90)
             current_blind_angle = 90
             if display1 and oled_power_state:
@@ -608,14 +626,15 @@ while True:
                 display1.show()
             sleep(0.3)
         
-    elif touch2.value(): # 터치 2: 기상 모드 (Wakeup Mode - 불 켜기 & 블라인드 180°)
+    elif touch2.value(): # 터치 2: 기상 모드 (Wakeup Mode - NeoPixel 켜기 & 블라인드 180°)
         mic_active = False
         snore_count = 0
         snore_flag = False
         buzzer.duty_u16(0)
-        print("☀️ [Touch 2] 기상 모드 진입 (불 켜기 & 블라인드 180°)")
+        print("☀️ [Touch 2] 기상 모드 진입 (NeoPixel ON & 블라인드 180°)")
         p.send("MODE:WAKEUP\n")
-        R.on(); G.on(); B.on()
+        set_neopixel_color(50, 50, 50)
+        R.off(); G.off()
         motor.move(180)
         current_blind_angle = 180
         if display1 and oled_power_state:
@@ -627,13 +646,14 @@ while True:
         update_sensors_and_oled2()
         sleep(0.3)
     
-    elif touch3.value(): # 터치 3: 집중 모드
+    elif touch3.value(): # 터치 3: 집중 모드 (NeoPixel 웜톤 ON)
         mic_active = False
         snore_count = 0
         buzzer.duty_u16(0)
         print("🧠 [Touch 3] 집중 모드 진입")
         p.send("MODE:FOCUS\n")
-        R.on(); G.on(); B.off()
+        set_neopixel_color(50, 40, 0)
+        R.off(); G.off()
         if display1 and oled_power_state:
             display1.fill(0)
             display1.text("=== FOCUS MODE ===", 0, 0)
@@ -642,14 +662,15 @@ while True:
             display1.show()
         sleep(0.3)
         
-    elif touch4.value(): # 터치 4: 모든 모드 OFF
+    elif touch4.value(): # 터치 4: 모든 모드 OFF (NeoPixel OFF)
         mic_active = False
         snore_count = 0
         snore_flag = False
         buzzer.duty_u16(0)
         print("⚪ [Touch 4] 모든 모드 OFF (스마트홈 대기 상태)")
         p.send("MODE:OFF\n")
-        R.off(); G.off(); B.off()
+        neopixel_off()
+        R.off(); G.off()
         if display1 and oled_power_state:
             display1.fill(0)
             display1.text("=== ALL MODES OFF ===", 0, 0)
@@ -682,7 +703,8 @@ while True:
                 snore_count = 0
                 snore_flag = False
                 buzzer.duty_u16(0)
-                R.on(); G.on(); B.on()
+                set_neopixel_color(50, 50, 50)
+                R.off(); G.off()
                 motor.move(180)
                 current_blind_angle = 180
                 if display1 and oled_power_state:
