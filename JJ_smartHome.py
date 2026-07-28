@@ -26,7 +26,7 @@ WEATHER_URL = "http://api.openweathermap.org/data/2.5/weather?q=" + CITY + "&app
 cds = ADC(Pin(36))
 cds.atten(ADC.ATTN_11DB)
 cds_flag = 0
-auto_blind_enabled = True # 조도 자동 블라인드 연동 플래그
+auto_blind_enabled = False # 조도 자동 블라인드 연동 플래그 (기본 OFF)
 
 # 2. 마이크(사운드) 센서 초기화 (ADC Pin 34)
 mic_adc = ADC(Pin(34))
