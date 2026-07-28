@@ -1205,16 +1205,14 @@ const ENGLISH_WORDS_DB = [
 function updateRandomWord() {
   const item = ENGLISH_WORDS_DB[Math.floor(Math.random() * ENGLISH_WORDS_DB.length)];
   const elEn = document.getElementById('word-card-en');
-  const elKr = document.getElementById('word-card-kr');
   const elEx = document.getElementById('word-card-ex');
 
   if (elEn) elEn.innerText = item.en;
-  if (elKr) elKr.innerText = item.kr;
   if (elEx) elEx.innerText = `"${item.ex}"`;
 
-  // OLED 디스플레이 렌더링용 BLE 송신 (영문 텍스트 송신으로 인코딩 오류 방지)
+  // OLED 디스플레이 렌더링용 BLE 순수 영문 송신 (인코딩 오류 100% 방지)
   sendBLECommand(`W:${item.en}|VOCABULARY|${item.ex}`);
-  logSystem(`📚 [오늘의 영단어] '${item.en}' (${item.kr}) / 문장: "${item.ex}"`);
+  logSystem(`📚 [Daily Word Card] '${item.en}' / Quote: "${item.ex}"`);
 }
 
 function sendTodoToOLED() {
