@@ -367,7 +367,13 @@ def on_rx(v):
     global mic_active, snore_count, snore_flag, current_blind_angle
 
     if isinstance(v, bytes):
-        v = v.decode('utf-8').strip()
+        try:
+            v = v.decode('utf-8', 'ignore').strip()
+        except Exception:
+            try:
+                v = str(v, 'utf-8').strip()
+            except Exception:
+                v = str(v).strip()
     else:
         v = str(v).strip()
         
