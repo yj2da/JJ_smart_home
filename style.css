@@ -1399,7 +1399,7 @@ body.light-mode .routine-time-badge {
 
 /* Language Selection Button Styles */
 .btn-lang-select {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.1);
   border: 1px solid var(--border-glass);
   color: var(--text-main);
   padding: 6px 12px;
@@ -1407,17 +1407,19 @@ body.light-mode .routine-time-badge {
   font-size: 0.78rem;
   font-weight: 700;
   cursor: pointer;
+  white-space: nowrap;
   transition: var(--transition-fast);
 }
 
 .btn-lang-select:hover {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(56, 189, 248, 0.15);
 }
 
 .btn-lang-select.active {
-  background: var(--gradient-sky);
-  border-color: var(--accent-sky);
-  color: #FFFFFF;
-  box-shadow: 0 0 12px rgba(56, 189, 248, 0.35);
+  background: #38BDF8 !important;
+  border-color: #38BDF8 !important;
+  color: #FFFFFF !important;
+  font-weight: 800 !important;
+  box-shadow: 0 3px 12px rgba(56, 189, 248, 0.45);
 }
 
