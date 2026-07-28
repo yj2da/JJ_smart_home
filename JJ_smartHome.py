@@ -279,7 +279,7 @@ def render_word_card():
 
     if display2:
         display2.fill(0)
-        display2.text("=== EXAMPLE ===", 4, 0)
+        display2.text("TODAY'S SENTENCE", 0, 0)
         lines = wrap_text_16(cached_word_ex, 3)
         y_offsets = [18, 32, 46]
         for idx, line_str in enumerate(lines):
